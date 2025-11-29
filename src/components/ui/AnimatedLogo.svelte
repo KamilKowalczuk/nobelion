@@ -5,40 +5,35 @@
     let svgContainer: HTMLElement;
     
     onMount(() => {
-        // Pobieramy wszystkie elementy wektorowe
         const paths = svgContainer.querySelectorAll('path, circle, rect, ellipse, line, polyline, polygon');
         
-        // 1. SETUP (Ukrycie oryginalnego wyglądu)
+        // GSAP przejmuje kontrolę i ustawia opacity na 1, ale dopiero gdy zacznie rysować
         gsap.set(paths, { 
             strokeDasharray: (i, target) => (target as SVGGeometryElement).getTotalLength(),
             strokeDashoffset: (i, target) => (target as SVGGeometryElement).getTotalLength(),
-            fillOpacity: 0,       // Ukrywamy wypełnienie (zarówno czarne jak i złote)
-            stroke: '#C5A059',    // Rysujemy wszystko złotą linią
-            strokeWidth: 40,      // Dobrana grubość do skali 8534px
-            strokeOpacity: 1
+            fillOpacity: 0,
+            stroke: '#C5A059',
+            strokeWidth: 40,
+            strokeOpacity: 1,
+            opacity: 1 // Tutaj GSAP włącza widoczność, żeby zacząć rysować linię
         });
 
         const tl = gsap.timeline({ delay: 0.5 });
         
-        // 2. RYSOWANIE KONTURÓW (Szkic Architekta)
         tl.to(paths, {
             strokeDashoffset: 0,
-            duration: 2.0,
+            duration: 3.0,
             ease: "power2.inOut",
             stagger: 0.05
         });
 
-        // 3. UJAWNIENIE PRAWDZIWEJ FORMY (True Identity)
-        // Zamiast zmieniać kolor na złoty, zmieniamy fillOpacity na 1.
-        // To sprawi, że SVG wróci do swoich ORYGINALNYCH kolorów z pliku.
         tl.to(paths, {
-            fillOpacity: 1,       // Przywracamy kolory (Czarny i Złoty)
-            strokeOpacity: 0,     // Ukrywamy linie pomocnicze
+            fillOpacity: 1,
+            strokeOpacity: 0,
             duration: 1.5,
             ease: "power2.out"
         }, "-=1.0");
 
-        // 4. ROZŚWIETLENIE (Glow)
         tl.to(svgContainer, {
             filter: "drop-shadow(0 0 40px rgba(197,160,89,0.3))",
             duration: 2

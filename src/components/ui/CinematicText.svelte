@@ -38,10 +38,22 @@
     });
 </script>
 
-<span bind:this={container} class={`inline-block whitespace-nowrap ${className}`}>
+<span 
+    bind:this={container} 
+    class={`inline-block whitespace-nowrap ${className}`}
+    aria-label={text}
+>
     {#each chars as char, i}
-        <span class="char inline-block will-change-transform will-change-opacity">
+        <span class="char inline-block [backface-hidden] [transform-3d] [text-rendering:geometricPrecision] opacity-0">
             {char === " " ? "\u00A0" : char}
         </span>
     {/each}
 </span>
+
+<style>
+    .char {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        will-change: transform, opacity, filter;
+    }
+</style>
