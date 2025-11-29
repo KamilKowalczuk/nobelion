@@ -1,0 +1,82 @@
+/* src/styles/global.css */
+
+/* 1. Import Fontów (Google Fonts) */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Manrope:wght@300;400;600&family=JetBrains+Mono:wght@400&display=swap');
+
+/* 2. Import Tailwind v4 [cite: 15020] */
+@import "tailwindcss";
+
+/* 3. Konfiguracja Motywu ONYX [cite: 16842, 16407] */
+@theme {
+  /* Kolory - The Onyx Palette */
+  --color-void: #050505;      /* Tło */
+  --color-surface: #0B101C;   /* Karty */
+  
+  --color-brass-DEFAULT: #C5A059; /* Akcent główny */
+  --color-brass-light: #E6C885;   /* Hover */
+  --color-brass-dark: #8E7035;    /* Shadow */
+  
+  --color-silver: #E0E0E0;    /* Tekst główny */
+  --color-steel: #94A3B8;     /* Tekst drugorzędny */
+
+  /* Typografia */
+  --font-heading: "Cinzel", serif;
+  --font-sans: "Manrope", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  /* Spacing & Effects */
+  --tracking-cinematic: 0.15em;
+  
+  /* Animacje (Custom dla v4) [cite: 16525] */
+  --animate-fade-in: fade-in 1s ease-out forwards;
+  
+  @keyframes fade-in {
+    0% { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+}
+
+/* 4. Globalne Style i Atmosfera */
+@layer base {
+  body {
+    background-color: var(--color-void);
+    color: var(--color-silver);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  @media (hover: none) {
+    body { cursor: auto; }
+    .custom-cursor { display: none; }
+}
+  
+  /* Custom Scrollbar - Ukryty dla immersji */
+  ::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Selection - Złote zaznaczenie [cite: 15678] */
+  ::selection {
+    background-color: color-mix(in srgb, var(--color-brass-DEFAULT), transparent 70%);
+    color: white;
+  }
+}
+
+/* 5. Utilities - Efekt Ziarna */
+@utility noise-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9990;
+  opacity: 0.04; /* Bardzo subtelne */
+  /* Generowany szum base64 - działa od razu bez pliku */
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+}
+
+/* Dodajmy też globalną klasę dla "Szkła" żeby wszędzie wyglądało tak samo */
+@utility glass-panel {
+  @apply bg-surface/30 border border-white/5 backdrop-blur-md;
+}

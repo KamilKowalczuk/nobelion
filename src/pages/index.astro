@@ -1,16 +1,28 @@
 ---
-
+import Layout from '../layouts/Layout.astro';
+import Hero from '../components/sections/Hero.astro';
+import Foundation from '../components/sections/Foundation.astro';
+import Proof from '../components/sections/Proof.astro';
+import Marquee from '../components/ui/Marquee.svelte';
+import Divisions from '../components/sections/Divisions.astro';
+import Intelligence from '../components/sections/Intelligence.astro'; // IMPORT
+import Vault from '../components/sections/Vault.astro';
+import MagneticCursor from '../components/core/MagneticCursor.svelte';
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Layout>
+	<MagneticCursor client:load />
+	
+	<main>
+		<Hero />
+        <Foundation />
+        <Proof />
+        
+        <div class="py-24 bg-void">
+            <Marquee client:visible />
+        </div>
+
+        <Divisions />
+        <Intelligence /> <Vault />
+	</main>
+</Layout>

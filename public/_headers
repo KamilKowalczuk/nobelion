@@ -1,0 +1,28 @@
+/*
+  # 1. ZABEZPIECZENIA (Security Headers)
+  # Blokuje osadzanie strony w ramkach (obrona przed Clickjackingiem)
+  X-Frame-Options: DENY
+  
+  # Blokuje ładowanie skryptów, jeśli typ MIME jest nieprawidłowy (obrona przed Sniffingiem)
+  X-Content-Type-Options: nosniff
+  
+  # Włącza filtr XSS w starszych przeglądarkach
+  X-XSS-Protection: 1; mode=block
+  
+  # Kontrola tego, ile informacji o źródle przekazujemy innym stronom
+  Referrer-Policy: strict-origin-when-cross-origin
+  
+  # Blokada dostępu do API przeglądarki (kamera, mikrofon, geolokalizacja)
+  # To buduje zaufanie - strona nie szpieguje.
+  Permissions-Policy: geolocation=(), camera=(), microphone=(), payment=(), usb=()
+
+  # 2. CACHING (Wydajność)
+  # Statyczne zasoby (fonty, obrazki) trzymamy długo w pamięci
+  Cache-Control: public, max-age=0, must-revalidate
+
+/assets/*
+  # Pliki w folderze assets (CSS, JS, Obrazy) cache'ujemy agresywnie (rok)
+  Cache-Control: public, max-age=31536000, immutable
+
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable

@@ -1,0 +1,62 @@
+---
+import { divisionsData } from '../../data/content';
+// USUNIĘTO: import GlobalMap
+---
+
+<section id="divisions" class="relative w-full py-20 md:py-32 px-4 md:px-12 lg:px-24 bg-void z-10 overflow-hidden border-t border-white/5">
+    
+    <div class="absolute inset-0 w-full h-full pointer-events-none opacity-[0.03]" 
+         style="background-image: linear-gradient(90deg, #ffffff 1px, transparent 1px); background-size: 10% 100%;">
+    </div>
+
+    <div class="absolute inset-0 w-full h-full pointer-events-none opacity-10 animate-scan">
+        <div class="w-[30%] h-full bg-linear-to-r from-transparent via-white/10 to-transparent skew-x-12 blur-3xl"></div>
+    </div>
+
+    <div class="relative z-10 max-w-7xl mx-auto mb-12 md:mb-24 border-b border-white/10 pb-8">
+        <span class="text-brass font-mono text-xs tracking-widest uppercase mb-2 block">/ 03 STRUKTURA</span>
+        <h2 class="text-3xl md:text-5xl font-heading font-bold text-silver tracking-cinematic uppercase leading-tight">
+            Model <br/> <span class="text-steel/50">Operacyjny</span>
+        </h2>
+    </div>
+
+    <div class="relative z-10 max-w-7xl mx-auto flex flex-col">
+        {divisionsData.map((item) => (
+            <div class="group relative border-t border-white/10 py-8 md:py-12 transition-all duration-500 hover:bg-white/2">
+                
+                <div class="absolute inset-0 bg-linear-to-r from-brass/0 via-brass/[0.02] to-brass/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-2xl pointer-events-none"></div>
+                
+                <div class="relative flex flex-col md:flex-row md:items-baseline gap-3 md:gap-24 px-2 md:px-4">
+                    
+                    <div class="flex items-center gap-4 w-full md:w-auto min-w-[100px] mb-1 md:mb-0">
+                        <div class="w-1.5 h-1.5 bg-steel/20 group-hover:bg-brass group-hover:shadow-[0_0_8px_#C5A059] transition-all duration-300"></div>
+                        <span class="font-mono text-brass/40 text-sm tracking-widest group-hover:text-brass transition-colors">
+                            {item.id}
+                        </span>
+                    </div>
+                    
+                    <h3 class="text-xl md:text-3xl font-heading font-bold text-silver tracking-wider uppercase w-full md:w-1/3 group-hover:text-white transition-colors mb-2 md:mb-0">
+                        {item.title}
+                    </h3>
+                    
+                    <p class="text-sm text-steel font-sans leading-relaxed max-w-lg group-hover:text-silver/80 transition-colors">
+                        {item.description}
+                    </p>
+
+                </div>
+            </div>
+        ))}
+        <div class="border-t border-white/10"></div>
+    </div>
+
+</section>
+
+<style>
+    @keyframes scan {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(200%); }
+    }
+    .animate-scan {
+        animation: scan 15s linear infinite;
+    }
+</style>

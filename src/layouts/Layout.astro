@@ -1,0 +1,228 @@
+---
+import '../styles/global.css';
+import SmoothScroll from '../components/core/SmoothScroll.svelte';
+import LegalSystem from '../components/core/LegalSystem.svelte';
+import OrbitalTracker from '../components/core/OrbitalTracker.svelte';
+---
+<!doctype html>
+<html lang="pl">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width" />
+        <meta name="generator" content={Astro.generator} />
+
+        <title>NOBELION | Globalny Holding E-commerce & Marki Własne</title>
+        
+        <meta name="description" content="Nobelion to operator e-commerce zarządzający ekosystemem marek własnych (DTC). Importujemy, walidujemy i skalujemy produkty na rynkach globalnych. Sprzedaż detaliczna i hurtowa.">
+        
+        <meta name="author" content="Nobelion Sp. z o.o.">
+        
+        <meta name="keywords" content="holding e-commerce, marki własne, direct to consumer, globalna dystrybucja, import bezpośredni, sprzedaż hurtowa B2B, inwestycje w e-commerce, ekosystem marek">
+        
+        <link rel="canonical" href="https://nobelion.pl/">
+
+        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+        <meta name="googlebot" content="index, follow">
+
+        <meta property="og:locale" content="pl_PL">
+        <meta property="og:type" content="website">
+        <meta property="og:title" content="NOBELION | Globalny Holding E-commerce">
+        <meta property="og:description" content="Tworzymy i skalujemy marki globalne. Od importu i walidacji rynku po sprzedaż końcową. Poznaj nasz model operacyjny.">
+        <meta property="og:url" content="https://nobelion.pl/">
+        <meta property="og:site_name" content="NOBELION">
+        <meta property="og:image" content="https://nobelion.pl/og-image-onyx.jpg"> 
+        <meta property="og:image:width" content="1200">
+        <meta property="og:image:height" content="630">
+        <meta property="og:image:alt" content="Nobelion - Holding Logo">
+
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="NOBELION | Marki Własne & Dystrybucja">
+        <meta name="twitter:description" content="Niezależny kapitał, własna logistyka i globalny zasięg. Budujemy liderów kategorii e-commerce.">
+        <meta name="twitter:image" content="https://nobelion.pl/og-image-onyx.jpg">
+
+        <meta name="theme-color" content="#050505"> 
+        <meta name="msapplication-TileColor" content="#0B101C">
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+        <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#C5A059">
+
+        <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "Corporation",
+          "name": "Nobelion Sp. z o.o.",
+          "alternateName": "Nobelion Group",
+          "url": "https://nobelion.pl/",
+          "logo": "https://nobelion.pl/logo-device.png",
+          "description": "Operator e-commerce zarządzający portfelem marek własnych w modelu Direct-to-Consumer oraz prowadzący dystrybucję hurtową.",
+          "foundingDate": "2020", 
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Ul. Pamiątkowa 2",
+            "addressLocality": "Poznań",
+            "postalCode": "61-512",
+            "addressCountry": "PL"
+          },
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "email": "kontakt@nobelion.pl",
+            "contactType": "customer service",
+            "areaServed": ["PL", "EU", "US"],
+            "availableLanguage": ["Polish", "English"]
+          },
+          "sameAs": [
+            "https://www.linkedin.com/company/nobelion",
+            "https://www.facebook.com/nobelion"
+          ],
+          "identifier": [
+            {
+              "@type": "PropertyValue",
+              "propertyID": "NIP",
+              "value": "7831898094"
+            },
+            {
+              "@type": "PropertyValue",
+              "propertyID": "KRS",
+              "value": "0001088524"
+            }
+          ]
+        }
+        </script>
+
+        <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Jaki jest model biznesowy Nobelion?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Działamy jako holding e-commerce. Tworzymy, importujemy i sprzedajemy produkty pod markami własnymi w modelu DTC (Direct-to-Consumer) oraz prowadzimy dystrybucję hurtową B2B."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Czy Nobelion prowadzi sprzedaż hurtową?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Tak. Udostępniamy nasze zweryfikowane bestsellery oraz infrastrukturę logistyczną dla partnerów handlowych i sieci sprzedaży w kanale B2B."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "W jaki sposób Nobelion weryfikuje produkty?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Stosujemy proces 'Market Validation Lab'. Przed pełnym zatowarowaniem przeprowadzamy testy popytu na żywym rynku, opierając decyzje zakupowe na twardych danych sprzedażowych."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Czy Nobelion jest pośrednikiem?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Nie. Jesteśmy właścicielem towaru i marek. Posiadamy własne zaplecze kapitałowe, magazynowe oraz bezpośrednie relacje z producentami, co eliminuje pośredników z łańcucha dostaw."
+              }
+            }
+          ]
+        }
+        </script>
+    </head>
+    <body class="bg-void text-silver selection:bg-brass/30 selection:text-white relative">
+        <SmoothScroll client:only />
+        <LegalSystem client:load />
+        
+        <OrbitalTracker client:load />
+
+        <div class="noise-overlay"></div>
+        <div class="vignette-overlay"></div>
+
+        <nav class="fixed left-6 md:left-12 top-0 bottom-0 w-12 z-50 h-full flex-col justify-center gap-32 pointer-events-none hidden md:flex">
+            
+            <div class="absolute left-14px top-0 bottom-0 w-1px bg-white/5 -z-10"></div>
+
+            <a href="#hero" class="relative group pointer-events-auto cursor-none interactive w-8 h-8 flex items-center justify-center" aria-label="Go to Hero">
+                <span id="marker-01" class="nav-marker absolute -left-1 text-[10px] font-mono -rotate-90deg transition-all duration-500 text-brass opacity-100 font-bold group-hover:text-brass group-hover:opacity-100">01</span>
+                <div class="absolute left-14px w-1px h-12 bg-brass transition-all duration-500 opacity-100 origin-center scale-y-100 group-hover:scale-y-150" id="line-01"></div>
+            </a>
+            
+            <a href="#foundation" class="relative group pointer-events-auto cursor-none interactive w-8 h-8 flex items-center justify-center" aria-label="Go to Foundation">
+                <span id="marker-02" class="nav-marker absolute -left-1 text-[10px] font-mono -rotate-90deg transition-all duration-500 text-steel/30 group-hover:text-white group-hover:opacity-100">02</span>
+                <div class="absolute left-14px w-1px h-8 bg-brass transition-all duration-500 opacity-0 origin-center group-hover:opacity-50" id="line-02"></div>
+            </a>
+            
+            <a href="#proof" class="relative group pointer-events-auto cursor-none interactive w-8 h-8 flex items-center justify-center" aria-label="Go to Proof">
+                <span id="marker-03" class="nav-marker absolute -left-1 text-[10px] font-mono -rotate-90deg transition-all duration-500 text-steel/30 group-hover:text-white group-hover:opacity-100">03</span>
+                <div class="absolute left-14px w-1px h-8 bg-brass transition-all duration-500 opacity-0 origin-center group-hover:opacity-50" id="line-03"></div>
+            </a>
+
+             <a href="#divisions" class="relative group pointer-events-auto cursor-none interactive w-8 h-8 flex items-center justify-center" aria-label="Go to Divisions">
+                <span id="marker-04" class="nav-marker absolute -left-1 text-[10px] font-mono -rotate-90deg transition-all duration-500 text-steel/30 group-hover:text-white group-hover:opacity-100">04</span>
+                <div class="absolute left-14px w-1px h-8 bg-brass transition-all duration-500 opacity-0 origin-center group-hover:opacity-50" id="line-04"></div>
+            </a>
+
+             <a href="#intelligence" class="relative group pointer-events-auto cursor-none interactive w-8 h-8 flex items-center justify-center" aria-label="Go to Intelligence">
+                <span id="marker-05" class="nav-marker absolute -left-1 text-[10px] font-mono -rotate-90deg transition-all duration-500 text-steel/30 group-hover:text-white group-hover:opacity-100">05</span>
+                <div class="absolute left-14px w-1px h-8 bg-brass transition-all duration-500 opacity-0 origin-center group-hover:opacity-50" id="line-05"></div>
+            </a>
+            
+             <a href="#vault" class="relative group pointer-events-auto cursor-none interactive w-8 h-8 flex items-center justify-center" aria-label="Go to Vault">
+                <span id="marker-06" class="nav-marker absolute -left-1 text-[10px] font-mono -rotate-90deg transition-all duration-500 text-steel/30 group-hover:text-white group-hover:opacity-100">06</span>
+                <div class="absolute left-14px w-1px h-8 bg-brass transition-all duration-500 opacity-0 origin-center group-hover:opacity-50" id="line-06"></div>
+            </a>
+        </nav>
+
+        <div class="fixed left-1/2 top-0 bottom-0 w-1px bg-white/5 -translate-x-1/2 z-0 pointer-events-none"></div>
+
+        <slot />
+
+        <script>
+            const sections = document.querySelectorAll('section, footer');
+            
+            const markers = {
+                '0': { text: document.getElementById('marker-01'), line: document.getElementById('line-01') },
+                '1': { text: document.getElementById('marker-02'), line: document.getElementById('line-02') },
+                '2': { text: document.getElementById('marker-03'), line: document.getElementById('line-03') },
+                '3': { text: document.getElementById('marker-04'), line: document.getElementById('line-04') },
+                '4': { text: document.getElementById('marker-05'), line: document.getElementById('line-05') },
+                '5': { text: document.getElementById('marker-06'), line: document.getElementById('line-06') }
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const index = Array.from(sections).indexOf(entry.target);
+                        
+                        Object.values(markers).forEach(m => {
+                            if(m.text) {
+                                m.text.classList.remove('text-brass', 'opacity-100', 'font-bold');
+                                m.text.classList.add('text-steel/30');
+                            }
+                            if(m.line) {
+                                m.line.classList.remove('opacity-100', 'h-12');
+                                m.line.classList.add('opacity-0', 'h-8');
+                            }
+                        });
+
+                        const key = index.toString() as keyof typeof markers;
+                        const active = markers[key];
+
+                        if (active) {
+                            if (active.text) {
+                                active.text.classList.remove('text-steel/30');
+                                active.text.classList.add('text-brass', 'opacity-100', 'font-bold');
+                            }
+                            if (active.line) {
+                                active.line.classList.remove('opacity-0', 'h-8');
+                                active.line.classList.add('opacity-100', 'h-12');
+                            }
+                        }
+                    }
+                });
+            }, { threshold: 0.3 });
+
+            sections.forEach(section => observer.observe(section));
+        </script>
+    </body>
+</html>

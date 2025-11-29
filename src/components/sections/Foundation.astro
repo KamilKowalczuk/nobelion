@@ -1,0 +1,33 @@
+---
+import { bentoGridItems } from '../../data/content';
+import BentoCard from '../ui/BentoCard.svelte';
+---
+
+<section id="foundation" class="relative w-full py-20 md:py-32 px-4 md:px-12 lg:px-24 bg-void z-10">
+    
+    <div class="max-w-7xl mx-auto mb-12 md:mb-24 flex flex-col md:flex-row justify-between items-start md:items-end border-b border-white/10 pb-8">
+        <div>
+            <span class="text-brass font-mono text-xs tracking-widest uppercase mb-2 block">/ 02 FUNDAMENT</span>
+            <h2 class="text-3xl md:text-5xl font-heading font-bold text-silver tracking-cinematic uppercase leading-tight">
+                Architektura <br/> <span class="text-steel/50">Elitarna</span>
+            </h2>
+        </div>
+        
+        <p class="text-steel/60 font-mono text-xs tracking-widest uppercase max-w-xs text-left md:text-right mt-4 md:mt-0">
+            System zaprojektowany <br/> dla zerowej tolerancji błędu.
+        </p>
+    </div>
+
+    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
+        {bentoGridItems.map((item) => (
+            <BentoCard 
+                client:visible 
+                title={item.title} 
+                description={item.description} 
+                icon={item.icon} 
+                colSpan={item.colSpan} 
+            />
+        ))}
+    </div>
+
+</section>

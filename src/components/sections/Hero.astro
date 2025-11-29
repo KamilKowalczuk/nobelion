@@ -1,0 +1,51 @@
+---
+import { heroData } from '../../data/content';
+// ZMIANA: Importujemy nowy komponent, stary (DecoderText) można usunąć
+import CinematicText from '../ui/CinematicText.svelte';
+import AnimatedLogo from '../ui/AnimatedLogo.svelte';
+---
+
+<section id="hero" class="relative h-screen w-full flex flex-col items-center justify-center overflow-hidden border-b border-surface/50">
+    
+    <div 
+        class="absolute inset-0 -z-10"
+        style="background: radial-gradient(circle at center, #0B101C 0%, #050505 70%);"
+    >
+        <div class="absolute inset-0 opacity-10" 
+             style="background-image: linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px); background-size: 100px 100px;">
+        </div>
+    </div>
+
+    <div class="relative z-10 mb-12"> 
+        <AnimatedLogo client:load />
+    </div>
+
+    <div class="text-center z-10 space-y-6 mix-blend-difference px-4">
+        <h1 class="text-5xl md:text-8xl lg:text-9xl font-heading font-bold text-silver tracking-cinematic leading-none drop-shadow-2xl">
+            <CinematicText client:load text="NOBELION" />
+        </h1>
+        
+        <p class="text-xs md:text-sm font-mono text-brass tracking-[0.4em] uppercase opacity-0 animate-fade-in-slow" style="animation-delay: 2s; animation-fill-mode: forwards;">
+            {heroData.subheading}
+        </p>
+    </div>
+
+    <div class="absolute bottom-0 left-1/2 -translate-x-1/2 flex flex-col items-center pb-12 z-20">
+        <div class="w-1px h-24 bg-linear-to-b from-transparent via-brass to-transparent opacity-60"></div>
+        <span class="mt-4 text-[10px] font-mono text-steel/50 tracking-[0.4em] uppercase animate-pulse">
+            {heroData.scrollText}
+        </span>
+    </div>
+
+</section>
+
+<style>
+    /* Dodatkowa animacja dla subheadingu */
+    @keyframes fadeInSlow {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in-slow {
+        animation: fadeInSlow 1.5s ease-out;
+    }
+</style>
