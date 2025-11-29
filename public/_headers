@@ -26,3 +26,14 @@
 
 /fonts/*
   Cache-Control: public, max-age=31536000, immutable
+
+  /*
+  # ... Twoje dotychczasowe nagłówki bezpieczeństwa ...
+
+# CACHING FONTÓW (Wydajność)
+# Astro podczas buildu często zmienia nazwy plików (hash), więc możemy je cache'ować "forever".
+/*.woff2
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.css
+  Cache-Control: public, max-age=31536000, immutable

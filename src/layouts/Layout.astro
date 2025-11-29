@@ -3,6 +3,21 @@ import '../styles/global.css';
 import SmoothScroll from '../components/core/SmoothScroll.svelte';
 import LegalSystem from '../components/core/LegalSystem.svelte';
 import OrbitalTracker from '../components/core/OrbitalTracker.svelte';
+
+// === OPTYMALIZACJA FONTÓW (Self-Hosting) ===
+// Importujemy tylko potrzebne wagi, żeby nie ładować zbędnych kilobajtów.
+
+// 1. Cinzel (Nagłówki) - Wagi: Regular (400), Bold (700)
+import '@fontsource/cinzel/400.css';
+import '@fontsource/cinzel/700.css';
+
+// 2. Manrope (Tekst UI) - Wagi: Light (300), Regular (400), SemiBold (600)
+import '@fontsource/manrope/300.css';
+import '@fontsource/manrope/400.css';
+import '@fontsource/manrope/600.css';
+
+// 3. JetBrains Mono (Dane techniczne) - Waga: Regular (400)
+import '@fontsource/jetbrains-mono/400.css';
 ---
 <!doctype html>
 <html lang="pl">
