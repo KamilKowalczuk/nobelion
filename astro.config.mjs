@@ -16,6 +16,5 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()], // [cite: 15016]
   },
-  output: 'static',
   adapter: netlify(),
 });

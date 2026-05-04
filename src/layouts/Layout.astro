@@ -1,39 +1,32 @@
 ---
 import '../styles/global.css';
+import { siteConfig } from '../data/content';
 import SmoothScroll from '../components/core/SmoothScroll.svelte';
 import LegalSystem from '../components/core/LegalSystem.svelte';
-import OrbitalTracker from '../components/core/OrbitalTracker.svelte';
 
-// === OPTYMALIZACJA FONTÓW (Self-Hosting) ===
-// Importujemy tylko potrzebne wagi, żeby nie ładować zbędnych kilobajtów.
-
-// 1. Cinzel (Nagłówki) - Wagi: Regular (400), Bold (700)
+// === FONTY (self-hosted, tylko niezbędne wagi) ===
 import '@fontsource/cinzel/400.css';
 import '@fontsource/cinzel/700.css';
 
-// 2. Manrope (Tekst UI) - Wagi: Light (300), Regular (400), SemiBold (600)
 import '@fontsource/manrope/300.css';
 import '@fontsource/manrope/400.css';
 import '@fontsource/manrope/600.css';
 
-// 3. JetBrains Mono (Dane techniczne) - Waga: Regular (400)
 import '@fontsource/jetbrains-mono/400.css';
 ---
 <!doctype html>
 <html lang="pl">
     <head>
         <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="generator" content={Astro.generator} />
 
-        <title>NOBELION | Globalny Holding E-commerce & Marki Własne</title>
-        
-        <meta name="description" content="Nobelion to operator e-commerce zarządzający ekosystemem marek własnych (DTC). Importujemy, walidujemy i skalujemy produkty na rynkach globalnych. Sprzedaż detaliczna i hurtowa.">
-        
+        <title>{siteConfig.title}</title>
+
+        <meta name="description" content={siteConfig.description}>
         <meta name="author" content="Nobelion Sp. z o.o.">
-        
-        <meta name="keywords" content="holding e-commerce, marki własne, direct to consumer, globalna dystrybucja, import bezpośredni, sprzedaż hurtowa B2B, inwestycje w e-commerce, ekosystem marek">
-        
+        <meta name="keywords" content="automatyzacja AI, automatyzacje dla firm, agencja AI, strony internetowe, oprogramowanie na zamówienie, automatyzacja procesów, bot mailingowy, integracje API, custom software, automatyzacja sprzedaży, automatyzacja księgowości">
+
         <link rel="canonical" href="https://nobelion.pl/">
 
         <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
@@ -41,202 +34,524 @@ import '@fontsource/jetbrains-mono/400.css';
 
         <meta property="og:locale" content="pl_PL">
         <meta property="og:type" content="website">
-        <meta property="og:title" content="NOBELION | Globalny Holding E-commerce">
-        <meta property="og:description" content="Tworzymy i skalujemy marki globalne. Od importu i walidacji rynku po sprzedaż końcową. Poznaj nasz model operacyjny.">
+        <meta property="og:title" content="NOBELION | Automatyzacje AI i Systemy dla Firm">
+        <meta property="og:description" content="Projektujemy automatyzacje AI i strony internetowe dla firm, które chcą rosnąć bez zatrudniania kolejnych ludzi.">
         <meta property="og:url" content="https://nobelion.pl/">
         <meta property="og:site_name" content="NOBELION">
-        <meta property="og:image" content="https://nobelion.pl/og-image-onyx.jpg"> 
+        <meta property="og:image" content="https://nobelion.pl/og-image-onyx.jpg">
         <meta property="og:image:width" content="1200">
         <meta property="og:image:height" content="630">
-        <meta property="og:image:alt" content="Nobelion - Holding Logo">
+        <meta property="og:image:alt" content="Nobelion, automatyzacje AI dla firm">
 
         <meta name="twitter:card" content="summary_large_image">
-        <meta name="twitter:title" content="NOBELION | Marki Własne & Dystrybucja">
-        <meta name="twitter:description" content="Niezależny kapitał, własna logistyka i globalny zasięg. Budujemy liderów kategorii e-commerce.">
+        <meta name="twitter:title" content="NOBELION | Automatyzacje AI i Systemy dla Firm">
+        <meta name="twitter:description" content="Projektujemy automatyzacje AI dla polskich firm. Brief w 2 minuty, plan i wycena w 24 godziny.">
         <meta name="twitter:image" content="https://nobelion.pl/og-image-onyx.jpg">
 
-        <meta name="theme-color" content="#050505"> 
+        <meta name="theme-color" content="#050505">
         <meta name="msapplication-TileColor" content="#0B101C">
         <link rel="icon" type="image/svg+xml" href="/favicon.svg">
         <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#C5A059">
 
-        <script type="application/ld+json">
-        {
-          "@context": "https://schema.org",
-          "@type": "Corporation",
-          "name": "Nobelion Sp. z o.o.",
-          "alternateName": "Nobelion Group",
-          "url": "https://nobelion.pl/",
-          "logo": "https://nobelion.pl/logo-device.png",
-          "description": "Operator e-commerce zarządzający portfelem marek własnych w modelu Direct-to-Consumer oraz prowadzący dystrybucję hurtową.",
-          "foundingDate": "2020", 
-          "address": {
-            "@type": "PostalAddress",
-            "streetAddress": "Ul. Pamiątkowa 2",
-            "addressLocality": "Poznań",
-            "postalCode": "61-512",
-            "addressCountry": "PL"
-          },
-          "contactPoint": {
-            "@type": "ContactPoint",
-            "email": "kontakt@nobelion.pl",
-            "contactType": "customer service",
-            "areaServed": ["PL", "EU", "US"],
-            "availableLanguage": ["Polish", "English"]
-          },
-          "sameAs": [
-            "https://www.linkedin.com/company/nobelion",
-            "https://www.facebook.com/nobelion"
-          ],
-          "identifier": [
-            {
-              "@type": "PropertyValue",
-              "propertyID": "NIP",
-              "value": "7831898094"
+        <script type="application/ld+json" set:html={JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "ProfessionalService",
+            "name": "Nobelion Sp. z o.o.",
+            "alternateName": "Nobelion",
+            "url": "https://nobelion.pl/",
+            "logo": "https://nobelion.pl/favicon.svg",
+            "description": "Agencja projektowania automatyzacji AI, stron internetowych oraz oprogramowania na zamówienie dla polskich firm. Od briefu do wdrożenia w jednym ekosystemie.",
+            "foundingDate": "2020",
+            "priceRange": "$$$",
+            "address": {
+                "@type": "PostalAddress",
+                "streetAddress": "Ul. Pamiątkowa 2",
+                "addressLocality": "Poznań",
+                "postalCode": "61-512",
+                "addressCountry": "PL"
             },
-            {
-              "@type": "PropertyValue",
-              "propertyID": "KRS",
-              "value": "0001088524"
-            }
-          ]
-        }
-        </script>
+            "contactPoint": {
+                "@type": "ContactPoint",
+                "email": "kontakt@nobelion.pl",
+                "contactType": "customer service",
+                "areaServed": ["PL", "EU"],
+                "availableLanguage": ["Polish", "English"]
+            },
+            "areaServed": {
+                "@type": "Country",
+                "name": "Poland"
+            },
+            "serviceType": [
+                "Automatyzacje AI",
+                "Strony internetowe",
+                "Oprogramowanie na zamówienie",
+                "Integracje systemów",
+                "Custom software development"
+            ],
+            "identifier": [
+                { "@type": "PropertyValue", "propertyID": "NIP", "value": "7831898094" },
+                { "@type": "PropertyValue", "propertyID": "KRS", "value": "0001088524" },
+                { "@type": "PropertyValue", "propertyID": "REGON", "value": "527810001" }
+            ]
+        })} />
 
-        <script type="application/ld+json">
-        {
-          "@context": "https://schema.org",
-          "@type": "FAQPage",
-          "mainEntity": [
-            {
-              "@type": "Question",
-              "name": "Jaki jest model biznesowy Nobelion?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Działamy jako holding e-commerce. Tworzymy, importujemy i sprzedajemy produkty pod markami własnymi w modelu DTC (Direct-to-Consumer) oraz prowadzimy dystrybucję hurtową B2B."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "Czy Nobelion prowadzi sprzedaż hurtową?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Tak. Udostępniamy nasze zweryfikowane bestsellery oraz infrastrukturę logistyczną dla partnerów handlowych i sieci sprzedaży w kanale B2B."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "W jaki sposób Nobelion weryfikuje produkty?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Stosujemy proces 'Market Validation Lab'. Przed pełnym zatowarowaniem przeprowadzamy testy popytu na żywym rynku, opierając decyzje zakupowe na twardych danych sprzedażowych."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "Czy Nobelion jest pośrednikiem?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Nie. Jesteśmy właścicielem towaru i marek. Posiadamy własne zaplecze kapitałowe, magazynowe oraz bezpośrednie relacje z producentami, co eliminuje pośredników z łańcucha dostaw."
-              }
-            }
-          ]
-        }
-        </script>
+        <script type="application/ld+json" set:html={JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+                {
+                    "@type": "Question",
+                    "name": "Czym zajmuje się Nobelion?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Projektujemy automatyzacje AI, strony internetowe oraz oprogramowanie na zamówienie dla polskich firm. Każdy projekt zaczynamy od briefu i konkretnej wyceny w ciągu 24 do 48 godzin."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "Ile kosztuje wdrożenie automatyzacji?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Każdy projekt jest inny, dlatego wycena jest zawsze indywidualna. Po wypełnieniu briefu otrzymują Państwo plan i konkretną kwotę w ciągu 24 do 48 godzin. Bez ukrytych kosztów."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "Czy muszę znać się na technologii?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Nie. Naszą rolą jest tłumaczenie złożonych spraw na zwykły język. Brief jest po polsku, plan jest po polsku. Wystarczy, że wiesz, co Cię uwiera w codziennej pracy."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "Jak długo trwa projekt?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Najczęściej od dwóch do sześciu tygodni, w zależności od skali. Proste integracje uruchamiamy w ciągu kilku dni. Większe systemy budujemy etapami."
+                    }
+                }
+            ]
+        })} />
     </head>
     <body class="bg-void text-silver selection:bg-brass/30 selection:text-white relative">
         <SmoothScroll client:only />
         <LegalSystem client:load />
-        
 
         <div class="noise-overlay"></div>
-        <div class="vignette-overlay"></div>
 
-        <nav class="fixed left-6 md:left-12 top-0 bottom-0 w-12 z-50 h-full flex-col justify-center gap-32 pointer-events-none hidden md:flex">
-            
-            <div class="absolute left-14px top-0 bottom-0 w-1px bg-white/5 -z-10"></div>
+        <!-- Skip to content (accessibility) -->
+        <a
+            href="#main-content"
+            class="skip-link sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-brass focus:text-void focus:font-mono focus:text-xs focus:tracking-[0.3em] focus:uppercase focus:outline-none"
+        >
+            Przejdź do treści
+        </a>
 
-            <a href="#hero" class="relative group pointer-events-auto cursor-none interactive w-8 h-8 flex items-center justify-center" aria-label="Go to Hero">
-                <span id="marker-01" class="nav-marker absolute -left-1 text-[10px] font-mono -rotate-90deg transition-all duration-500 text-brass opacity-100 font-bold group-hover:text-brass group-hover:opacity-100">01</span>
-                <div class="absolute left-14px w-1px h-12 bg-brass transition-all duration-500 opacity-100 origin-center scale-y-100 group-hover:scale-y-150" id="line-01"></div>
-            </a>
-            
-            <a href="#foundation" class="relative group pointer-events-auto cursor-none interactive w-8 h-8 flex items-center justify-center" aria-label="Go to Foundation">
-                <span id="marker-02" class="nav-marker absolute -left-1 text-[10px] font-mono -rotate-90deg transition-all duration-500 text-steel/30 group-hover:text-white group-hover:opacity-100">02</span>
-                <div class="absolute left-14px w-1px h-8 bg-brass transition-all duration-500 opacity-0 origin-center group-hover:opacity-50" id="line-02"></div>
-            </a>
-            
-            <a href="#proof" class="relative group pointer-events-auto cursor-none interactive w-8 h-8 flex items-center justify-center" aria-label="Go to Proof">
-                <span id="marker-03" class="nav-marker absolute -left-1 text-[10px] font-mono -rotate-90deg transition-all duration-500 text-steel/30 group-hover:text-white group-hover:opacity-100">03</span>
-                <div class="absolute left-14px w-1px h-8 bg-brass transition-all duration-500 opacity-0 origin-center group-hover:opacity-50" id="line-03"></div>
+        <!-- ============================================================
+             GŁÓWNY HEADER NAWIGACJI
+             - Transparent na hero, dark-glass po scrollu
+             - Logo lewo | Nav środek | CTA prawo
+             - Mobile: hamburger → fullscreen overlay
+        ============================================================ -->
+        <header id="site-header" class="site-header fixed top-0 left-0 right-0 z-[60] h-16 md:h-20" role="banner">
+            <div class="relative max-w-7xl mx-auto px-4 md:px-12 h-full flex items-center gap-4">
+
+                <!-- Logo — pojawia się gdy hero brand znika z viewportu -->
+                <a
+                    id="header-logo"
+                    href="#hero"
+                    class="header-logo interactive cursor-none flex items-center gap-2.5 flex-shrink-0"
+                    aria-label="Nobelion — wróć na górę strony"
+                >
+                    <img src="/favicon.svg" alt="" aria-hidden="true" class="w-7 h-7 md:w-8 md:h-8 flex-shrink-0" />
+                    <span class="font-heading font-bold text-brass tracking-[0.45em] text-sm md:text-base uppercase">NOBELION</span>
+                </a>
+
+                <!-- Desktop nawigacja — ml-auto przesuwa do prawej krawędzi -->
+                <nav class="hidden md:flex items-center gap-5 lg:gap-7 ml-auto" aria-label="Główna nawigacja">
+                    <a href="#problem"  class="nav-link interactive cursor-none" data-section="problem">PROBLEM</a>
+                    <a href="#services" class="nav-link interactive cursor-none" data-section="services">USŁUGI</a>
+                    <a href="#cases"    class="nav-link interactive cursor-none" data-section="cases">DOWODY</a>
+                    <a href="#process"  class="nav-link interactive cursor-none" data-section="process">PROCES</a>
+                    <a href="#faq"      class="nav-link interactive cursor-none" data-section="faq">FAQ</a>
+                </nav>
+
+                <!-- Hamburger (mobile only) — 44×44 tap target, ml-auto przesuwa do prawej -->
+                <button
+                    id="mobile-menu-btn"
+                    class="interactive cursor-none md:hidden w-11 h-11 flex items-center justify-center ml-auto"
+                    aria-label="Otwórz menu nawigacyjne"
+                    aria-expanded="false"
+                    aria-controls="mobile-menu"
+                    type="button"
+                >
+                    <span class="hamburger-icon" aria-hidden="true">
+                        <span class="ham-line"></span>
+                        <span class="ham-line"></span>
+                        <span class="ham-line"></span>
+                    </span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Mobile menu fullscreen overlay -->
+        <div
+            id="mobile-menu"
+            class="fixed inset-0 z-[59] bg-void flex flex-col items-center justify-center pointer-events-none opacity-0"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Menu nawigacyjne"
+            tabindex="-1"
+        >
+            <!-- Dekoracyjna linia mosiężna -->
+            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-px h-20 bg-linear-to-b from-transparent to-brass/40" aria-hidden="true"></div>
+
+            <nav class="flex flex-col items-center gap-7 md:gap-8" aria-label="Menu mobilne">
+                <a href="#problem"  class="mobile-nav-link interactive cursor-none" data-section="problem">PROBLEM</a>
+                <a href="#services" class="mobile-nav-link interactive cursor-none" data-section="services">USŁUGI</a>
+                <a href="#cases"    class="mobile-nav-link interactive cursor-none" data-section="cases">DOWODY</a>
+                <a href="#process"  class="mobile-nav-link interactive cursor-none" data-section="process">PROCES</a>
+                <a href="#faq"      class="mobile-nav-link interactive cursor-none" data-section="faq">FAQ</a>
+            </nav>
+
+            <a
+                href="#brief"
+                class="interactive cursor-none mt-12 inline-flex items-center gap-3 px-8 py-4 bg-brass text-void font-heading text-sm tracking-[0.2em] uppercase transition-all duration-200 ease-out hover:bg-brass-light"
+            >
+                <span>ZACZNIJ BRIEF</span>
+                <span aria-hidden="true">→</span>
             </a>
 
-             <a href="#divisions" class="relative group pointer-events-auto cursor-none interactive w-8 h-8 flex items-center justify-center" aria-label="Go to Divisions">
-                <span id="marker-04" class="nav-marker absolute -left-1 text-[10px] font-mono -rotate-90deg transition-all duration-500 text-steel/30 group-hover:text-white group-hover:opacity-100">04</span>
-                <div class="absolute left-14px w-1px h-8 bg-brass transition-all duration-500 opacity-0 origin-center group-hover:opacity-50" id="line-04"></div>
-            </a>
+            <!-- Numer sekretny na dole (estetyczny detal) -->
+            <p class="absolute bottom-8 font-mono text-steel/20 text-[10px] tracking-[0.4em] uppercase">NOBELION © {new Date().getFullYear()}</p>
+        </div>
 
-             <a href="#intelligence" class="relative group pointer-events-auto cursor-none interactive w-8 h-8 flex items-center justify-center" aria-label="Go to Intelligence">
-                <span id="marker-05" class="nav-marker absolute -left-1 text-[10px] font-mono -rotate-90deg transition-all duration-500 text-steel/30 group-hover:text-white group-hover:opacity-100">05</span>
-                <div class="absolute left-14px w-1px h-8 bg-brass transition-all duration-500 opacity-0 origin-center group-hover:opacity-50" id="line-05"></div>
-            </a>
-            
-             <a href="#vault" class="relative group pointer-events-auto cursor-none interactive w-8 h-8 flex items-center justify-center" aria-label="Go to Vault">
-                <span id="marker-06" class="nav-marker absolute -left-1 text-[10px] font-mono -rotate-90deg transition-all duration-500 text-steel/30 group-hover:text-white group-hover:opacity-100">06</span>
-                <div class="absolute left-14px w-1px h-8 bg-brass transition-all duration-500 opacity-0 origin-center group-hover:opacity-50" id="line-06"></div>
-            </a>
-        </nav>
+        <!-- Section ambient indicator (bottom-left, pojawia się na 2s) -->
+        <div
+            id="section-indicator"
+            class="fixed bottom-6 left-6 z-40 pointer-events-none opacity-0"
+            aria-hidden="true"
+            style="transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);"
+        >
+            <div class="flex items-center gap-3 px-4 py-2 bg-surface/80 backdrop-blur-sm border border-brass/30">
+                <span class="inline-block w-1.5 h-1.5 bg-brass rounded-full" id="section-indicator-dot"></span>
+                <span class="font-mono text-brass text-[10px] tracking-[0.3em] uppercase" id="section-indicator-label">START</span>
+            </div>
+        </div>
 
-        <div class="fixed left-1/2 top-0 bottom-0 w-1px bg-white/5 -translate-x-1/2 z-0 pointer-events-none"></div>
+        <main id="main-content" tabindex="-1">
+            <slot />
+        </main>
 
-        <slot />
+        <!-- Floating CTA: pojawia się po opuszczeniu hero -->
+        <a
+            id="floating-cta"
+            href="#brief"
+            class="floating-cta interactive cursor-none fixed bottom-6 right-6 md:bottom-10 md:right-10 z-50 inline-flex items-center gap-3 pl-6 pr-7 py-4 bg-brass text-void font-heading text-xs md:text-sm tracking-[0.2em] uppercase opacity-0 pointer-events-none transition-all duration-300 ease-out"
+            aria-label="Rozpocznij brief"
+        >
+            <span class="floating-cta-dot inline-block w-2 h-2 bg-void rounded-full"></span>
+            <span>ZACZNIJ BRIEF</span>
+        </a>
 
         <script>
-            const sections = document.querySelectorAll('section, footer');
-            
-            const markers = {
-                '0': { text: document.getElementById('marker-01'), line: document.getElementById('line-01') },
-                '1': { text: document.getElementById('marker-02'), line: document.getElementById('line-02') },
-                '2': { text: document.getElementById('marker-03'), line: document.getElementById('line-03') },
-                '3': { text: document.getElementById('marker-04'), line: document.getElementById('line-04') },
-                '4': { text: document.getElementById('marker-05'), line: document.getElementById('line-05') },
-                '5': { text: document.getElementById('marker-06'), line: document.getElementById('line-06') }
-            };
+            // === HEADER: dark-glass po ~50px scrolla ===
+            const siteHeader = document.getElementById('site-header');
 
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const index = Array.from(sections).indexOf(entry.target);
-                        
-                        Object.values(markers).forEach(m => {
-                            if(m.text) {
-                                m.text.classList.remove('text-brass', 'opacity-100', 'font-bold');
-                                m.text.classList.add('text-steel/30');
-                            }
-                            if(m.line) {
-                                m.line.classList.remove('opacity-100', 'h-12');
-                                m.line.classList.add('opacity-0', 'h-8');
-                            }
-                        });
-
-                        const key = index.toString() as keyof typeof markers;
-                        const active = markers[key];
-
-                        if (active) {
-                            if (active.text) {
-                                active.text.classList.remove('text-steel/30');
-                                active.text.classList.add('text-brass', 'opacity-100', 'font-bold');
-                            }
-                            if (active.line) {
-                                active.line.classList.remove('opacity-0', 'h-8');
-                                active.line.classList.add('opacity-100', 'h-12');
-                            }
-                        }
+            if (siteHeader) {
+                let rafPending = false;
+                const checkScroll = () => {
+                    siteHeader.classList.toggle('is-scrolled', window.scrollY > 50);
+                    rafPending = false;
+                };
+                window.addEventListener('scroll', () => {
+                    if (!rafPending) {
+                        rafPending = true;
+                        requestAnimationFrame(checkScroll);
                     }
-                });
-            }, { threshold: 0.3 });
+                }, { passive: true });
+                checkScroll();
+            }
 
-            sections.forEach(section => observer.observe(section));
+            // === LOGO TRANSFER: header logo wskakuje gdy hero brand znika ===
+            const headerLogo = document.getElementById('header-logo');
+            const heroBrand = document.getElementById('hero-brand');
+
+            if (headerLogo && heroBrand) {
+                const logoTransferObs = new IntersectionObserver(([entry]) => {
+                    headerLogo.classList.toggle('is-visible', !entry.isIntersecting);
+                }, {
+                    threshold: 0,
+                    rootMargin: '-80px 0px 0px 0px'
+                });
+                logoTransferObs.observe(heroBrand);
+            }
+
+            // === HEADER: aktywny link nawigacji ===
+            const navLinks = document.querySelectorAll<HTMLElement>('.nav-link[data-section]');
+            const activeIds = ['problem', 'services', 'cases', 'process', 'faq', 'brief'];
+
+            if (navLinks.length > 0) {
+                const linkObs = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            navLinks.forEach(link => {
+                                link.classList.toggle('is-active', link.dataset.section === entry.target.id);
+                            });
+                        }
+                    });
+                }, { threshold: 0.35, rootMargin: '-15% 0px -45% 0px' });
+
+                activeIds.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) linkObs.observe(el);
+                });
+            }
+
+            // === MOBILE MENU ===
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            let isMenuOpen = false;
+
+            function toggleMobileMenu(open: boolean) {
+                isMenuOpen = open;
+                mobileMenuBtn?.setAttribute('aria-expanded', String(open));
+                mobileMenuBtn?.classList.toggle('is-open', open);
+                mobileMenu?.classList.toggle('is-open', open);
+                document.body.style.overflow = open ? 'hidden' : '';
+                if (open) (mobileMenu as HTMLElement)?.focus();
+            }
+
+            mobileMenuBtn?.addEventListener('click', () => toggleMobileMenu(!isMenuOpen));
+
+            mobileMenu?.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => toggleMobileMenu(false));
+            });
+
+            document.addEventListener('keydown', (e: KeyboardEvent) => {
+                if (e.key === 'Escape' && isMenuOpen) toggleMobileMenu(false);
+            });
+
+            // === FLOATING CTA: pojawia się po hero, chowa się gdy footer wchodzi ===
+            const floatingCta = document.getElementById('floating-cta');
+            const heroEl = document.getElementById('hero');
+
+            if (floatingCta && heroEl) {
+                let heroVisible = true;
+                let bottomVisible = false;
+
+                const refreshCta = () => {
+                    const show = !heroVisible && !bottomVisible;
+                    floatingCta.classList.toggle('opacity-0', !show);
+                    floatingCta.classList.toggle('pointer-events-none', !show);
+                    floatingCta.classList.toggle('opacity-100', show);
+                };
+
+                new IntersectionObserver(([entry]) => {
+                    heroVisible = entry.isIntersecting;
+                    refreshCta();
+                }, { threshold: 0.1 }).observe(heroEl);
+
+                const footerEl = document.querySelector('footer') ?? document.getElementById('vault');
+                if (footerEl) {
+                    let rafFooter = false;
+                    const checkFooter = () => {
+                        bottomVisible = footerEl.getBoundingClientRect().top < window.innerHeight + 100;
+                        refreshCta();
+                        rafFooter = false;
+                    };
+                    window.addEventListener('scroll', () => {
+                        if (!rafFooter) { rafFooter = true; requestAnimationFrame(checkFooter); }
+                    }, { passive: true });
+                    checkFooter();
+                }
+            }
+
+            // === SECTION AMBIENT INDICATOR ===
+            const allSections = document.querySelectorAll('section, footer');
+            const sectionLabels: Record<string, string> = {
+                'problem': 'PROBLEM', 'services': 'USŁUGI', 'examples': 'PRZYKŁADY',
+                'cases': 'DOWODY', 'process': 'PROCES', 'audience': 'DLA KOGO',
+                'benefits': 'KORZYŚCI', 'faq': 'PYTANIA', 'brief': 'BRIEF'
+            };
+            const indicator = document.getElementById('section-indicator');
+            const indicatorLabel = document.getElementById('section-indicator-label');
+            let indicatorTimeout: ReturnType<typeof setTimeout> | null = null;
+            let lastShownSection = '';
+
+            if (indicator && indicatorLabel) {
+                const indicatorObs = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (!entry.isIntersecting) return;
+                        const id = entry.target.id;
+                        const label = sectionLabels[id];
+                        if (!label || id === lastShownSection) return;
+
+                        lastShownSection = id;
+                        indicatorLabel.textContent = label;
+                        indicator.classList.replace('opacity-0', 'opacity-100');
+                        if (indicatorTimeout) clearTimeout(indicatorTimeout);
+                        indicatorTimeout = setTimeout(() => {
+                            indicator.classList.replace('opacity-100', 'opacity-0');
+                        }, 1800);
+                    });
+                }, { threshold: 0.5, rootMargin: '-25% 0px -25% 0px' });
+
+                allSections.forEach(s => { if (s.id) indicatorObs.observe(s); });
+            }
         </script>
+
+        <style is:global>
+            /* ─── Site Header ─── */
+            .site-header {
+                transition: background-color 280ms ease-out, border-color 280ms ease-out, box-shadow 280ms ease-out;
+                border-bottom: 1px solid transparent;
+            }
+            .site-header.is-scrolled {
+                background-color: rgba(5, 5, 5, 0.93);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                border-bottom-color: rgba(255, 255, 255, 0.07);
+                box-shadow: 0 1px 32px rgba(0, 0, 0, 0.6);
+            }
+
+            /* Desktop nav links */
+            .nav-link {
+                font-family: var(--font-mono);
+                font-size: 0.6875rem;
+                letter-spacing: 0.25em;
+                text-transform: uppercase;
+                color: rgba(148, 163, 184, 0.5);
+                transition: color 200ms ease-out;
+                padding: 0.375rem 0;
+                position: relative;
+            }
+            .nav-link::after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 1px;
+                background: var(--color-brass);
+                transform: scaleX(0);
+                transform-origin: left center;
+                transition: transform 200ms ease-out;
+            }
+            .nav-link:hover,
+            .nav-link.is-active {
+                color: var(--color-brass);
+            }
+            .nav-link.is-active::after {
+                transform: scaleX(1);
+            }
+            .nav-link:focus-visible {
+                outline: 1px solid var(--color-brass);
+                outline-offset: 5px;
+            }
+
+            /* Logo transfer animation */
+            .header-logo {
+                opacity: 0;
+                transform: translateY(-5px);
+                pointer-events: none;
+                transition: opacity 280ms cubic-bezier(0.16, 1, 0.3, 1), transform 280ms cubic-bezier(0.16, 1, 0.3, 1);
+            }
+            .header-logo.is-visible {
+                opacity: 1;
+                transform: translateY(0);
+                pointer-events: auto;
+            }
+            .header-logo.is-visible:hover {
+                opacity: 0.7;
+            }
+            .header-logo:focus-visible {
+                outline: 1px solid var(--color-brass);
+                outline-offset: 6px;
+            }
+
+            /* ─── Hamburger icon ─── */
+            .hamburger-icon {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+                width: 22px;
+            }
+            .ham-line {
+                display: block;
+                height: 1px;
+                width: 100%;
+                background: var(--color-silver);
+                transition: transform 250ms cubic-bezier(0.16, 1, 0.3, 1), opacity 200ms ease-out, width 250ms ease-out;
+                transform-origin: center;
+            }
+            .ham-line:nth-child(3) { width: 70%; }
+            #mobile-menu-btn.is-open .ham-line:nth-child(1) { transform: translateY(6px) rotate(45deg); width: 100%; }
+            #mobile-menu-btn.is-open .ham-line:nth-child(2) { opacity: 0; transform: scaleX(0); }
+            #mobile-menu-btn.is-open .ham-line:nth-child(3) { transform: translateY(-6px) rotate(-45deg); width: 100%; }
+
+            /* ─── Mobile menu overlay ─── */
+            #mobile-menu {
+                transition: opacity 300ms cubic-bezier(0.16, 1, 0.3, 1);
+            }
+            #mobile-menu.is-open {
+                opacity: 1;
+                pointer-events: auto;
+            }
+            .mobile-nav-link {
+                font-family: var(--font-heading);
+                font-size: clamp(1.75rem, 7vw, 2.75rem);
+                font-weight: 700;
+                letter-spacing: 0.1em;
+                text-transform: uppercase;
+                color: var(--color-silver);
+                transition: color 200ms ease-out, letter-spacing 200ms ease-out;
+                line-height: 1;
+            }
+            .mobile-nav-link:hover,
+            .mobile-nav-link:focus-visible {
+                color: var(--color-brass);
+                letter-spacing: 0.14em;
+            }
+            .mobile-nav-link:focus-visible {
+                outline: 1px solid var(--color-brass);
+                outline-offset: 8px;
+            }
+
+            /* ─── Scroll-margin for all anchor targets ─── */
+            section[id], footer[id] {
+                scroll-margin-top: 5rem;
+            }
+
+            /* ─── Floating CTA ─── */
+            .floating-cta {
+                box-shadow: 0 0.5rem 2rem 0 rgba(197, 160, 89, 0.3);
+                outline: 1px solid transparent;
+            }
+            .floating-cta:hover,
+            .floating-cta:focus-visible {
+                background-color: var(--color-silver, #E0E0E0);
+                color: var(--color-void, #050505);
+                transform: translateY(-4px) scale(1.05);
+                box-shadow: 0 1rem 3rem 0 rgba(224, 224, 224, 0.4), 0 0 0 2px var(--color-brass);
+            }
+            .floating-cta:hover .floating-cta-dot { background-color: var(--color-brass) !important; animation: none; }
+            .floating-cta:focus-visible { outline: 2px solid var(--color-brass-light); outline-offset: 6px; }
+            .floating-cta-dot { animation: pulseDot 1.6s ease-in-out infinite; }
+            @keyframes pulseDot {
+                0%, 100% { opacity: 1; transform: scale(1); }
+                50% { opacity: 0.4; transform: scale(0.7); }
+            }
+
+            /* ─── Reduced motion ─── */
+            @media (prefers-reduced-motion: reduce) {
+                .site-header, .nav-link::after, .ham-line,
+                #mobile-menu, .header-logo, .mobile-nav-link { transition: none; }
+                .header-logo { transform: none !important; }
+                .floating-cta-dot { animation: none; }
+                .floating-cta:hover { transform: none; }
+            }
+        </style>
     </body>
 </html>

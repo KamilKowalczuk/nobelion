@@ -1,0 +1,222 @@
+---
+import { casesData } from '../../data/content';
+import GeometricGrid from '../decorations/GeometricGrid.svelte';
+
+// Dla każdego case: wybieramy odpowiednią mini-wizualizację (animowaną przy reveal).
+// Anonimizowane wartości — tylko proporcje, żeby budowały wrażenie ROI bez ujawniania klientów.
+const visualForCase: Record<string, 'bar' | 'speed' | 'orbit'> = {
+    '01': 'bar',     // 240k zł — animowany bar wypełniający się od 0
+    '02': 'speed',   // 24x szybciej — porównanie dwóch równoległych pasów
+    '03': 'orbit'    // produkt na abonament — orbita z mosiężnym węzłem
+};
+---
+
+<section
+    id="cases"
+    class="relative w-full py-24 md:py-40 px-4 md:px-12 lg:px-24 bg-void z-10 border-t border-white/5 overflow-hidden"
+>
+    <!-- Atmosferyczna mgła mosiężna od dołu -->
+    <div
+        class="absolute bottom-0 left-0 w-full h-[30rem] pointer-events-none"
+        style="background: radial-gradient(ellipse at 50% 100%, rgba(197,160,89,0.05) 0%, transparent 70%);"
+    ></div>
+
+    <!-- Subtelna animowana siatka -->
+    <GeometricGrid client:visible columns={18} rows={10} opacity={0.035} density={0.1} />
+
+    <div class="relative max-w-7xl mx-auto">
+        <header class="text-center mb-20 md:mb-32 pb-12 md:pb-20 border-b border-white/10">
+            <span class="block text-brass font-mono text-xs tracking-[0.4em] uppercase mb-6">
+                {casesData.sectionLabel}
+            </span>
+            <h2 class="font-heading font-bold text-silver tracking-[0.04em] uppercase leading-[0.88] text-[clamp(3.5rem,10vw,8rem)] mb-8">
+                {casesData.heading}
+            </h2>
+            <p class="font-sans text-steel text-base md:text-lg leading-relaxed max-w-2xl mx-auto">
+                {casesData.subheading}
+            </p>
+        </header>
+
+        <!-- Trzy case studies, każdy jako osobny "rozkład magazynowy" -->
+        <div class="space-y-px bg-white/5">
+            {casesData.items.map((item, idx) => (
+                <article
+                    class="case-row group relative bg-void grid grid-cols-12 gap-4 md:gap-8 py-12 md:py-16 px-2 md:px-6 transition-colors duration-200 ease-out hover:bg-surface/50"
+                    data-case-index={idx}
+                >
+                    <!-- LEWA: numer + branża + duration (col 01-04) -->
+                    <header class="col-span-12 md:col-span-4 flex flex-col gap-4">
+                        <div class="flex items-baseline gap-4">
+                            <span class="font-heading text-brass/60 text-5xl md:text-6xl leading-none transition-colors duration-200 ease-out group-hover:text-brass">
+                                {item.id}
+                            </span>
+                            <span class="font-mono text-brass text-xs tracking-[0.3em] uppercase">
+                                {item.industry}
+                            </span>
+                        </div>
+                        <span class="inline-flex items-center gap-2 self-start px-3 py-1.5 border border-brass/40 text-brass font-mono text-[10px] md:text-xs tracking-widest uppercase">
+                            <span class="inline-block w-1 h-1 bg-brass rounded-full"></span>
+                            {item.duration}
+                        </span>
+                    </header>
+
+                    <!-- PRAWA: challenge → solution → result (col 05-12) -->
+                    <div class="col-span-12 md:col-span-8 space-y-8">
+                        <!-- Challenge -->
+                        <div>
+                            <p class="font-mono text-steel/60 text-[10px] md:text-xs tracking-[0.25em] uppercase mb-2">
+                                WYZWANIE
+                            </p>
+                            <p class="font-sans text-silver/85 text-sm md:text-base leading-relaxed max-w-2xl">
+                                {item.challenge}
+                            </p>
+                        </div>
+
+                        <!-- Solution -->
+                        <div>
+                            <p class="font-mono text-steel/60 text-[10px] md:text-xs tracking-[0.25em] uppercase mb-2">
+                                CO ZROBILIŚMY
+                            </p>
+                            <p class="font-sans text-silver/85 text-sm md:text-base leading-relaxed max-w-2xl">
+                                {item.solution}
+                            </p>
+                        </div>
+
+                        <!-- Result (główna atrakcja, bardzo duży typografią) -->
+                        <div class="pt-6 border-t border-brass/20">
+                            <p class="font-mono text-brass text-[10px] md:text-xs tracking-[0.25em] uppercase mb-3">
+                                EFEKT
+                            </p>
+                            <p class="font-heading text-silver leading-tight text-[clamp(1.5rem,3.5vw,2.75rem)] mb-6">
+                                {item.result}
+                            </p>
+
+                            <!-- Mini wizualizacja efektu (anonimizowana, tylko proporcje) -->
+                            <div class="case-viz mt-6 max-w-md">
+                                <p class="font-mono text-steel/60 text-[10px] tracking-[0.25em] uppercase mb-3">
+                                    {visualForCase[item.id] === 'bar' && 'WZROST PRZYCHODU W CZASIE'}
+                                    {visualForCase[item.id] === 'speed' && 'PORÓWNANIE TEMPA WYKONANIA'}
+                                    {visualForCase[item.id] === 'orbit' && 'MODEL PRZYCHODU'}
+                                </p>
+                                {visualForCase[item.id] === 'bar' && (
+                                    <div class="space-y-2.5">
+                                        <div class="flex items-center gap-3">
+                                            <span class="font-mono text-steel/60 text-[10px] tracking-widest uppercase w-14">START</span>
+                                            <div class="flex-1 h-1 bg-white/5 relative overflow-hidden">
+                                                <div class="absolute top-0 left-0 h-full bg-steel/40 w-[3%]"></div>
+                                            </div>
+                                            <span class="font-mono text-steel/60 text-[10px] w-16 text-right whitespace-nowrap">0 zł</span>
+                                        </div>
+                                        <div class="flex items-center gap-3">
+                                            <span class="font-mono text-brass text-[10px] tracking-widest uppercase w-14">9 MIES.</span>
+                                            <div class="flex-1 h-1 bg-white/5 relative overflow-hidden">
+                                                <div class="case-bar-fill absolute top-0 left-0 h-full bg-brass w-full" style="box-shadow: 0 0 0.5rem rgba(197,160,89,0.5);"></div>
+                                            </div>
+                                            <span class="font-mono text-brass text-[10px] w-16 text-right whitespace-nowrap">240k zł</span>
+                                        </div>
+                                    </div>
+                                )}
+                                {visualForCase[item.id] === 'speed' && (
+                                    <div class="space-y-3">
+                                        <div class="flex items-center gap-3">
+                                            <span class="font-mono text-steel/60 text-[10px] tracking-widest uppercase w-24 whitespace-nowrap">PRACA RĘCZNA</span>
+                                            <div class="flex-1 flex gap-px h-3">
+                                                {Array(24).fill(0).map(() => (
+                                                    <div class="flex-1 bg-steel/30"></div>
+                                                ))}
+                                            </div>
+                                            <span class="font-mono text-steel/60 text-[10px] w-12 text-right whitespace-nowrap">24j</span>
+                                        </div>
+                                        <div class="flex items-center gap-3">
+                                            <span class="font-mono text-brass text-[10px] tracking-widest uppercase w-24 whitespace-nowrap">SYSTEM</span>
+                                            <div class="flex-1 flex gap-px h-3">
+                                                <div class="case-speed-fill flex-1 bg-brass" style="box-shadow: 0 0 0.4rem rgba(197,160,89,0.6); max-width: 4.16%;"></div>
+                                                <div class="flex-1"></div>
+                                            </div>
+                                            <span class="font-mono text-brass text-[10px] w-12 text-right whitespace-nowrap">1j</span>
+                                        </div>
+                                        <p class="font-mono text-steel/50 text-[10px] tracking-widest uppercase pt-1">
+                                            j = jednostka czasu (np. tydzień)
+                                        </p>
+                                    </div>
+                                )}
+                                {visualForCase[item.id] === 'orbit' && (
+                                    <div class="flex items-center gap-5 pt-2">
+                                        <svg width="72" height="72" viewBox="0 0 72 72" fill="none" aria-hidden="true" class="flex-shrink-0">
+                                            <circle cx="36" cy="36" r="32" stroke="var(--color-brass, #C5A059)" stroke-width="1" stroke-opacity="0.25" />
+                                            <circle cx="36" cy="36" r="22" stroke="var(--color-brass, #C5A059)" stroke-width="1" stroke-opacity="0.5" stroke-dasharray="2 4" />
+                                            <circle cx="36" cy="36" r="3" fill="var(--color-brass, #C5A059)" />
+                                            <g class="case-orbit-node" style="transform-origin: 36px 36px;">
+                                                <circle cx="58" cy="36" r="2.5" fill="var(--color-brass, #C5A059)" style="filter: drop-shadow(0 0 0.3rem rgba(197,160,89,0.8));" />
+                                            </g>
+                                        </svg>
+                                        <div class="leading-relaxed">
+                                            <p class="font-mono text-brass text-[11px] tracking-[0.25em] uppercase">STAŁY PRZYCHÓD MIESIĘCZNY</p>
+                                            <p class="font-mono text-steel/60 text-[10px] tracking-widest uppercase mt-1">model abonamentowy, klient płaci co miesiąc</p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        <!-- Note (drobna stopka) -->
+                        <p class="font-mono text-steel/50 text-[11px] tracking-wide italic">
+                            {item.note}
+                        </p>
+                    </div>
+                </article>
+            ))}
+        </div>
+    </div>
+</section>
+
+<style>
+    .case-row {
+        will-change: background-color;
+    }
+
+    /* Mini-wizualizacje: w stanie spoczynku zerowane, po wejściu w viewport rosną. */
+    .case-bar-fill {
+        width: 0%;
+        transition: width 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .case-row.in-view .case-bar-fill {
+        width: 100%;
+    }
+
+    .case-speed-fill {
+        max-width: 0% !important;
+        transition: max-width 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .case-row.in-view .case-speed-fill {
+        max-width: 4.16% !important;
+    }
+
+    .case-orbit-node {
+        transform-origin: 32px 32px;
+        animation: orbitRotate 12s linear infinite;
+    }
+    @keyframes orbitRotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .case-bar-fill { transition: none; width: 100%; }
+        .case-speed-fill { transition: none; max-width: 4.16% !important; }
+        .case-orbit-node { animation: none; }
+    }
+</style>
+
+<script>
+    // Reveal data viz tylko gdy karta wjedzie w viewport (powtarzalnie przy ponownym scrollu).
+    const caseRows = document.querySelectorAll('.case-row');
+    const caseObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('in-view');
+            }
+        });
+    }, { threshold: 0.35 });
+    caseRows.forEach(row => caseObserver.observe(row));
+</script>

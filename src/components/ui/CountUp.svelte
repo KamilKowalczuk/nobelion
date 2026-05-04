@@ -37,24 +37,24 @@
     });
 </script>
 
-<div bind:this={element} class="flex flex-col items-center justify-center py-8">
-    <div class="flex items-baseline font-mono font-bold text-brass tracking-tighter">
+<div bind:this={element} class="flex flex-col items-center justify-center py-8 min-w-0 w-full">
+    <div class="flex items-baseline justify-center font-mono font-bold text-brass tracking-tighter whitespace-nowrap max-w-full">
         {#if prefix}
-            <span class="text-2xl md:text-4xl mr-2 opacity-60">{prefix}</span>
+            <span class="text-xl md:text-3xl mr-2 opacity-60">{prefix}</span>
         {/if}
-        
-        <span class="text-6xl md:text-8xl tabular-nums">
+
+        <span class="text-5xl md:text-6xl lg:text-7xl tabular-nums">
             {Math.floor($count)}
         </span>
-        
+
         {#if suffix}
-            <span class="text-3xl md:text-5xl ml-1 text-brass/80">{suffix}</span>
+            <span class="text-2xl md:text-3xl lg:text-4xl ml-1 text-brass/80">{suffix}</span>
         {/if}
     </div>
-    
-    <div class="mt-4 h-[px] w-12 bg-steel/30"></div>
-    
-    <p class="mt-4 text-sm md:text-base font-sans text-steel tracking-[0.2em] uppercase">
+
+    <div class="mt-4 h-px w-12 bg-brass/40"></div>
+
+    <p class="mt-4 text-xs md:text-sm font-sans text-steel tracking-[0.2em] uppercase text-center max-w-[20ch]">
         {label}
     </p>
 </div>

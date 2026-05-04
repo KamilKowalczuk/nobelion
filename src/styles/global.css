@@ -9,9 +9,9 @@
   --color-void: #050505;      /* Tło */
   --color-surface: #0B101C;   /* Karty */
   
-  --color-brass-DEFAULT: #C5A059; /* Akcent główny */
-  --color-brass-light: #E6C885;   /* Hover */
-  --color-brass-dark: #8E7035;    /* Shadow */
+  --color-brass: #C5A059;        /* Akcent główny */
+  --color-brass-light: #E6C885;  /* Hover */
+  --color-brass-dark: #8E7035;   /* Shadow */
   
   --color-silver: #E0E0E0;    /* Tekst główny */
   --color-steel: #94A3B8;     /* Tekst drugorzędny */
@@ -56,7 +56,7 @@
   
   /* Selection - Złote zaznaczenie [cite: 15678] */
   ::selection {
-    background-color: color-mix(in srgb, var(--color-brass-DEFAULT), transparent 70%);
+    background-color: color-mix(in srgb, var(--color-brass), transparent 70%);
     color: white;
   }
 }

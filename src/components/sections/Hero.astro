@@ -1,51 +1,165 @@
 ---
 import { heroData } from '../../data/content';
-// ZMIANA: Importujemy nowy komponent, stary (DecoderText) można usunąć
 import CinematicText from '../ui/CinematicText.svelte';
 import AnimatedLogo from '../ui/AnimatedLogo.svelte';
 ---
 
-<section id="hero" class="relative h-screen w-full flex flex-col items-center justify-center overflow-hidden border-b border-surface/50">
-    
-    <div 
+<section
+    id="hero"
+    class="relative min-h-screen w-full flex flex-col items-center justify-center overflow-hidden border-b border-surface/50 px-4 py-16 md:py-20"
+>
+    <!-- Tło: radialne źródło światła + subtelna siatka -->
+    <div
         class="absolute inset-0 -z-10"
-        style="background: radial-gradient(circle at center, #0B101C 0%, #050505 70%);"
+        style="background: radial-gradient(circle at 50% 40%, #0B101C 0%, #050505 70%);"
     >
-        <div class="absolute inset-0 opacity-10" 
-             style="background-image: linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px); background-size: 100px 100px;">
+        <div
+            class="absolute inset-0 opacity-10"
+            style="background-image: linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px); background-size: 100px 100px;"
+        >
         </div>
     </div>
 
-    <div class="relative z-10 mb-12"> 
-        <AnimatedLogo client:load />
+    <!-- Centralny stack: logo + treść + CTA jako jeden blok wycentrowany w viewport -->
+    <div class="relative z-10 flex flex-col items-center justify-center w-full max-w-5xl mx-auto">
+
+        <!-- Animowane logo (sygnatura marki) -->
+        <div class="mb-6 md:mb-8 flex justify-center">
+            <AnimatedLogo client:load />
+        </div>
+
+        <!-- Główna kompozycja słowna -->
+        <div class="text-center w-full space-y-4 md:space-y-6">
+            <!-- Pierwsza linia: NOBELION (brand mark, oryginalny Cinzel) -->
+            <p id="hero-brand" class="font-heading font-bold text-brass uppercase hero-fade text-sm md:text-base tracking-[0.5em] pl-[0.5em]" style="animation-delay: 0.4s;">
+                NOBELION
+            </p>
+
+            <!-- Główne słowo: AUTOMATYZUJEMY (CinematicText decoder reveal) -->
+            <h1 class="font-heading font-bold text-silver leading-[0.95] drop-shadow-2xl text-[clamp(1.4rem,7vw,5.5rem)] tracking-[0.04em] text-center px-2">
+                <CinematicText client:load text={heroData.heading} />
+            </h1>
+
+            <!-- Subheading: emocjonalna obietnica -->
+            <p class="font-sans text-silver/90 text-[clamp(1.05rem,2vw,1.5rem)] leading-snug max-w-xl mx-auto hero-fade" style="animation-delay: 1.4s;">
+                {heroData.subheading}
+            </p>
+
+            <!-- Mikrotagline: kategoryzacja działalności -->
+            <p class="text-[10px] md:text-[11px] font-mono text-brass tracking-[0.3em] uppercase hero-fade max-w-2xl mx-auto leading-relaxed" style="animation-delay: 1.8s;">
+                {heroData.microTagline}
+            </p>
+        </div>
+
+        <!-- CTA pair (kluczowy element konwersji) -->
+        <div class="mt-8 md:mt-10 flex flex-col sm:flex-row items-center gap-4 sm:gap-6 hero-fade" style="animation-delay: 2.2s;">
+            <a
+                href={heroData.primaryCta.href}
+                class="hero-cta-primary interactive cursor-none group inline-flex items-center gap-3 px-7 py-4 md:px-9 md:py-5 bg-brass text-void font-heading text-xs md:text-sm tracking-[0.2em] uppercase transition-all duration-200 ease-out"
+                aria-label={heroData.primaryCta.label}
+            >
+                <span>{heroData.primaryCta.label}</span>
+                <span aria-hidden="true" class="inline-block transition-transform duration-200 ease-out group-hover:translate-x-1">→</span>
+            </a>
+
+            <a
+                href={heroData.secondaryCta.href}
+                class="hero-cta-secondary interactive cursor-none group inline-flex items-center gap-3 px-5 py-3 border border-brass/30 text-silver font-mono text-[11px] md:text-xs tracking-[0.3em] uppercase transition-all duration-200 ease-out relative overflow-hidden"
+                aria-label={heroData.secondaryCta.label}
+            >
+                <span class="relative z-10">{heroData.secondaryCta.label}</span>
+                <span aria-hidden="true" class="relative z-10 transition-transform duration-200 ease-out group-hover:translate-y-[2px]">↓</span>
+            </a>
+        </div>
     </div>
 
-    <div class="text-center z-10 space-y-6 mix-blend-difference px-4">
-        <h1 class="text-5xl md:text-8xl lg:text-9xl font-heading font-bold text-silver tracking-cinematic leading-none drop-shadow-2xl">
-            <CinematicText client:load text="NOBELION" />
-        </h1>
-        
-        <p class="text-xs md:text-sm font-mono text-brass tracking-[0.4em] uppercase opacity-0 animate-fade-in-slow" style="animation-delay: 2s; animation-fill-mode: forwards;">
-            {heroData.subheading}
-        </p>
-    </div>
-
-    <div class="absolute bottom-0 left-1/2 -translate-x-1/2 flex flex-col items-center pb-12 z-20">
-        <div class="w-1px h-24 bg-linear-to-b from-transparent via-brass to-transparent opacity-60"></div>
-        <span class="mt-4 text-[10px] font-mono text-steel/50 tracking-[0.4em] uppercase animate-pulse">
+    <!-- Scroll cue (przesunięty żeby nie zachodzić na CTA) -->
+    <div class="absolute bottom-0 left-1/2 -translate-x-1/2 flex flex-col items-center pb-6 z-20 pointer-events-none">
+        <div class="w-px h-12 md:h-16 bg-linear-to-b from-transparent via-brass to-transparent opacity-60"></div>
+        <span class="mt-2 text-[10px] font-mono text-steel/60 tracking-[0.4em] uppercase animate-pulse">
             {heroData.scrollText}
         </span>
     </div>
-
 </section>
 
 <style>
-    /* Dodatkowa animacja dla subheadingu */
-    @keyframes fadeInSlow {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
+    /* Hero fade-in: subtelnie, bez bounce. Ease out exponential. */
+    @keyframes heroFade {
+        from {
+            opacity: 0;
+            transform: translateY(0.75rem);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
-    .animate-fade-in-slow {
-        animation: fadeInSlow 1.5s ease-out;
+
+    .hero-fade {
+        animation: heroFade 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    /* Primary CTA: drastyczna zmiana hover - jasne silver tło + outline + lift + glow */
+    .hero-cta-primary {
+        position: relative;
+        box-shadow: 0 0.25rem 1rem 0 rgba(197, 160, 89, 0.25);
+        will-change: transform, box-shadow, background-color;
+        outline: 1px solid transparent;
+        outline-offset: 0;
+    }
+
+    .hero-cta-primary:hover,
+    .hero-cta-primary:focus-visible {
+        background-color: var(--color-silver, #E0E0E0);
+        color: var(--color-void, #050505);
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 0.75rem 3rem 0 rgba(224, 224, 224, 0.35), 0 0 0 2px var(--color-brass, #C5A059);
+        outline-color: var(--color-brass-light, #E6C885);
+        outline-offset: 6px;
+    }
+
+    .hero-cta-primary:focus-visible {
+        outline: 2px solid var(--color-brass-light, #E6C885);
+        outline-offset: 6px;
+    }
+
+    /* Secondary CTA: ghost z brass border, hover wypełnia mosiądzem od lewej */
+    .hero-cta-secondary {
+        will-change: transform, background-color;
+        background: transparent;
+    }
+    .hero-cta-secondary::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: var(--color-brass, #C5A059);
+        transform: scaleX(0);
+        transform-origin: left center;
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        z-index: 0;
+    }
+    .hero-cta-secondary:hover,
+    .hero-cta-secondary:focus-visible {
+        color: var(--color-void, #050505);
+        border-color: var(--color-brass-light, #E6C885);
+        transform: translateY(-3px);
+        box-shadow: 0 0.5rem 2rem 0 rgba(197, 160, 89, 0.35);
+    }
+    .hero-cta-secondary:hover::after,
+    .hero-cta-secondary:focus-visible::after {
+        transform: scaleX(1);
+    }
+    .hero-cta-secondary:focus-visible {
+        outline: 2px solid var(--color-brass-light, #E6C885);
+        outline-offset: 4px;
+    }
+
+    /* Reduced motion: szanujemy preferencje */
+    @media (prefers-reduced-motion: reduce) {
+        .hero-fade {
+            animation: none !important;
+            opacity: 1 !important;
+            transform: none !important;
+        }
     }
 </style>
