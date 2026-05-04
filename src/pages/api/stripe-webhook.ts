@@ -1,12 +1,12 @@
 import type { APIRoute } from 'astro';
 import Stripe from 'stripe';
+import { backendEnv } from '../../lib/backend-env';
 
 export const prerender = false;
 
 export const POST: APIRoute = async ({ request }) => {
-    const env = (import.meta as any).env as Record<string, string | undefined>;
-    const stripeKey = env.STRIPE_SECRET_KEY;
-    const webhookSecret = env.STRIPE_WEBHOOK_SECRET;
+    const stripeKey = backendEnv('STRIPE_SECRET_KEY');
+    const webhookSecret = backendEnv('STRIPE_WEBHOOK_SECRET');
     if (!stripeKey || !webhookSecret) {
         return new Response('Stripe nie skonfigurowany', { status: 503 });
     }

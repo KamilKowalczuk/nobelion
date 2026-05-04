@@ -1,4 +1,5 @@
 import { Resend } from 'resend';
+import { backendEnv } from './backend-env';
 
 type BriefEmailData = {
     email: string;
@@ -24,17 +25,17 @@ type PaymentLinkEmailData = {
 };
 
 function getClient(): Resend | null {
-    const key = import.meta.env.RESEND_API_KEY;
+    const key = backendEnv('RESEND_API_KEY');
     if (!key) return null;
     return new Resend(key);
 }
 
 function getFrom(): string {
-    return import.meta.env.EMAIL_FROM || 'kontakt@nobelion.pl';
+    return backendEnv('EMAIL_FROM') || 'kontakt@nobelion.pl';
 }
 
 function getInternal(): string {
-    return import.meta.env.EMAIL_INTERNAL || 'kontakt@nobelion.pl';
+    return backendEnv('EMAIL_INTERNAL') || 'kontakt@nobelion.pl';
 }
 
 export async function sendBriefConfirmation(data: BriefEmailData): Promise<void> {

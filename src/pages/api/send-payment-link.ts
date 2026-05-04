@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import Stripe from 'stripe';
 import { sendPaymentLinkEmail } from '../../lib/email';
+import { backendEnv } from '../../lib/backend-env';
 
 type SendPaymentLinkBody = {
     briefId?: string;
@@ -22,10 +23,10 @@ function isEmail(value: string): boolean {
 }
 
 export const POST: APIRoute = async ({ request }) => {
-    const stripeKey = import.meta.env.STRIPE_SECRET_KEY;
+    const stripeKey = backendEnv('STRIPE_SECRET_KEY');
     if (!stripeKey) return json({ error: 'Stripe nie jest skonfigurowany' }, 503);
 
-    const adminSecret = import.meta.env.ADMIN_PAYMENT_LINK_SECRET;
+    const adminSecret = backendEnv('ADMIN_PAYMENT_LINK_SECRET');
     if (adminSecret) {
         const providedSecret = request.headers.get('x-admin-secret') || '';
         if (providedSecret !== adminSecret) return json({ error: 'Brak autoryzacji' }, 401);
@@ -44,8 +45,8 @@ export const POST: APIRoute = async ({ request }) => {
 
     const currency = (body.currency || 'pln').toLowerCase();
     const stripe = new Stripe(stripeKey, { apiVersion: '2026-04-22.dahlia' });
-    const successUrl = import.meta.env.STRIPE_SUCCESS_URL || 'https://nobelion.pl/dziekujemy?session_id={CHECKOUT_SESSION_ID}';
-    const cancelUrl = import.meta.env.STRIPE_CANCEL_URL || 'https://nobelion.pl/blad-platnosci';
+    const successUrl = backendEnv('STRIPE_SUCCESS_URL') || 'https://nobelion.pl/dziekujemy?session_id={CHECKOUT_SESSION_ID}';
+    const cancelUrl = backendEnv('STRIPE_CANCEL_URL') || 'https://nobelion.pl/blad-platnosci';
 
     const session = await stripe.checkout.sessions.create({
         mode: 'payment',

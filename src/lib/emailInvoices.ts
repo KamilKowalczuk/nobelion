@@ -1,4 +1,5 @@
 import { Resend } from 'resend';
+import { backendEnv } from './backend-env';
 
 type DispatchInput = {
     toEmail: string;
@@ -10,9 +11,8 @@ type DispatchInput = {
 };
 
 export async function dispatchInvoiceEmailWithPdf(input: DispatchInput): Promise<boolean> {
-    const env = (import.meta as any).env as Record<string, string | undefined>;
-    const apiKey = env.RESEND_API_KEY;
-    const from = env.EMAIL_FROM || 'kontakt@nobelion.pl';
+    const apiKey = backendEnv('RESEND_API_KEY');
+    const from = backendEnv('EMAIL_FROM') || 'kontakt@nobelion.pl';
 
     if (!apiKey) return false;
 

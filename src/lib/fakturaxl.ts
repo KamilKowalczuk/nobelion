@@ -1,3 +1,5 @@
+import { backendEnv } from './backend-env';
+
 export type FakturaXlClientData = {
     companyName: string;
     email: string;
@@ -16,14 +18,12 @@ type CreateInvoiceInput = {
     totalPriceGross: number;
 };
 
-const env = (import.meta as any).env as Record<string, string | undefined>;
-
 function getToken(): string {
-    return env.FAKTURAXL_API_TOKEN || '';
+    return backendEnv('FAKTURAXL_API_TOKEN') || '';
 }
 
 function getApiUrl(): string {
-    return (env.FAKTURAXL_API_URL || 'https://api.fakturaxl.pl').replace(/\/$/, '');
+    return (backendEnv('FAKTURAXL_API_URL') || 'https://api.fakturaxl.pl').replace(/\/$/, '');
 }
 
 export async function createInvoice(input: CreateInvoiceInput): Promise<{ id: number } | null> {
