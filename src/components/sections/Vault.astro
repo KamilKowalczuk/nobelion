@@ -1,0 +1,119 @@
+---
+import { contactData, siteConfig } from '../../data/content';
+---
+
+<footer id="vault" class="relative bg-void border-t border-white/10 pt-20 md:pt-28 overflow-hidden z-10">
+
+    <div class="relative z-10 max-w-7xl mx-auto px-4 md:px-12 mb-20 md:mb-28">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-start">
+
+            <!-- LEWA: kontakt jako mocna sygnatura -->
+            <div class="lg:col-span-7 flex flex-col justify-start">
+                <span class="block text-brass font-mono text-xs tracking-[0.3em] uppercase mb-4">
+                    {contactData.cta}
+                </span>
+                <p class="font-heading text-steel text-lg md:text-xl mb-6 max-w-md">
+                    {contactData.subCta}
+                </p>
+
+                <a
+                    href={`mailto:${siteConfig.email}`}
+                    class="vault-mail interactive cursor-none group inline-flex items-center gap-4 self-start"
+                    aria-label={`Wyślij email na ${siteConfig.email}`}
+                >
+                    <span class="font-heading text-silver text-2xl md:text-4xl lg:text-5xl tracking-wider transition-colors duration-200 ease-out group-hover:text-brass">
+                        {contactData.buttonLabel}
+                    </span>
+                    <span aria-hidden="true" class="text-brass text-2xl transition-transform duration-200 ease-out group-hover:translate-x-1">→</span>
+                </a>
+
+                <div class="mt-10 pt-8 border-t border-white/10 max-w-md">
+                    <p class="font-mono text-steel text-xs tracking-widest uppercase">
+                        ALBO WYPEŁNIJ BRIEF, SZYBCIEJ.
+                        <a href="#brief" class="text-brass hover:text-brass-light transition-colors duration-200 ease-out interactive cursor-none ml-2">
+                            ZACZNIJ →
+                        </a>
+                    </p>
+                </div>
+            </div>
+
+            <!-- PRAWA: dane firmy w mosiężnym box -->
+            <aside class="lg:col-span-5 relative">
+                <div class="relative bg-surface/30 backdrop-blur-sm p-6 md:p-8 border border-brass/20">
+                    <h3 class="text-base md:text-lg font-heading text-white mb-6 tracking-widest">
+                        {contactData.companyName}
+                    </h3>
+
+                    <dl class="space-y-3 font-mono text-xs md:text-sm">
+                        {contactData.details.map((item) => (
+                            <div class="flex justify-between items-end border-b border-white/5 pb-1.5">
+                                <dt class="text-steel/60">{item.label}</dt>
+                                <dd class="text-silver tracking-wider select-all text-right ml-4">{item.value}</dd>
+                            </div>
+                        ))}
+                    </dl>
+                </div>
+            </aside>
+
+        </div>
+    </div>
+
+    <!-- Stopka prawna + dekoracja typograficzna -->
+    <div class="relative w-full border-t border-white/10 bg-surface/10">
+
+        <!-- Wielki dekoracyjny napis NOBELION (atmosferyczny ślad) -->
+        <div class="absolute inset-0 overflow-hidden pointer-events-none flex items-center justify-center">
+            <h2 class="text-[clamp(8rem,18vw,22rem)] font-heading font-bold text-center text-white tracking-tighter leading-[0.75] opacity-[0.04] select-none">
+                NOBELION
+            </h2>
+        </div>
+
+        <div class="relative z-10 max-w-7xl mx-auto px-4 md:px-12 py-10 flex flex-col md:flex-row justify-between items-center text-[10px] font-mono text-steel/60 uppercase tracking-widest gap-6 md:gap-0">
+            <p class="text-center md:text-left">
+                © {new Date().getFullYear()} NOBELION SP. Z O.O. WSZELKIE PRAWA ZASTRZEŻONE.
+            </p>
+
+            <div class="flex flex-wrap justify-center gap-6 md:gap-8">
+                <button
+                    id="open-privacy"
+                    class="vault-legal interactive cursor-none transition-colors duration-200 ease-out"
+                >
+                    Polityka Prywatności
+                </button>
+                <button
+                    id="open-terms"
+                    class="vault-legal interactive cursor-none transition-colors duration-200 ease-out"
+                >
+                    Regulamin
+                </button>
+                <button
+                    id="open-rodo"
+                    class="vault-legal interactive cursor-none transition-colors duration-200 ease-out"
+                >
+                    RODO
+                </button>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<style>
+    .vault-mail:focus-visible {
+        outline: 1px solid var(--color-brass, #C5A059);
+        outline-offset: 8px;
+    }
+    .vault-legal {
+        color: var(--color-steel, #94A3B8);
+        opacity: 0.6;
+        position: relative;
+    }
+    .vault-legal:hover,
+    .vault-legal:focus-visible {
+        color: var(--color-brass, #C5A059);
+        opacity: 1;
+    }
+    .vault-legal:focus-visible {
+        outline: 1px solid var(--color-brass, #C5A059);
+        outline-offset: 4px;
+    }
+</style>

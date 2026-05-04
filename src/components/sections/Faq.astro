@@ -1,0 +1,45 @@
+---
+import { faqData } from '../../data/content';
+import IntelligenceList from '../ui/IntelligenceList.svelte';
+import GeometricGrid from '../decorations/GeometricGrid.svelte';
+import BrassOrnament from '../decorations/BrassOrnament.astro';
+---
+
+<section
+    id="faq"
+    class="relative w-full py-24 md:py-40 px-4 md:px-12 lg:px-24 bg-void z-10 border-t border-white/5 overflow-hidden"
+>
+    <!-- Animowana siatka tła -->
+    <GeometricGrid client:visible columns={14} rows={8} opacity={0.035} density={0.12} />
+
+    <!-- Galery corner bracket -->
+    <div class="absolute top-8 right-8 hidden md:block pointer-events-none">
+        <BrassOrnament variant="corner-tr" size="md" />
+    </div>
+
+    <div class="relative max-w-7xl mx-auto">
+        <header class="mb-16 md:mb-24 pb-8 border-b border-white/10">
+            <span class="block text-brass font-mono text-xs tracking-[0.3em] uppercase mb-4">
+                PYTANIA
+            </span>
+            <h2 class="font-heading font-bold text-silver tracking-cinematic uppercase leading-[0.9] text-[clamp(2.5rem,7vw,5.5rem)]">
+                ZANIM ZAPYTASZ
+            </h2>
+            <p class="mt-6 text-steel font-sans text-base md:text-lg leading-relaxed max-w-2xl">
+                Najczęstsze pytania klientów na początku rozmowy. Jeśli Twojego nie ma na liście, napisz na <a href="mailto:kontakt@nobelion.pl" class="text-brass hover:text-brass-light transition-colors duration-200 ease-out interactive cursor-none">kontakt@nobelion.pl</a>.
+            </p>
+        </header>
+
+        <IntelligenceList client:visible data={faqData} />
+
+        <div class="mt-16 pt-10 border-t border-white/10 text-center">
+            <p class="font-mono text-steel text-xs tracking-widest uppercase">
+                NIE ZNALAZŁEŚ ODPOWIEDZI?
+                <a href="mailto:kontakt@nobelion.pl" class="text-brass hover:text-brass-light transition-colors duration-200 ease-out interactive cursor-none ml-2">
+                    KONTAKT@NOBELION.PL
+                </a>
+            </p>
+        </div>
+    </div>
+</section>
+

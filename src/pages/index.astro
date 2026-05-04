@@ -1,0 +1,37 @@
+---
+import Layout from '../layouts/Layout.astro';
+import MagneticCursor from '../components/core/MagneticCursor.svelte';
+import ScrollChoreography from '../components/core/ScrollChoreography.svelte';
+
+import Hero from '../components/sections/Hero.astro';
+import Problem from '../components/sections/Problem.astro';
+import Services from '../components/sections/Services.astro';
+import Examples from '../components/sections/Examples.astro';
+import Cases from '../components/sections/Cases.astro';
+import Process from '../components/sections/Process.astro';
+import Audience from '../components/sections/Audience.astro';
+import Benefits from '../components/sections/Benefits.astro';
+import Faq from '../components/sections/Faq.astro';
+import Brief from '../components/sections/Brief.astro';
+import Vault from '../components/sections/Vault.astro';
+---
+
+<Layout>
+    <MagneticCursor client:load />
+    <ScrollChoreography client:idle />
+
+    <div>
+        <Hero />
+        <Problem />
+        <Services />
+        <Examples />
+        <Cases />
+        <Process />
+        <Audience />
+        <Benefits />
+        <Faq />
+        <Brief />
+    </div>
+
+    <Vault />
+</Layout>

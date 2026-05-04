@@ -1,0 +1,39 @@
+---
+const sessionId = Astro.url.searchParams.get('session_id') || '';
+const apiUrl = sessionId ? `/api/stripe/verify-session?session_id=${encodeURIComponent(sessionId)}` : '';
+let verified = false;
+let error = '';
+if (apiUrl) {
+    try {
+        const res = await fetch(new URL(apiUrl, Astro.site || 'http://localhost:4321'));
+        if (res.ok) {
+            const data = await res.json();
+            verified = !!data.valid;
+        } else {
+            error = 'Nie udało się potwierdzić płatności.';
+        }
+    } catch {
+        error = 'Nie udało się połączyć z serwerem płatności.';
+    }
+} else {
+    error = 'Brak identyfikatora sesji płatności.';
+}
+---
+
+<section class="min-h-[70vh] flex items-center justify-center px-6 py-24 bg-void text-silver">
+    <div class="w-full max-w-2xl border border-white/10 bg-surface/30 p-10 text-center">
+        {verified ? (
+            <>
+                <p class="font-mono text-brass text-xs tracking-[0.3em] uppercase mb-4">Płatność potwierdzona</p>
+                <h1 class="font-heading text-3xl md:text-5xl tracking-[0.06em] uppercase mb-6">Dziękujemy</h1>
+                <p class="text-steel text-base md:text-lg">Otrzymaliśmy Twoją płatność, zaczynamy pracę.</p>
+            </>
+        ) : (
+            <>
+                <p class="font-mono text-brass text-xs tracking-[0.3em] uppercase mb-4">Weryfikacja płatności</p>
+                <h1 class="font-heading text-3xl md:text-5xl tracking-[0.06em] uppercase mb-6">Brak potwierdzenia</h1>
+                <p class="text-steel text-base md:text-lg">{error}</p>
+            </>
+        )}
+    </div>
+</section>

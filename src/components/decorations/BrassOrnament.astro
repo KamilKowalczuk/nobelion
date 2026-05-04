@@ -1,0 +1,70 @@
+---
+// BrassOrnament: rogi w stylu galeryjnych narożników i dzielniki z mosiężną kropką.
+// Używane jako sygnatura redakcyjna na kartach, sekcjach i bocznych marginesach.
+
+interface Props {
+    variant?: 'corner-tl' | 'corner-tr' | 'corner-bl' | 'corner-br' | 'divider-h' | 'divider-v';
+    size?: 'sm' | 'md' | 'lg';
+    class?: string;
+}
+
+const { variant = 'corner-tl', size = 'md', class: className = '' } = Astro.props;
+
+// Rozmiary w rem żeby skalowały się z user font-size (a11y).
+const sizeMap = {
+    sm: '1.5rem',
+    md: '2.5rem',
+    lg: '4rem'
+};
+
+const dimension = sizeMap[size];
+const strokeWidth = size === 'sm' ? 1 : 1.5;
+
+const cornerPaths: Record<string, string> = {
+    'corner-tl': 'M 2 18 L 2 2 L 18 2',
+    'corner-tr': 'M 6 2 L 22 2 L 22 18',
+    'corner-bl': 'M 2 6 L 2 22 L 18 22',
+    'corner-br': 'M 6 22 L 22 22 L 22 6'
+};
+---
+
+{variant.startsWith('corner-') && (
+    <svg
+        width={dimension}
+        height={dimension}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="var(--color-brass, #C5A059)"
+        stroke-width={strokeWidth}
+        stroke-linecap="square"
+        aria-hidden="true"
+        class={className}
+    >
+        <path d={cornerPaths[variant]} />
+    </svg>
+)}
+
+{variant === 'divider-h' && (
+    <div class={`flex items-center gap-3 ${className}`}>
+        <span class="flex-1 h-px bg-linear-to-r from-transparent to-brass/40"></span>
+        <span aria-hidden="true">
+            <svg width="8" height="8" viewBox="0 0 8 8" fill="var(--color-brass, #C5A059)">
+                <rect x="3" y="0" width="2" height="8" transform="rotate(45 4 4)" />
+                <rect x="0" y="3" width="8" height="2" transform="rotate(45 4 4)" />
+            </svg>
+        </span>
+        <span class="flex-1 h-px bg-linear-to-l from-transparent to-brass/40"></span>
+    </div>
+)}
+
+{variant === 'divider-v' && (
+    <div class={`flex flex-col items-center gap-3 ${className}`}>
+        <span class="flex-1 w-px bg-linear-to-b from-transparent to-brass/40"></span>
+        <span aria-hidden="true">
+            <svg width="8" height="8" viewBox="0 0 8 8" fill="var(--color-brass, #C5A059)">
+                <circle cx="4" cy="4" r="2" />
+            </svg>
+        </span>
+        <span class="flex-1 w-px bg-linear-to-t from-transparent to-brass/40"></span>
+    </div>
+)}

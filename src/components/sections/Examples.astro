@@ -1,0 +1,86 @@
+---
+import { examplesData } from '../../data/content';
+import GeometricGrid from '../decorations/GeometricGrid.svelte';
+---
+
+<section
+    id="examples"
+    class="relative w-full py-24 md:py-40 px-4 md:px-12 lg:px-24 bg-void z-10 border-t border-white/5 overflow-hidden"
+>
+    <!-- Subtelny diagonal pattern w tle (warstwa 1) -->
+    <div
+        class="absolute inset-0 pointer-events-none opacity-[0.025]"
+        style="background-image: repeating-linear-gradient(45deg, transparent, transparent 7px, #ffffff 7px, #ffffff 8px);"
+    ></div>
+
+    <!-- Animowana siatka geometryczna (warstwa 2) -->
+    <GeometricGrid client:visible columns={20} rows={12} opacity={0.04} density={0.08} />
+
+    <div class="relative max-w-7xl mx-auto">
+        <header class="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 mb-16 md:mb-24 pb-8 border-b border-white/10">
+            <div class="md:col-span-7">
+                <span class="block text-brass font-mono text-xs tracking-[0.3em] uppercase mb-4">
+                    {examplesData.sectionLabel}
+                </span>
+                <h2 class="font-heading font-bold text-silver tracking-cinematic uppercase leading-[0.9] text-[clamp(2.25rem,6vw,5rem)]">
+                    {examplesData.heading}
+                </h2>
+            </div>
+            <p class="md:col-span-5 text-steel font-sans text-base md:text-lg leading-relaxed self-end max-w-md md:ml-auto">
+                {examplesData.subheading}
+            </p>
+        </header>
+
+        <!-- Grid 9 przykładów (3x3 desktop, 1 col mobile) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-px bg-white/5">
+            {examplesData.items.map((item) => (
+                <article class="example-card group relative bg-void p-6 md:p-8 transition-colors duration-200 ease-out hover:bg-surface min-h-[12rem] md:min-h-[14rem] flex flex-col justify-between">
+                    <!-- Tag branży -->
+                    <span class="font-mono text-[10px] md:text-[11px] text-brass tracking-[0.3em] uppercase">
+                        {item.tag}
+                    </span>
+
+                    <!-- Tytuł automatyzacji (główna treść karty) -->
+                    <h3 class="font-heading text-silver text-base md:text-lg leading-snug mt-4 mb-6 transition-colors duration-200 ease-out group-hover:text-white">
+                        {item.title}
+                    </h3>
+
+                    <!-- Mosiężna strzałka w prawym dolnym rogu -->
+                    <div class="flex justify-end">
+                        <span
+                            aria-hidden="true"
+                            class="text-brass/40 text-lg transition-all duration-200 ease-out group-hover:text-brass group-hover:translate-x-1 inline-block"
+                        >
+                            →
+                        </span>
+                    </div>
+                </article>
+            ))}
+        </div>
+
+        <!-- Closing line + pull CTA -->
+        <div class="mt-16 md:mt-20 text-center">
+            <p class="font-heading text-silver text-xl md:text-2xl mb-6 max-w-2xl mx-auto">
+                {examplesData.closing}
+            </p>
+            <a
+                href="#brief"
+                class="examples-cta interactive cursor-none group inline-flex items-center gap-3 text-brass font-mono text-xs tracking-[0.3em] uppercase transition-colors duration-200 ease-out hover:text-brass-light"
+            >
+                <span class="inline-block w-8 h-px bg-brass transition-all duration-200 ease-out group-hover:w-12 group-hover:bg-brass-light"></span>
+                <span>OPISZ SWÓJ POMYSŁ W BRIEFIE</span>
+                <span aria-hidden="true" class="transition-transform duration-200 ease-out group-hover:translate-x-1">→</span>
+            </a>
+        </div>
+    </div>
+</section>
+
+<style>
+    .example-card {
+        will-change: background-color;
+    }
+    .examples-cta:focus-visible {
+        outline: 1px solid var(--color-brass, #C5A059);
+        outline-offset: 6px;
+    }
+</style>

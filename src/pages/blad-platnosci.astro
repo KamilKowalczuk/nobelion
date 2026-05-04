@@ -1,0 +1,15 @@
+---
+const reason = Astro.url.searchParams.get('reason') || '';
+const message = reason
+    ? `Płatność została przerwana: ${reason}`
+    : 'Płatność została anulowana lub nie została zakończona.';
+---
+
+<section class="min-h-[70vh] flex items-center justify-center px-6 py-24 bg-void text-silver">
+    <div class="w-full max-w-2xl border border-white/10 bg-surface/30 p-10 text-center">
+        <p class="font-mono text-brass text-xs tracking-[0.3em] uppercase mb-4">Płatność</p>
+        <h1 class="font-heading text-3xl md:text-5xl tracking-[0.06em] uppercase mb-6">Wystąpił problem</h1>
+        <p class="text-steel text-base md:text-lg mb-8">{message}</p>
+        <a href="/#brief" class="inline-block border border-brass text-brass px-6 py-3 uppercase tracking-[0.14em] text-xs">Wróć do briefu</a>
+    </div>
+</section>

@@ -1,0 +1,62 @@
+---
+// SignatureGlyph: numerowany monogram geometryczny dla numeracji sekcji/kart.
+// Zastępuje plain numer ozdobnym kształtem brass + cyfrą Cinzel w środku.
+
+interface Props {
+    number: string;
+    variant?: 'circle' | 'square' | 'diamond' | 'hexagon';
+    size?: number;
+    class?: string;
+}
+
+const { number, variant = 'circle', size = 80, class: className = '' } = Astro.props;
+---
+
+<div
+    class={`relative inline-flex items-center justify-center ${className}`}
+    style={`width: ${size}px; height: ${size}px;`}
+>
+    <svg
+        width={size}
+        height={size}
+        viewBox="0 0 80 80"
+        fill="none"
+        stroke="var(--color-brass, #C5A059)"
+        stroke-width="1.5"
+        stroke-linecap="square"
+        stroke-linejoin="miter"
+        aria-hidden="true"
+    >
+        {variant === 'circle' && (
+            <>
+                <circle cx="40" cy="40" r="36" />
+                <circle cx="40" cy="40" r="32" stroke-opacity="0.3" />
+            </>
+        )}
+        {variant === 'square' && (
+            <>
+                <rect x="6" y="6" width="68" height="68" />
+                <rect x="10" y="10" width="60" height="60" stroke-opacity="0.3" />
+            </>
+        )}
+        {variant === 'diamond' && (
+            <>
+                <polygon points="40,4 76,40 40,76 4,40" />
+                <polygon points="40,12 68,40 40,68 12,40" stroke-opacity="0.3" />
+            </>
+        )}
+        {variant === 'hexagon' && (
+            <>
+                <polygon points="40,4 70,22 70,58 40,76 10,58 10,22" />
+                <polygon points="40,12 64,26 64,54 40,68 16,54 16,26" stroke-opacity="0.3" />
+            </>
+        )}
+    </svg>
+
+    <span
+        class="absolute inset-0 flex items-center justify-center font-heading text-brass leading-none"
+        style={`font-size: ${size * 0.32}px;`}
+    >
+        {number}
+    </span>
+</div>

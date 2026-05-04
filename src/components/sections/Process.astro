@@ -1,0 +1,165 @@
+---
+import { processData } from '../../data/content';
+import GeometricGrid from '../decorations/GeometricGrid.svelte';
+import BrassOrnament from '../decorations/BrassOrnament.astro';
+---
+
+<section
+    id="process"
+    class="relative w-full py-24 md:py-40 px-4 md:px-12 lg:px-24 bg-surface z-10 border-t border-white/5 overflow-hidden"
+>
+    <!-- Animowana siatka tła -->
+    <GeometricGrid client:visible columns={16} rows={10} opacity={0.04} density={0.1} />
+
+    <!-- Galery corner brackets -->
+    <div class="absolute top-8 left-8 hidden md:block pointer-events-none">
+        <BrassOrnament variant="corner-tl" size="md" />
+    </div>
+    <div class="absolute bottom-8 right-8 hidden md:block pointer-events-none">
+        <BrassOrnament variant="corner-br" size="md" />
+    </div>
+
+    <div class="relative max-w-7xl mx-auto">
+        <header class="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 mb-16 md:mb-24 pb-8 border-b border-white/10">
+            <div class="md:col-span-7">
+                <span class="block text-brass font-mono text-xs tracking-[0.3em] uppercase mb-4">
+                    {processData.sectionLabel}
+                </span>
+                <h2 class="font-heading font-bold text-silver tracking-cinematic uppercase leading-[0.9] text-[clamp(2.5rem,7vw,5.5rem)]">
+                    {processData.heading}
+                </h2>
+            </div>
+            <p class="md:col-span-5 text-steel font-sans text-base md:text-lg leading-relaxed self-end max-w-md md:ml-auto">
+                {processData.subheading}
+            </p>
+        </header>
+
+        <!-- Timeline pionowy z osią mosiężną (lewa strona) -->
+        <ol class="relative pl-10 md:pl-14">
+            <!-- Pionowa linia osi czasu -->
+            <div class="absolute left-4 md:left-6 top-3 bottom-8 w-px bg-linear-to-b from-brass/60 via-brass/30 to-transparent" aria-hidden="true"></div>
+
+            {processData.steps.map((step, idx) => (
+                <li class="process-step group relative pb-12 md:pb-20 last:pb-0">
+                    <!-- Kropka mosiężna na osi czasu — centered on the line -->
+                    <span
+                        class="process-dot absolute -left-8 md:-left-[2.625rem] top-1.5 w-4 h-4 md:w-5 md:h-5 rounded-full bg-brass"
+                        aria-hidden="true"
+                    ></span>
+
+                    <!-- Header kroku: ID + duration pigułka -->
+                    <div class="flex flex-wrap items-baseline gap-4 mb-4">
+                        <span class="font-mono text-brass text-2xl md:text-3xl tracking-wider">
+                            {step.id}
+                        </span>
+                        <span class="inline-flex items-center gap-2 px-3 py-1 border border-brass/40 text-brass font-mono text-[10px] md:text-xs tracking-widest uppercase">
+                            <span class="inline-block w-1 h-1 bg-brass rounded-full"></span>
+                            {step.duration}
+                        </span>
+                    </div>
+
+                    <!-- Title kroku -->
+                    <h3 class="font-heading text-silver text-2xl md:text-4xl tracking-cinematic uppercase leading-tight mb-4 transition-colors duration-200 ease-out group-hover:text-white">
+                        {step.title}
+                    </h3>
+
+                    <!-- Body kroku -->
+                    <p class="font-sans text-steel text-base md:text-lg leading-relaxed max-w-2xl mb-8">
+                        {step.body}
+                    </p>
+
+                    <!-- Split: TWOJA STRONA / NASZA STRONA -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl pt-6 border-t border-white/10">
+                        <div>
+                            <p class="font-mono text-brass/70 text-[10px] md:text-xs tracking-[0.25em] uppercase mb-2">
+                                TWOJA STRONA
+                            </p>
+                            <p class="font-sans text-silver/80 text-sm leading-relaxed">
+                                {step.clientSide}
+                            </p>
+                        </div>
+                        <div>
+                            <p class="font-mono text-brass/70 text-[10px] md:text-xs tracking-[0.25em] uppercase mb-2">
+                                NASZA STRONA
+                            </p>
+                            <p class="font-sans text-silver/80 text-sm leading-relaxed">
+                                {step.ourSide}
+                            </p>
+                        </div>
+                    </div>
+                </li>
+            ))}
+        </ol>
+
+        <!-- CTA na końcu procesu -->
+        <div class="mt-12 md:mt-16 pt-12 border-t border-brass/30 text-center">
+            <p class="font-heading text-silver text-xl md:text-2xl mb-6">
+                Cztery kroki dzielą Cię od działającego systemu.
+            </p>
+            <a
+                href="#brief"
+                class="process-cta interactive cursor-none group inline-flex items-center gap-3 px-7 py-4 bg-brass text-void font-heading text-sm tracking-[0.2em] uppercase transition-all duration-200 ease-out"
+                aria-label="Zacznij swój proces od briefu"
+            >
+                <span>ZACZNIJ OD BRIEFU</span>
+                <span aria-hidden="true" class="transition-transform duration-200 ease-out group-hover:translate-x-1">→</span>
+            </a>
+        </div>
+    </div>
+</section>
+
+<style>
+    .process-step {
+        will-change: transform;
+    }
+
+    /* Dot: solid brass circle + surface ring (separates from line) + soft glow */
+    .process-dot {
+        box-shadow:
+            0 0 0 3px var(--color-surface, #0B101C),
+            0 0 0 4px rgba(197, 160, 89, 0.5),
+            0 0 12px 0 rgba(197, 160, 89, 0.5);
+        transition: box-shadow 250ms cubic-bezier(0.16, 1, 0.3, 1), transform 250ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Dot: pulse ring via outline animation (no extra DOM element needed) */
+    .process-dot::after {
+        content: '';
+        position: absolute;
+        inset: -5px;
+        border-radius: 9999px;
+        border: 1px solid rgba(197, 160, 89, 0.4);
+        animation: dot-ring 2.8s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+    }
+
+    @keyframes dot-ring {
+        0%   { transform: scale(1);   opacity: 0.7; }
+        60%  { transform: scale(2.4); opacity: 0; }
+        100% { transform: scale(2.4); opacity: 0; }
+    }
+
+    .process-step:hover .process-dot {
+        transform: scale(1.25);
+        box-shadow:
+            0 0 0 3px var(--color-surface, #0B101C),
+            0 0 0 4px var(--color-brass-light, #E6C885),
+            0 0 20px 2px rgba(197, 160, 89, 0.8);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .process-dot::after { animation: none; }
+    }
+
+    .process-cta {
+        box-shadow: none;
+    }
+    .process-cta:hover,
+    .process-cta:focus-visible {
+        background-color: var(--color-brass-light, #E6C885);
+        box-shadow: 0 0 2rem 0 rgba(197, 160, 89, 0.3);
+    }
+    .process-cta:focus-visible {
+        outline: 2px solid var(--color-brass-light, #E6C885);
+        outline-offset: 4px;
+    }
+</style>

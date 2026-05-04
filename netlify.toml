@@ -1,0 +1,8 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[[edge_functions]]
+  function = "security-headers"
+  path = "/*"
+  excludedPattern = "(/api/.*|/_astro/.*|\\.js$|\\.css$|\\.woff2$|\\.avif$|\\.webp$|\\.png$|\\.jpg$|\\.svg$)"
