@@ -20,7 +20,7 @@ export const POST: APIRoute = async ({ request }) => {
         return new Response(JSON.stringify({ error: 'Brak wymaganych danych: briefId, amount' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
     }
 
-    const stripe = new Stripe(stripeKey, { apiVersion: '2025-02-24.acacia' });
+    const stripe = new Stripe(stripeKey, { apiVersion: '2026-04-22.dahlia' });
     const successUrl = import.meta.env.STRIPE_SUCCESS_URL || 'https://nobelion.pl/dziekujemy?session_id={CHECKOUT_SESSION_ID}';
     const cancelUrl = import.meta.env.STRIPE_CANCEL_URL || 'https://nobelion.pl/blad-platnosci';
 

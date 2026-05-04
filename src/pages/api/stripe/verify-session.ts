@@ -22,7 +22,7 @@ export const GET: APIRoute = async ({ url }) => {
     }
 
     try {
-        const stripe = new Stripe(stripeKey, { apiVersion: '2025-02-24.acacia' });
+        const stripe = new Stripe(stripeKey, { apiVersion: '2026-04-22.dahlia' });
         const session = await stripe.checkout.sessions.retrieve(sessionId);
         const paid = session.payment_status === 'paid';
         return new Response(JSON.stringify({ valid: paid }), {

@@ -16,7 +16,7 @@ export const POST: APIRoute = async ({ request }) => {
         return new Response('Brak podpisu', { status: 400 });
     }
 
-    const stripe = new Stripe(stripeKey, { apiVersion: '2025-02-24.acacia' });
+    const stripe = new Stripe(stripeKey, { apiVersion: '2026-04-22.dahlia' });
     const payload = await request.text();
 
     try {
