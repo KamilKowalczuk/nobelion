@@ -39,11 +39,11 @@ import BrassOrnament from '../decorations/BrassOrnament.astro';
             <!-- Pionowa linia osi czasu -->
             <div class="absolute left-4 md:left-6 top-3 bottom-8 w-px bg-linear-to-b from-brass/60 via-brass/30 to-transparent" aria-hidden="true"></div>
 
-            {processData.steps.map((step, idx) => (
+            {processData.steps.map((step) => (
                 <li class="process-step group relative pb-12 md:pb-20 last:pb-0">
                     <!-- Kropka mosiężna na osi czasu — centered on the line -->
                     <span
-                        class="process-dot absolute -left-8 md:-left-[2.625rem] top-1.5 w-4 h-4 md:w-5 md:h-5 rounded-full bg-brass"
+                        class="process-dot absolute -left-8 md:-left-10.5 top-1.5 w-4 h-4 md:w-5 md:h-5 rounded-full bg-brass"
                         aria-hidden="true"
                     ></span>
 
