@@ -13,8 +13,8 @@
   --color-brass-light: #E6C885;  /* Hover */
   --color-brass-dark: #8E7035;   /* Shadow */
   
-  --color-silver: #F1F5F9;    /* Tekst główny - rozjaśniony z E0E0E0 */
-  --color-steel: #CBD5E1;     /* Tekst drugorzędny - rozjaśniony z 94A3B8 */
+  --color-silver: #E0E0E0;    /* Tekst główny */
+  --color-steel: #94A3B8;     /* Tekst drugorzędny */
 
   /* Typografia */
   --font-heading: "Cinzel", serif;
