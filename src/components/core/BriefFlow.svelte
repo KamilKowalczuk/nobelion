@@ -302,7 +302,7 @@
                 <button
                     type="button"
                     onclick={retrySubmit}
-                    class="brief-next interactive cursor-none inline-flex items-center gap-3 px-7 py-3 bg-brass text-void font-heading text-xs tracking-[0.2em] uppercase transition-all duration-200 ease-out"
+                    class="brief-next interactive cursor-none inline-flex items-center gap-3 px-7 py-3 bg-brass text-void font-heading font-bold text-xs tracking-[0.2em] uppercase transition-all duration-200 ease-out"
                 >
                     SPRÓBUJ PONOWNIE
                 </button>
@@ -755,7 +755,7 @@
                     type="button"
                     onclick={() => goToStep(currentStep + 1)}
                     disabled={!canProceed(currentStep)}
-                    class="brief-next interactive cursor-none inline-flex items-center gap-3 px-6 md:px-8 py-3 md:py-4 bg-brass text-void font-heading text-xs md:text-sm tracking-[0.2em] uppercase transition-all duration-200 ease-out disabled:bg-steel/30 disabled:text-void/50 disabled:cursor-not-allowed"
+                    class="brief-next interactive cursor-none inline-flex items-center gap-3 px-6 md:px-8 py-3 md:py-4 bg-brass text-void font-heading font-bold text-xs md:text-sm tracking-[0.2em] uppercase transition-all duration-200 ease-out disabled:bg-white/10 disabled:text-silver/70 disabled:cursor-not-allowed"
                 >
                     DALEJ
                     <span aria-hidden="true">→</span>
@@ -765,7 +765,7 @@
                     type="button"
                     onclick={submit}
                     disabled={!canProceed(7) || isSubmitting}
-                    class="brief-submit interactive cursor-none inline-flex items-center gap-3 px-7 md:px-10 py-3 md:py-4 bg-brass text-void font-heading text-xs md:text-sm tracking-[0.2em] uppercase transition-all duration-200 ease-out disabled:bg-steel/30 disabled:text-void/50 disabled:cursor-not-allowed"
+                    class="brief-submit interactive cursor-none inline-flex items-center gap-3 px-7 md:px-10 py-3 md:py-4 bg-brass text-void font-heading font-bold text-xs md:text-sm tracking-[0.2em] uppercase transition-all duration-200 ease-out disabled:bg-white/10 disabled:text-silver/70 disabled:cursor-not-allowed"
                 >
                     {isSubmitting ? 'WYSYŁANIE...' : 'WYŚLIJ ZGŁOSZENIE →'}
                 </button>
