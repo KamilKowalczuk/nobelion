@@ -1,0 +1,130 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+export const prerender = false; // Musi być SSR żeby pobierać z tokenu
+
+const { token } = Astro.params;
+const apiUrl = import.meta.env.PUBLIC_CMS_URL || 'http://localhost:3001';
+
+let quoteData = null;
+let errorMsg = null;
+
+try {
+  const res = await fetch(`${apiUrl}/api/briefs/quote/${token}`);
+  if (res.ok) {
+    quoteData = await res.json();
+  } else {
+    errorMsg = 'Nie znaleziono wyceny lub link wygasł.';
+  }
+} catch (e) {
+  errorMsg = 'Błąd połączenia z serwerem.';
+}
+---
+
+<Layout title="Wycena Projektu - Nobelion" description="Twoja indywidualna wycena projektu.">
+  <main class="min-h-screen bg-void pt-32 pb-24 px-4 md:px-12 selection:bg-brass/30 selection:text-white">
+    <!-- Grid tła -->
+    <div class="fixed inset-0 pointer-events-none opacity-[0.03] z-0" aria-hidden="true">
+        <div class="absolute inset-0" style="background-image: linear-gradient(to right, #ffffff 1px, transparent 1px), linear-gradient(to bottom, #ffffff 1px, transparent 1px); background-size: 4rem 4rem;"></div>
+    </div>
+
+    <div class="max-w-4xl mx-auto relative z-10">
+      {errorMsg ? (
+        <div class="text-center py-20">
+          <h1 class="text-3xl text-white font-heading mb-4">Ups!</h1>
+          <p class="text-steel">{errorMsg}</p>
+        </div>
+      ) : (
+        <div class="bg-surface/50 border border-white/10 p-8 md:p-12 shadow-2xl backdrop-blur-md">
+          <div class="mb-12">
+            <h1 class="text-3xl md:text-5xl font-heading font-light tracking-wide text-white mb-4">
+              Wycena dla <span class="text-brass font-normal">{quoteData.company}</span>
+            </h1>
+            <p class="text-steel text-lg">Zgodnie z naszymi ustaleniami, przedstawiamy propozycję inwestycji dla Twojego systemu.</p>
+          </div>
+
+          <div class="mb-12 p-6 border border-brass/20 bg-brass/5">
+            <h2 class="text-sm font-mono text-brass uppercase tracking-widest mb-2">Całkowita wartość inwestycji</h2>
+            <div class="text-4xl md:text-6xl font-heading text-white">
+              {new Intl.NumberFormat('pl-PL').format(quoteData.proposedPrice)} <span class="text-xl text-steel">PLN netto</span>
+            </div>
+          </div>
+
+          <h3 class="text-xl font-heading text-white mb-6">Wybierz preferowany wariant płatności:</h3>
+          
+          <div class="grid md:grid-cols-2 gap-6" id="payment-options" data-token={token} data-api={apiUrl}>
+            <!-- Opcja 100% -->
+            <button type="button" data-model="100" class="payment-btn w-full text-left p-6 border border-white/10 hover:border-brass transition-colors duration-300 group bg-void/50 h-full flex flex-col">
+              <div class="text-brass font-mono text-xs tracking-widest uppercase mb-4">Opcja 1</div>
+              <h4 class="text-2xl font-heading text-white mb-2">Płatność jednorazowa</h4>
+              <p class="text-steel mb-8 flex-grow">Opłacasz z góry całą kwotę projektu. Gwarantuje to najszybsze rozpoczęcie prac.</p>
+              <div class="text-xl font-heading text-white mb-4">{new Intl.NumberFormat('pl-PL').format(quoteData.proposedPrice)} PLN</div>
+              <div class="inline-flex items-center justify-center w-full bg-white text-void font-bold py-3 px-6 group-hover:bg-brass group-hover:text-white transition-colors btn-text">
+                Opłać całość
+              </div>
+            </button>
+
+            <!-- Opcja 50% -->
+            <button type="button" data-model="50" class="payment-btn w-full text-left p-6 border border-white/10 hover:border-brass transition-colors duration-300 group bg-void/50 h-full flex flex-col">
+              <div class="text-brass font-mono text-xs tracking-widest uppercase mb-4">Opcja 2</div>
+              <h4 class="text-2xl font-heading text-white mb-2">Płatność etapowa (50/30/20)</h4>
+              <p class="text-steel mb-8 flex-grow">Płacisz tylko 50% przed startem projektu. Kolejne wpłaty po wdrożeniu i oddaniu projektu.</p>
+              <div class="text-xl font-heading text-white mb-4">{new Intl.NumberFormat('pl-PL').format(quoteData.proposedPrice / 2)} PLN <span class="text-sm text-steel font-sans font-normal">(I Rata)</span></div>
+              <div class="inline-flex items-center justify-center w-full border border-white text-white font-bold py-3 px-6 group-hover:border-brass group-hover:text-brass transition-colors btn-text">
+                Opłać I ratę (50%)
+              </div>
+            </button>
+          </div>
+          
+        </div>
+      )}
+    </div>
+  </main>
+</Layout>
+
+<script>
+  // @ts-nocheck
+  document.addEventListener('DOMContentLoaded', () => {
+    const container = document.getElementById('payment-options');
+    if (!container) return;
+
+    const token = container.dataset.token;
+    const apiUrl = container.dataset.api;
+    const buttons = container.querySelectorAll('.payment-btn');
+
+    buttons.forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        
+        // Pokaż loader
+        const btnText = btn.querySelector('.btn-text');
+        const originalText = btnText.innerHTML;
+        btnText.innerHTML = 'Przetwarzanie...';
+        btn.disabled = true;
+
+        const model = btn.dataset.model;
+
+        try {
+          const res = await fetch(`${apiUrl}/api/briefs/checkout/${token}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ paymentModel: model })
+          });
+
+          const data = await res.json();
+          if (data.url) {
+            window.location.href = data.url; // Przekierowanie do Stripe
+          } else {
+            alert('Wystąpił błąd: ' + (data.error || 'Nieznany błąd'));
+            btnText.innerHTML = originalText;
+            btn.disabled = false;
+          }
+        } catch (err) {
+          alert('Błąd połączenia z serwerem.');
+          btnText.innerHTML = originalText;
+          btn.disabled = false;
+        }
+      });
+    });
+  });
+</script>
