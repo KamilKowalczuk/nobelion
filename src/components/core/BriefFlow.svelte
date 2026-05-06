@@ -433,7 +433,7 @@
                                 type="text"
                                 bind:value={formData.tools}
                                 placeholder="np. Gmail, Excel, Subiekt, Allegro, Salesforce..."
-                                class="brief-input w-full bg-void/40 border border-white/10 px-4 py-3 text-silver placeholder:text-steel/50 font-sans text-base focus:border-brass focus:outline-none transition-colors duration-200 ease-out"
+                                class="brief-input w-full bg-void/40 border border-white/10 px-4 py-3 text-silver placeholder:text-steel/80 font-sans text-base focus:border-brass focus:outline-none transition-colors duration-200 ease-out"
                             />
                         </div>
                     </div>
@@ -449,11 +449,11 @@
                                 placeholder={placeholders[placeholderIndex]}
                                 rows="6"
                                 maxlength="2000"
-                                class="brief-input w-full bg-void/40 border border-white/10 px-4 py-3 text-silver placeholder:text-steel/50 font-sans text-base leading-relaxed focus:border-brass focus:outline-none transition-colors duration-200 ease-out resize-y"
+                                class="brief-input w-full bg-void/40 border border-white/10 px-4 py-3 text-silver placeholder:text-steel/80 font-sans text-base leading-relaxed focus:border-brass focus:outline-none transition-colors duration-200 ease-out resize-y"
                                 aria-describedby="problem-counter"
                             ></textarea>
                             <div class="flex justify-between mt-2">
-                                <span id="problem-counter" class="font-mono text-steel/50 text-[11px] tracking-widest">
+                                <span id="problem-counter" class="font-mono text-steel/80 text-[11px] tracking-widest">
                                     {formData.problem.length} znaków {formData.problem.length < 30 ? '(min. 30)' : ''}
                                 </span>
                                 <button
@@ -491,10 +491,10 @@
 
                         <!-- Drag&drop placeholder (UI only, brak uploadu w fazie 1) -->
                         <div class="border border-dashed border-brass/30 p-6 text-center">
-                            <p class="font-mono text-steel/60 text-xs tracking-widest uppercase">
+                            <p class="font-mono text-steel/90 text-xs tracking-widest uppercase">
                                 OPCJONALNIE: PRZECIĄGNIJ TU SCREENSHOTY LUB DOKUMENTY
                             </p>
-                            <p class="font-mono text-steel/40 text-[10px] tracking-widest uppercase mt-1">
+                            <p class="font-mono text-steel/90 text-[10px] tracking-widest uppercase mt-1">
                                 (do 5 plików, max 10 MB każdy, dostępne wkrótce)
                             </p>
                         </div>
@@ -598,7 +598,7 @@
                                 bind:value={formData.triedNotes}
                                 rows="4"
                                 placeholder="Dlaczego dotychczasowe próby nie wyszły..."
-                                class="brief-input w-full bg-void/40 border border-white/10 px-4 py-3 text-silver placeholder:text-steel/50 font-sans text-base focus:border-brass focus:outline-none transition-colors duration-200 ease-out resize-y"
+                                class="brief-input w-full bg-void/40 border border-white/10 px-4 py-3 text-silver placeholder:text-steel/80 font-sans text-base focus:border-brass focus:outline-none transition-colors duration-200 ease-out resize-y"
                             ></textarea>
                         </div>
                     </div>
@@ -694,7 +694,7 @@
                                     autocomplete="tel"
                                     class="brief-input w-full bg-void/40 border border-white/10 px-4 py-3 text-silver font-sans text-base focus:border-brass focus:outline-none transition-colors duration-200 ease-out"
                                 />
-                                <p class="font-mono text-steel/50 text-[10px] tracking-widest mt-1">JEŚLI WOLISZ ROZMOWĘ ZAMIAST MAILA</p>
+                                <p class="font-mono text-steel/80 text-[10px] tracking-widest mt-1">JEŚLI WOLISZ ROZMOWĘ ZAMIAST MAILA</p>
                             </div>
                             <div>
                                 <label for="company" class="block font-mono text-brass text-[11px] tracking-[0.25em] uppercase mb-2">NAZWA FIRMY *</label>
@@ -745,7 +745,7 @@
                 type="button"
                 onclick={() => goToStep(currentStep - 1)}
                 disabled={currentStep === 1}
-                class="brief-back interactive cursor-none font-mono text-xs tracking-[0.25em] uppercase transition-colors duration-200 ease-out disabled:opacity-30 disabled:cursor-not-allowed"
+                class="brief-back interactive cursor-none font-mono text-xs tracking-[0.25em] uppercase transition-colors duration-200 ease-out disabled:opacity-70 disabled:cursor-not-allowed"
             >
                 ← WSTECZ
             </button>

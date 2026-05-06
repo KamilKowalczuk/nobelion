@@ -19,7 +19,7 @@
         <div class="flex items-center gap-6">
             <div class={`w-1.5 h-1.5 transition-colors duration-300 ${isOpen ? 'bg-brass shadow-[0_0_8px_#C5A059]' : 'bg-steel/30 group-hover:bg-brass'}`}></div>
             
-            <h3 class={`font-heading font-bold text-lg md:text-xl tracking-widest uppercase transition-colors duration-300 ${isOpen ? 'text-white' : 'text-silver/60 group-hover:text-silver'}`}>
+            <h3 class={`font-heading font-bold text-lg md:text-xl tracking-widest uppercase transition-colors duration-300 ${isOpen ? 'text-white' : 'text-silver/90 group-hover:text-silver'}`}>
                 {question}
             </h3>
         </div>

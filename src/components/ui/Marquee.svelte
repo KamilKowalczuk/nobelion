@@ -12,7 +12,7 @@
         <div class="flex items-center gap-12 md:gap-24 pr-12 md:pr-24">
             {#each content as word}
                 <div class="flex items-center gap-12 md:gap-24">
-                    <span class="text-2xl md:text-6xl font-heading font-bold text-silver/30 tracking-widest">
+                    <span class="text-2xl md:text-6xl font-heading font-bold text-silver/80 tracking-widest">
                         {word}
                     </span>
                     

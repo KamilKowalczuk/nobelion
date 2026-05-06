@@ -40,7 +40,7 @@
 <div bind:this={element} class="flex flex-col items-center justify-center py-8 min-w-0 w-full">
     <div class="flex items-baseline justify-center font-mono font-bold text-brass tracking-tighter whitespace-nowrap max-w-full">
         {#if prefix}
-            <span class="text-xl md:text-3xl mr-2 opacity-60">{prefix}</span>
+            <span class="text-xl md:text-3xl mr-2 opacity-80">{prefix}</span>
         {/if}
 
         <span class="text-5xl md:text-6xl lg:text-7xl tabular-nums">

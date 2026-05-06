@@ -106,7 +106,7 @@
                     {/each}
                 </div>
 
-                <div class="mt-24 pt-8 border-t border-white/5 flex justify-between items-center opacity-40">
+                <div class="mt-24 pt-8 border-t border-white/5 flex justify-between items-center opacity-80">
                     <span class="font-mono text-[10px] uppercase text-silver">NOBELION SP. Z O.O.</span>
                     <div class="w-24 h-[1px] bg-silver"></div>
                 </div>
