@@ -212,9 +212,15 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-      if (!res.ok) throw new Error(`Submit failed with status ${res.status}`);
+      
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        console.error("[BriefFlow] Server Error:", errorData);
+        throw new Error(errorData.details || `Submit failed with status ${res.status}`);
+      }
+      
       submitState = "success";
-    } catch (e) {
+    } catch (e: any) {
       console.error("[BriefFlow] submit error:", e);
       submitState = "error";
     } finally {
