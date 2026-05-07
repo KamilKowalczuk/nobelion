@@ -55,8 +55,8 @@ export const POST: APIRoute = async ({ request }) => {
 
     try {
         const payloadDoc = await createDoc('briefs', {
-            name: body.name?.trim(),
-            email: body.email?.trim(),
+            clientName: body.name?.trim(),
+            clientEmail: body.email?.trim(),
             phone: body.phone?.trim() || '',
             company: body.company?.trim(),
             nip: body.nip?.trim() || '',
