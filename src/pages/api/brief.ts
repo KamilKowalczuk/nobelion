@@ -79,9 +79,15 @@ export const POST: APIRoute = async ({ request }) => {
             source: 'brief-form'
         });
 
-        if (!payloadDoc) {
-            console.error('[brief API] createDoc zwrócił null — Payload odrzucił request');
-            return new Response(JSON.stringify({ error: 'Nie udało się zapisać briefu' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+        if (!payloadDoc || payloadDoc.error) {
+            console.error('[brief API] Błąd Payloada:', payloadDoc);
+            return new Response(JSON.stringify({ 
+                error: 'Nie udało się zapisać briefu', 
+                details: payloadDoc?.body || payloadDoc?.message || 'Unknown error' 
+            }), { 
+                status: 500, 
+                headers: { 'Content-Type': 'application/json' } 
+            });
         }
 
         await Promise.allSettled([

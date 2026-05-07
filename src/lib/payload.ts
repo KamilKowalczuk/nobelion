@@ -1,4 +1,8 @@
-const env = (import.meta as any).env as Record<string, string | undefined>;
+// Łączymy zmienne z Astro i z procesu Node/Netlify
+const env = {
+    ...(import.meta as any).env,
+    ...process.env
+} as Record<string, string | undefined>;
 
 function getBaseUrl(): string {
     const url = (env.PAYLOAD_API_URL || env.PAYLOAD_URL || 'http://localhost:3001').replace(/\/$/, '');
@@ -50,12 +54,13 @@ export async function createDoc(collection: string, data: Record<string, unknown
         if (!res.ok) {
             const body = await res.text().catch(() => '');
             console.error(`[payload] createDoc ${collection} failed: ${res.status}`, body);
-            return null;
+            // Zwracamy obiekt z błędem, żeby API mogło go przekazać dalej
+            return { error: true, status: res.status, body };
         }
         return await res.json();
     } catch (err: any) {
         console.error(`[payload] createDoc ${collection} network error:`, err?.message);
-        return null;
+        return { error: true, message: err?.message };
     }
 }
 
