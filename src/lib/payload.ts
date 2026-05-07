@@ -1,13 +1,17 @@
 const env = (import.meta as any).env as Record<string, string | undefined>;
 
 function getBaseUrl(): string {
-    return (env.PAYLOAD_API_URL || env.PAYLOAD_URL || 'http://localhost:3001').replace(/\/$/, '');
+    const url = (env.PAYLOAD_API_URL || env.PAYLOAD_URL || 'http://localhost:3001').replace(/\/$/, '');
+    return url;
 }
 
 function getHeaders(): Record<string, string> {
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     const apiKey = env.PAYLOAD_API_KEY;
-    if (apiKey) headers.Authorization = `users API-Key ${apiKey}`;
+    // Tylko dodaj nagłówek autoryzacji jeśli klucz jest ustawiony i nie jest placeholderem
+    if (apiKey && !apiKey.includes('PASTE_') && apiKey.length > 10) {
+        headers.Authorization = `users API-Key ${apiKey}`;
+    }
     return headers;
 }
 
@@ -18,30 +22,59 @@ export async function findSingle(collection: string, where: Record<string, strin
     });
     params.set('limit', '1');
 
-    const res = await fetch(`${getBaseUrl()}/api/${collection}?${params.toString()}`, {
-        headers: getHeaders(),
-    });
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data?.docs?.[0] || null;
+    const url = `${getBaseUrl()}/api/${collection}?${params.toString()}`;
+    try {
+        const res = await fetch(url, { headers: getHeaders() });
+        if (!res.ok) {
+            const body = await res.text().catch(() => '');
+            console.error(`[payload] findSingle ${collection} failed: ${res.status}`, body);
+            return null;
+        }
+        const data = await res.json();
+        return data?.docs?.[0] || null;
+    } catch (err: any) {
+        console.error(`[payload] findSingle ${collection} network error:`, err?.message);
+        return null;
+    }
 }
 
 export async function createDoc(collection: string, data: Record<string, unknown>): Promise<any | null> {
-    const res = await fetch(`${getBaseUrl()}/api/${collection}`, {
-        method: 'POST',
-        headers: getHeaders(),
-        body: JSON.stringify(data),
-    });
-    if (!res.ok) return null;
-    return await res.json();
+    const url = `${getBaseUrl()}/api/${collection}`;
+    console.log(`[payload] createDoc → POST ${url}`);
+    try {
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: getHeaders(),
+            body: JSON.stringify(data),
+        });
+        if (!res.ok) {
+            const body = await res.text().catch(() => '');
+            console.error(`[payload] createDoc ${collection} failed: ${res.status}`, body);
+            return null;
+        }
+        return await res.json();
+    } catch (err: any) {
+        console.error(`[payload] createDoc ${collection} network error:`, err?.message);
+        return null;
+    }
 }
 
 export async function patchDoc(collection: string, id: string, data: Record<string, unknown>): Promise<any | null> {
-    const res = await fetch(`${getBaseUrl()}/api/${collection}/${id}`, {
-        method: 'PATCH',
-        headers: getHeaders(),
-        body: JSON.stringify(data),
-    });
-    if (!res.ok) return null;
-    return await res.json();
+    const url = `${getBaseUrl()}/api/${collection}/${id}`;
+    try {
+        const res = await fetch(url, {
+            method: 'PATCH',
+            headers: getHeaders(),
+            body: JSON.stringify(data),
+        });
+        if (!res.ok) {
+            const body = await res.text().catch(() => '');
+            console.error(`[payload] patchDoc ${collection}/${id} failed: ${res.status}`, body);
+            return null;
+        }
+        return await res.json();
+    } catch (err: any) {
+        console.error(`[payload] patchDoc ${collection}/${id} network error:`, err?.message);
+        return null;
+    }
 }

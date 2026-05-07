@@ -11,10 +11,18 @@ type BriefBody = {
     company?: string;
     nip?: string;
     problem?: string;
+    diagnosis?: string;
+    industry?: string;
+    size?: string;
+    tools?: string;
     budget?: string;
     urgency?: string;
+    scope?: string;
     peopleInvolved?: string;
     hoursWeek?: number;
+    growsWithScale?: string;
+    triedBefore?: string[];
+    triedNotes?: string;
     agreedPrivacy?: boolean;
     agreedTerms?: boolean;
     honeypot?: string;
@@ -45,29 +53,45 @@ export const POST: APIRoute = async ({ request }) => {
     if (error === 'Bot detected') return new Response(JSON.stringify({ success: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
     if (error) return new Response(JSON.stringify({ error }), { status: 400, headers: { 'Content-Type': 'application/json' } });
 
-    const payloadDoc = await createDoc('briefs', {
-        name: body.name?.trim(),
-        email: body.email?.trim(),
-        phone: body.phone?.trim() || '',
-        company: body.company?.trim(),
-        nip: body.nip?.trim() || '',
-        problemDescription: body.problem?.trim(),
-        budget: body.budget || '',
-        urgency: body.urgency || '',
-        peopleInvolved: body.peopleInvolved || '',
-        hoursWeek: Number(body.hoursWeek || 0),
-        agreedPrivacy: !!body.agreedPrivacy,
-        agreedTerms: !!body.agreedTerms,
-        status: 'new',
-        source: 'brief-form'
-    });
+    try {
+        const payloadDoc = await createDoc('briefs', {
+            name: body.name?.trim(),
+            email: body.email?.trim(),
+            phone: body.phone?.trim() || '',
+            company: body.company?.trim(),
+            nip: body.nip?.trim() || '',
+            diagnosis: body.diagnosis || '',
+            industry: body.industry || '',
+            size: body.size || '',
+            tools: body.tools || '',
+            problemDescription: body.problem?.trim(),
+            hoursWeek: Number(body.hoursWeek || 0),
+            peopleInvolved: body.peopleInvolved || '',
+            growsWithScale: body.growsWithScale || '',
+            triedBefore: body.triedBefore || [],
+            triedNotes: body.triedNotes?.trim() || '',
+            urgency: body.urgency || '',
+            scope: body.scope || '',
+            budget: body.budget || '',
+            agreedPrivacy: !!body.agreedPrivacy,
+            agreedTerms: !!body.agreedTerms,
+            status: 'new',
+            source: 'brief-form'
+        });
 
-    if (!payloadDoc) return new Response(JSON.stringify({ error: 'Nie udało się zapisać briefu' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+        if (!payloadDoc) {
+            console.error('[brief API] createDoc zwrócił null — Payload odrzucił request');
+            return new Response(JSON.stringify({ error: 'Nie udało się zapisać briefu' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+        }
 
-    await Promise.allSettled([
-        sendBriefConfirmation({ email: body.email!.trim(), name: body.name!.trim(), company: body.company!.trim(), problemDescription: body.problem!.trim() }),
-        sendInternalNewBrief({ email: body.email!.trim(), name: body.name!.trim(), company: body.company!.trim(), problemDescription: body.problem!.trim() })
-    ]);
+        await Promise.allSettled([
+            sendBriefConfirmation({ email: body.email!.trim(), name: body.name!.trim(), company: body.company!.trim(), problemDescription: body.problem!.trim() }),
+            sendInternalNewBrief({ email: body.email!.trim(), name: body.name!.trim(), company: body.company!.trim(), problemDescription: body.problem!.trim() })
+        ]);
 
-    return new Response(JSON.stringify({ success: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+        return new Response(JSON.stringify({ success: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    } catch (err: any) {
+        console.error('[brief API] Nieoczekiwany błąd:', err?.message || err);
+        return new Response(JSON.stringify({ error: 'Wewnętrzny błąd serwera', details: err?.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    }
 };
