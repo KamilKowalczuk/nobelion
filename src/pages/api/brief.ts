@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import { createDoc } from '../../lib/payload';
 import { sendBriefConfirmation, sendInternalNewBrief } from '../../lib/email';
+import sanitizeHtml from 'sanitize-html';
 
 export const prerender = false;
 
@@ -32,12 +33,21 @@ function isEmail(value: string): boolean {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
+// Funkcja usuwająca wszystkie tagi HTML (bardzo rygorystycznie)
+function sanitizeInput(text: string | undefined): string {
+    if (!text) return '';
+    return sanitizeHtml(text, {
+        allowedTags: [],
+        allowedAttributes: {},
+    }).trim();
+}
+
 function validate(body: BriefBody): string | null {
     if ((body.honeypot || '').trim() !== '') return 'Bot detected';
-    if (!body.name || body.name.trim().length < 2) return 'Nieprawidłowe imię i nazwisko';
+    if (!body.name || body.name.length < 2) return 'Nieprawidłowe imię i nazwisko';
     if (!body.email || !isEmail(body.email)) return 'Nieprawidłowy email';
-    if (!body.company || body.company.trim().length < 2) return 'Nieprawidłowa nazwa firmy';
-    if (!body.problem || body.problem.trim().length < 30) return 'Opis problemu musi mieć min. 30 znaków';
+    if (!body.company || body.company.length < 2) return 'Nieprawidłowa nazwa firmy';
+    if (!body.problem || body.problem.length < 30) return 'Opis problemu musi mieć min. 30 znaków';
     if (!body.agreedPrivacy || !body.agreedTerms) return 'Wymagane zgody nie zostały zaakceptowane';
     return null;
 }
@@ -49,41 +59,56 @@ export const POST: APIRoute = async ({ request }) => {
     } catch {
         return new Response(JSON.stringify({ error: 'Nieprawidłowy JSON' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
     }
-    const error = validate(body);
+
+    // Sanityzacja danych wejściowych przed walidacją (ochrona XSS w Payload admin panel i mailach)
+    const sanitizedBody: BriefBody = {
+        ...body,
+        name: sanitizeInput(body.name),
+        email: sanitizeInput(body.email),
+        phone: sanitizeInput(body.phone),
+        company: sanitizeInput(body.company),
+        nip: sanitizeInput(body.nip),
+        problem: sanitizeInput(body.problem),
+        tools: sanitizeInput(body.tools),
+        triedNotes: sanitizeInput(body.triedNotes),
+        triedBefore: Array.isArray(body.triedBefore) ? body.triedBefore.map(t => sanitizeInput(t)) : [],
+    };
+
+    const error = validate(sanitizedBody);
     if (error === 'Bot detected') return new Response(JSON.stringify({ success: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
     if (error) return new Response(JSON.stringify({ error }), { status: 400, headers: { 'Content-Type': 'application/json' } });
 
     try {
         const payloadDoc = await createDoc('briefs', {
-            clientName: body.name?.trim(),
-            clientEmail: body.email?.trim(),
-            phone: body.phone?.trim() || '',
-            company: body.company?.trim(),
-            nip: body.nip?.trim() || '',
-            diagnosis: body.diagnosis || '',
-            industry: body.industry || '',
-            size: body.size || '',
-            tools: body.tools || '',
-            problemDescription: body.problem?.trim(),
-            hoursWeek: Number(body.hoursWeek || 0),
-            peopleInvolved: body.peopleInvolved || '',
-            growsWithScale: body.growsWithScale || '',
-            triedBefore: body.triedBefore || [],
-            triedNotes: body.triedNotes?.trim() || '',
-            urgency: body.urgency || '',
-            scope: body.scope || '',
-            budget: body.budget || '',
-            agreedPrivacy: !!body.agreedPrivacy,
-            agreedTerms: !!body.agreedTerms,
+            clientName: sanitizedBody.name,
+            clientEmail: sanitizedBody.email,
+            phone: sanitizedBody.phone,
+            company: sanitizedBody.company,
+            nip: sanitizedBody.nip,
+            diagnosis: sanitizedBody.diagnosis || '',
+            industry: sanitizedBody.industry || '',
+            size: sanitizedBody.size || '',
+            tools: sanitizedBody.tools,
+            problemDescription: sanitizedBody.problem,
+            hoursWeek: Number(sanitizedBody.hoursWeek || 0),
+            peopleInvolved: sanitizedBody.peopleInvolved || '',
+            growsWithScale: sanitizedBody.growsWithScale || '',
+            triedBefore: sanitizedBody.triedBefore,
+            triedNotes: sanitizedBody.triedNotes,
+            urgency: sanitizedBody.urgency || '',
+            scope: sanitizedBody.scope || '',
+            budget: sanitizedBody.budget || '',
+            agreedPrivacy: !!sanitizedBody.agreedPrivacy,
+            agreedTerms: !!sanitizedBody.agreedTerms,
             status: 'new',
             source: 'brief-form'
         });
 
         if (!payloadDoc || payloadDoc.error) {
             console.error('[brief API] Błąd Payloada:', payloadDoc);
+            // Zwracamy generyczny komunikat, aby nie ujawniać np. struktury bazy
             return new Response(JSON.stringify({ 
-                error: 'Nie udało się zapisać briefu', 
-                details: payloadDoc?.body || payloadDoc?.message || 'Unknown error' 
+                error: 'Nie udało się zapisać briefu - odrzucenie po stronie serwera.'
             }), { 
                 status: 500, 
                 headers: { 'Content-Type': 'application/json' } 
@@ -91,13 +116,14 @@ export const POST: APIRoute = async ({ request }) => {
         }
 
         await Promise.allSettled([
-            sendBriefConfirmation({ email: body.email!.trim(), name: body.name!.trim(), company: body.company!.trim(), problemDescription: body.problem!.trim() }),
-            sendInternalNewBrief({ email: body.email!.trim(), name: body.name!.trim(), company: body.company!.trim(), problemDescription: body.problem!.trim() })
+            sendBriefConfirmation({ email: sanitizedBody.email!, name: sanitizedBody.name!, company: sanitizedBody.company!, problemDescription: sanitizedBody.problem! }),
+            sendInternalNewBrief({ email: sanitizedBody.email!, name: sanitizedBody.name!, company: sanitizedBody.company!, problemDescription: sanitizedBody.problem! })
         ]);
 
         return new Response(JSON.stringify({ success: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
     } catch (err: any) {
         console.error('[brief API] Nieoczekiwany błąd:', err?.message || err);
-        return new Response(JSON.stringify({ error: 'Wewnętrzny błąd serwera', details: err?.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+        // Zwracamy generyczny komunikat błędu
+        return new Response(JSON.stringify({ error: 'Wewnętrzny błąd serwera' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
     }
 };
