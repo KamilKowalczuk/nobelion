@@ -19,66 +19,186 @@ try {
 } catch (e) {
   errorMsg = 'Błąd połączenia z serwerem.';
 }
+
+// Funkcja pomocnicza do renderowania bardzo prostego Lexical JSON do HTML
+function renderLexical(nodes: any[]): string {
+    if (!nodes || !Array.isArray(nodes)) return '';
+    return nodes.map(node => {
+        if (node.type === 'text') {
+            let text = node.text || '';
+            if (node.format === 1) text = `<strong>${text}</strong>`;
+            if (node.format === 2) text = `<em>${text}</em>`;
+            if (node.format === 8) text = `<u>${text}</u>`;
+            return text;
+        }
+        if (node.type === 'paragraph') return `<p class="mb-4 text-steel leading-relaxed">${renderLexical(node.children)}</p>`;
+        if (node.type === 'heading') {
+            const tag = `h${node.tag === 'h1' ? '2' : node.tag.replace('h', '')}`; // shift headings down
+            return `<${tag} class="text-white font-heading text-xl mt-6 mb-3">${renderLexical(node.children)}</${tag}>`;
+        }
+        if (node.type === 'list') {
+            const tag = node.listType === 'number' ? 'ol' : 'ul';
+            const listClass = node.listType === 'number' ? 'list-decimal' : 'list-disc';
+            return `<${tag} class="${listClass} ml-5 mb-4 text-steel">${renderLexical(node.children)}</${tag}>`;
+        }
+        if (node.type === 'listitem') return `<li class="mb-1">${renderLexical(node.children)}</li>`;
+        if (node.type === 'quote') return `<blockquote class="border-l-2 border-brass pl-4 italic text-steel/80 my-4">${renderLexical(node.children)}</blockquote>`;
+        if (node.children) return renderLexical(node.children);
+        return '';
+    }).join('');
+}
+
+const projectPlanHtml = quoteData?.projectPlan?.root?.children ? renderLexical(quoteData.projectPlan.root.children) : '';
+const fullPrice = quoteData?.proposedPrice || 0;
+const discountedPrice = Math.round(fullPrice * 0.9);
 ---
 
 <Layout title="Wycena Projektu - Nobelion" description="Twoja indywidualna wycena projektu.">
-  <main class="min-h-screen bg-void pt-32 pb-24 px-4 md:px-12 selection:bg-brass/30 selection:text-white">
+  <main class="min-h-screen bg-void pt-32 pb-24 px-4 md:px-12 selection:bg-brass/30 selection:text-white relative">
     <!-- Grid tła -->
     <div class="fixed inset-0 pointer-events-none opacity-[0.03] z-0" aria-hidden="true">
         <div class="absolute inset-0" style="background-image: linear-gradient(to right, #ffffff 1px, transparent 1px), linear-gradient(to bottom, #ffffff 1px, transparent 1px); background-size: 4rem 4rem;"></div>
     </div>
 
-    <div class="max-w-4xl mx-auto relative z-10">
+    <div class="max-w-5xl mx-auto relative z-10">
       {errorMsg ? (
         <div class="text-center py-20">
           <h1 class="text-3xl text-white font-heading mb-4">Ups!</h1>
           <p class="text-steel">{errorMsg}</p>
         </div>
       ) : (
-        <div class="bg-surface/50 border border-white/10 p-8 md:p-12 shadow-2xl backdrop-blur-md">
-          <div class="mb-12">
+        <div class="bg-surface/50 border border-white/10 shadow-2xl backdrop-blur-md overflow-hidden">
+          
+          {/* Header */}
+          <div class="p-8 md:p-12 border-b border-white/5 bg-gradient-to-br from-white/[0.02] to-transparent">
+            <div class="inline-block px-3 py-1 mb-6 border border-brass/30 text-brass text-xs uppercase tracking-widest font-mono">
+                Propozycja Wdrożenia
+            </div>
             <h1 class="text-3xl md:text-5xl font-heading font-light tracking-wide text-white mb-4">
               Wycena dla <span class="text-brass font-normal">{quoteData.company}</span>
             </h1>
-            <p class="text-steel text-lg">Zgodnie z naszymi ustaleniami, przedstawiamy propozycję inwestycji dla Twojego systemu.</p>
+            <p class="text-steel text-lg max-w-2xl">Zgodnie z naszymi ustaleniami, przedstawiamy dedykowany plan inwestycji oraz szczegóły technologiczne dla Twojego rozwiązania.</p>
           </div>
 
-          <div class="mb-12 p-6 border border-brass/20 bg-brass/5">
-            <h2 class="text-sm font-mono text-brass uppercase tracking-widest mb-2">Całkowita wartość inwestycji</h2>
-            <div class="text-4xl md:text-6xl font-heading text-white">
-              {new Intl.NumberFormat('pl-PL').format(quoteData.proposedPrice)} <span class="text-xl text-steel">PLN netto</span>
+          {/* Ciało oferty */}
+          <div class="p-8 md:p-12 grid grid-cols-1 lg:grid-cols-3 gap-12">
+            
+            {/* Lewa kolumna: Opisy */}
+            <div class="lg:col-span-2 space-y-12">
+                
+                {/* Plan prac */}
+                {projectPlanHtml ? (
+                    <section>
+                        <h2 class="text-2xl font-heading text-white mb-6 border-b border-white/10 pb-4">Plan prac i Technologie</h2>
+                        <div class="prose prose-invert prose-p:text-steel prose-a:text-brass max-w-none" set:html={projectPlanHtml} />
+                    </section>
+                ) : (
+                    <section>
+                        <h2 class="text-2xl font-heading text-white mb-6 border-b border-white/10 pb-4">Wyzwanie</h2>
+                        <p class="text-steel leading-relaxed">{quoteData.problemDescription}</p>
+                    </section>
+                )}
+
+                {/* Utrzymanie */}
+                {quoteData.monthlyMaintenancePrice ? (
+                    <section class="bg-white/5 border border-white/10 p-6 md:p-8 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-brass/10 rounded-full blur-3xl -mr-10 -mt-10"></div>
+                        <h2 class="text-xl font-heading text-white mb-4">Opcjonalne wsparcie i utrzymanie</h2>
+                        <div class="text-3xl font-heading text-brass mb-4">
+                            {new Intl.NumberFormat('pl-PL').format(quoteData.monthlyMaintenancePrice)} PLN <span class="text-sm text-steel font-sans font-normal uppercase tracking-wider">/ miesiąc</span>
+                        </div>
+                        <p class="text-steel mb-4 whitespace-pre-wrap">{quoteData.maintenanceDescription}</p>
+                        <div class="text-sm text-white/50 italic border-l-2 border-white/10 pl-3">Umowa i płatność subskrypcyjna za wsparcie zostaną aktywowane w osobnym procesie dopiero po pełnym wdrożeniu projektu.</div>
+                    </section>
+                ) : null}
+
+                {/* Przycisk prośby o zmiany */}
+                <section class="pt-8 border-t border-white/10 flex flex-col items-start">
+                    <p class="text-steel mb-4">Masz pytania lub chciałbyś zmodyfikować zakres tej wyceny?</p>
+                    <button id="open-change-modal" class="inline-flex items-center text-brass hover:text-white transition-colors group">
+                        <svg class="w-5 h-5 mr-2 transform group-hover:-rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="square" stroke-linejoin="miter" stroke-width="1.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                        <span class="border-b border-brass/30 group-hover:border-white">Poproś o poprawki do wyceny</span>
+                    </button>
+                </section>
+
             </div>
-          </div>
 
-          <h3 class="text-xl font-heading text-white mb-6">Wybierz preferowany wariant płatności:</h3>
-          
-          <div class="grid md:grid-cols-2 gap-6" id="payment-options" data-token={token} data-api={apiUrl}>
-            <!-- Opcja 100% -->
-            <button type="button" data-model="100" class="payment-btn w-full text-left p-6 border border-white/10 hover:border-brass transition-colors duration-300 group bg-void/50 h-full flex flex-col">
-              <div class="text-brass font-mono text-xs tracking-widest uppercase mb-4">Opcja 1</div>
-              <h4 class="text-2xl font-heading text-white mb-2">Płatność jednorazowa</h4>
-              <p class="text-steel mb-8 grow">Opłacasz z góry całą kwotę projektu. Gwarantuje to najszybsze rozpoczęcie prac.</p>
-              <div class="text-xl font-heading text-white mb-4">{new Intl.NumberFormat('pl-PL').format(quoteData.proposedPrice)} PLN</div>
-              <div class="inline-flex items-center justify-center w-full bg-white text-void font-bold py-3 px-6 group-hover:bg-brass group-hover:text-white transition-colors btn-text">
-                Opłać całość
-              </div>
-            </button>
+            {/* Prawa kolumna: Płatności */}
+            <div class="lg:col-span-1" id="payment-options" data-token={token} data-api={apiUrl}>
+                <div class="sticky top-32 space-y-6">
+                    <div class="mb-8">
+                        <h2 class="text-sm font-mono text-brass uppercase tracking-widest mb-2">Całkowita wartość</h2>
+                        <div class="text-4xl font-heading text-white line-through opacity-50 mb-1">
+                            {new Intl.NumberFormat('pl-PL').format(fullPrice)} PLN
+                        </div>
+                        <div class="text-sm text-steel">Cena podstawowa (netto)</div>
+                    </div>
 
-            <!-- Opcja 50% -->
-            <button type="button" data-model="50" class="payment-btn w-full text-left p-6 border border-white/10 hover:border-brass transition-colors duration-300 group bg-void/50 h-full flex flex-col">
-              <div class="text-brass font-mono text-xs tracking-widest uppercase mb-4">Opcja 2</div>
-              <h4 class="text-2xl font-heading text-white mb-2">Płatność etapowa (50/30/20)</h4>
-              <p class="text-steel mb-8 grow">Płacisz tylko 50% przed startem projektu. Kolejne wpłaty po wdrożeniu i oddaniu projektu.</p>
-              <div class="text-xl font-heading text-white mb-4">{new Intl.NumberFormat('pl-PL').format(quoteData.proposedPrice / 2)} PLN <span class="text-sm text-steel font-sans font-normal">(I Rata)</span></div>
-              <div class="inline-flex items-center justify-center w-full border border-white text-white font-bold py-3 px-6 group-hover:border-brass group-hover:text-brass transition-colors btn-text">
-                Opłać I ratę (50%)
-              </div>
-            </button>
+                    <!-- Opcja 100% z rabatem -->
+                    <button type="button" data-model="100" class="payment-btn w-full text-left relative p-6 border border-brass bg-brass/5 hover:bg-brass/10 transition-colors duration-300 group flex flex-col overflow-hidden">
+                        <div class="absolute top-0 right-0 bg-brass text-void text-[10px] font-bold px-3 py-1 uppercase tracking-wider">
+                            Rabat 10%
+                        </div>
+                        <h4 class="text-xl font-heading text-white mb-2">Płatność jednorazowa</h4>
+                        <p class="text-steel text-sm mb-6 grow">Opłacasz z góry całą kwotę i otrzymujesz gwarantowany rabat.</p>
+                        <div class="text-3xl font-heading text-brass mb-4">
+                            {new Intl.NumberFormat('pl-PL').format(discountedPrice)} PLN
+                        </div>
+                        <div class="inline-flex items-center justify-center w-full bg-brass text-void font-bold py-3 px-6 hover:brightness-110 transition-all btn-text">
+                            Opłać całość z rabatem
+                        </div>
+                    </button>
+
+                    <!-- Opcja 50% -->
+                    <button type="button" data-model="50" class="payment-btn w-full text-left p-6 border border-white/10 hover:border-white/30 transition-colors duration-300 group bg-surface h-full flex flex-col">
+                        <h4 class="text-xl font-heading text-white mb-2">Płatność etapowa</h4>
+                        <p class="text-steel text-sm mb-6 grow">Rozłożenie inwestycji w czasie (bez rabatu). Płacisz 50% na start.</p>
+                        <div class="text-xl font-heading text-white mb-4">
+                            {new Intl.NumberFormat('pl-PL').format(fullPrice / 2)} PLN <span class="text-xs text-steel font-sans font-normal uppercase tracking-wider block mt-1">Pierwsza Rata</span>
+                        </div>
+                        <div class="inline-flex items-center justify-center w-full border border-white/20 text-white font-bold py-3 px-6 group-hover:border-white transition-colors btn-text">
+                            Opłać I ratę (50%)
+                        </div>
+                    </button>
+                </div>
+            </div>
+
           </div>
-          
         </div>
       )}
     </div>
+
+    <!-- Modal Formularza Zmian -->
+    <div id="change-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-void/80 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300 p-4">
+        <div class="bg-surface border border-white/10 p-8 max-w-lg w-full relative transform scale-95 transition-transform duration-300 shadow-2xl" id="change-modal-content">
+            <button id="close-change-modal" class="absolute top-4 right-4 text-steel hover:text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="square" stroke-linejoin="miter" stroke-width="1.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            
+            <div id="change-form-state">
+                <h3 class="text-2xl font-heading text-white mb-2">Zgłoś poprawki</h3>
+                <p class="text-steel mb-6">Napisz nam, co chciałbyś zmienić w zakresie prac lub wycenie. Przygotujemy nową ofertę.</p>
+                
+                <textarea id="change-message" rows="5" class="w-full bg-void border border-white/10 text-white p-4 focus:outline-none focus:border-brass transition-colors resize-none mb-6" placeholder="Twoje uwagi..."></textarea>
+                
+                <button id="submit-change" class="w-full bg-white text-void font-bold py-3 px-6 hover:bg-brass hover:text-white transition-colors">
+                    Wyślij prośbę o zmiany
+                </button>
+            </div>
+
+            <div id="change-success-state" class="hidden text-center py-8">
+                <div class="w-16 h-16 rounded-full border-2 border-brass flex items-center justify-center mx-auto mb-6 text-brass">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                </div>
+                <h3 class="text-2xl font-heading text-white mb-4">Prośba przyjęta!</h3>
+                <p class="text-steel">Otrzymaliśmy Twoje uwagi. Wprowadzimy je i wkrótce prześlemy nową, zaktualizowaną wersję wyceny na Twój e-mail.</p>
+                <button id="close-success-modal" class="mt-8 border border-white/20 text-white py-2 px-6 hover:border-white transition-colors">
+                    Zamknij
+                </button>
+            </div>
+        </div>
+    </div>
+
   </main>
 </Layout>
 
@@ -92,11 +212,10 @@ try {
     const apiUrl = container.dataset.api;
     const buttons = container.querySelectorAll('.payment-btn');
 
+    // Obsługa Płatności Stripe
     buttons.forEach(btn => {
       btn.addEventListener('click', async (e) => {
         e.preventDefault();
-        
-        // Pokaż loader
         const btnText = btn.querySelector('.btn-text');
         const originalText = btnText.innerHTML;
         btnText.innerHTML = 'Przetwarzanie...';
@@ -113,7 +232,7 @@ try {
 
           const data = await res.json();
           if (data.url) {
-            window.location.href = data.url; // Przekierowanie do Stripe
+            window.location.href = data.url; 
           } else {
             alert('Wystąpił błąd: ' + (data.error || 'Nieznany błąd'));
             btnText.innerHTML = originalText;
@@ -126,5 +245,69 @@ try {
         }
       });
     });
+
+    // Obsługa Modala Zmian
+    const modal = document.getElementById('change-modal');
+    const modalContent = document.getElementById('change-modal-content');
+    const openBtn = document.getElementById('open-change-modal');
+    const closeBtn = document.getElementById('close-change-modal');
+    const submitBtn = document.getElementById('submit-change');
+    const closeSuccessBtn = document.getElementById('close-success-modal');
+    const messageInput = document.getElementById('change-message');
+    
+    const formState = document.getElementById('change-form-state');
+    const successState = document.getElementById('change-success-state');
+
+    const toggleModal = (show) => {
+        if (show) {
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            modalContent.classList.remove('scale-95');
+            modalContent.classList.add('scale-100');
+        } else {
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            modalContent.classList.remove('scale-100');
+            modalContent.classList.add('scale-95');
+        }
+    };
+
+    if(openBtn) openBtn.addEventListener('click', () => toggleModal(true));
+    if(closeBtn) closeBtn.addEventListener('click', () => toggleModal(false));
+    if(closeSuccessBtn) closeSuccessBtn.addEventListener('click', () => toggleModal(false));
+
+    if(submitBtn) {
+        submitBtn.addEventListener('click', async () => {
+            const message = messageInput.value.trim();
+            if(!message) {
+                alert('Proszę wpisać treść uwag.');
+                return;
+            }
+
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = 'Wysyłanie...';
+            submitBtn.disabled = true;
+
+            try {
+                const res = await fetch(`${apiUrl}/api/briefs/request-change/${token}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message })
+                });
+
+                if (res.ok) {
+                    formState.classList.add('hidden');
+                    successState.classList.remove('hidden');
+                } else {
+                    const data = await res.json();
+                    alert('Wystąpił błąd: ' + (data.error || 'Spróbuj ponownie później.'));
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }
+            } catch (err) {
+                alert('Błąd połączenia z serwerem.');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+    }
   });
 </script>
