@@ -12,7 +12,7 @@ let quoteData = null;
 let errorMsg = null;
 
 try {
-  const res = await fetch(`${apiUrl}/api/briefs/quote/${token}`);
+  const res = await fetch(`${apiUrl}/api/quotes/client/${token}`);
   if (res.ok) {
     quoteData = await res.json();
   } else {
@@ -22,10 +22,11 @@ try {
   errorMsg = 'Błąd połączenia z serwerem.';
 }
 
-// projectPlan jest teraz textarea (zwykły tekst), nie richText
-const projectPlanText = quoteData?.projectPlan || '';
-const fullPrice = quoteData?.proposedPrice || 0;
+const blocks = quoteData?.content || [];
+const fullPrice = quoteData?.totalPrice || 0;
 const discountedPrice = Math.round(fullPrice * 0.9);
+const briefCompany = quoteData?.brief?.company || 'Klienta';
+const briefProblem = quoteData?.brief?.problemDescription || '';
 ---
 
 <Layout title="Wycena Projektu - Nobelion" description="Twoja indywidualna wycena projektu.">
@@ -51,7 +52,7 @@ const discountedPrice = Math.round(fullPrice * 0.9);
                 Propozycja Wdrożenia
             </div>
             <h1 class="text-3xl md:text-5xl font-heading font-light tracking-wide text-white mb-4">
-              Wycena dla <span class="text-brass font-normal">{quoteData.company}</span>
+              Wycena dla <span class="text-brass font-normal">{briefCompany}</span>
             </h1>
             <p class="text-steel text-lg max-w-2xl">Zgodnie z naszymi ustaleniami, przedstawiamy dedykowany plan inwestycji oraz szczegóły technologiczne dla Twojego rozwiązania.</p>
           </div>
@@ -62,29 +63,53 @@ const discountedPrice = Math.round(fullPrice * 0.9);
             {/* Lewa kolumna: Opisy */}
             <div class="lg:col-span-2 space-y-12">
                 
-                {/* Plan prac */}
-                {projectPlanText ? (
-                    <section>
-                        <h2 class="text-2xl font-heading text-white mb-6 border-b border-white/10 pb-4">Plan prac i Technologie</h2>
-                        <div class="text-steel leading-relaxed whitespace-pre-wrap">{projectPlanText}</div>
-                    </section>
+                {/* Renderowanie Bloków Payload CMS */}
+                {blocks.length > 0 ? (
+                    blocks.map((block: any) => {
+                        if (block.blockType === 'richText') {
+                            return (
+                                <section class="prose prose-invert max-w-none text-steel leading-relaxed">
+                                    <div set:html={block.text_html || block.text} />
+                                </section>
+                            );
+                        }
+                        if (block.blockType === 'timeline') {
+                            return (
+                                <section class="border-l border-white/10 pl-6 relative">
+                                    <div class="absolute w-3 h-3 bg-brass rounded-full -left-[6.5px] top-1"></div>
+                                    <h3 class="text-xl font-heading text-white mb-3">{block.phaseName}</h3>
+                                    <p class="text-steel whitespace-pre-wrap">{block.description}</p>
+                                </section>
+                            );
+                        }
+                        return null;
+                    })
                 ) : (
                     <section>
                         <h2 class="text-2xl font-heading text-white mb-6 border-b border-white/10 pb-4">Wyzwanie</h2>
-                        <p class="text-steel leading-relaxed">{quoteData.problemDescription}</p>
+                        <p class="text-steel leading-relaxed">{briefProblem}</p>
                     </section>
                 )}
 
                 {/* Utrzymanie */}
-                {quoteData.monthlyMaintenancePrice ? (
+                {quoteData.maintenancePrice ? (
                     <section class="bg-white/5 border border-white/10 p-6 md:p-8 relative overflow-hidden">
                         <div class="absolute top-0 right-0 w-32 h-32 bg-brass/10 rounded-full blur-3xl -mr-10 -mt-10"></div>
                         <h2 class="text-xl font-heading text-white mb-4">Opcjonalne wsparcie i utrzymanie</h2>
                         <div class="text-3xl font-heading text-brass mb-4">
-                            {new Intl.NumberFormat('pl-PL').format(quoteData.monthlyMaintenancePrice)} PLN <span class="text-sm text-steel font-sans font-normal uppercase tracking-wider">/ miesiąc</span>
+                            {new Intl.NumberFormat('pl-PL').format(quoteData.maintenancePrice)} PLN <span class="text-sm text-steel font-sans font-normal uppercase tracking-wider">/ miesiąc</span>
                         </div>
-                        <p class="text-steel mb-4 whitespace-pre-wrap">{quoteData.maintenanceDescription}</p>
-                        <div class="text-sm text-white/50 italic border-l-2 border-white/10 pl-3">Umowa i płatność subskrypcyjna za wsparcie zostaną aktywowane w osobnym procesie dopiero po pełnym wdrożeniu projektu.</div>
+                        <p class="text-steel mb-6 whitespace-pre-wrap">{quoteData.maintenanceDescription}</p>
+                        
+                        <label class="flex items-start gap-4 cursor-pointer p-4 bg-void/50 border border-white/10 hover:border-brass/50 transition-colors">
+                            <div class="pt-1">
+                                <input type="checkbox" id="maintenance-checkbox" class="w-5 h-5 accent-brass bg-void border-white/20" checked={quoteData.clientSelectedMaintenance} />
+                            </div>
+                            <div>
+                                <span class="block text-white font-bold mb-1">Tak, chcę dodać pakiet utrzymania</span>
+                                <span class="block text-sm text-steel">Zaznaczając to pole, deklarujesz chęć nawiązania współpracy abonamentowej. Płatność za utrzymanie zostanie uruchomiona po wdrożeniu projektu w oddzielnym procesie.</span>
+                            </div>
+                        </label>
                     </section>
                 ) : null}
 
@@ -200,7 +225,7 @@ const discountedPrice = Math.round(fullPrice * 0.9);
         const model = btn.dataset.model;
 
         try {
-          const res = await fetch(`${apiUrl}/api/briefs/checkout/${token}`, {
+          const res = await fetch(`${apiUrl}/api/quotes/checkout/${token}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ paymentModel: model })
@@ -221,6 +246,22 @@ const discountedPrice = Math.round(fullPrice * 0.9);
         }
       });
     });
+
+    const maintenanceCheckbox = document.getElementById('maintenance-checkbox');
+    if (maintenanceCheckbox) {
+      maintenanceCheckbox.addEventListener('change', async (e) => {
+        const isChecked = e.target.checked;
+        try {
+          await fetch(`${apiUrl}/api/quotes/client/${token}/maintenance`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ wantsMaintenance: isChecked })
+          });
+        } catch (err) {
+          console.error('Błąd zapisywania wyboru subskrypcji', err);
+        }
+      });
+    }
 
     // Obsługa Modala Zmian
     const modal = document.getElementById('change-modal');
@@ -263,7 +304,7 @@ const discountedPrice = Math.round(fullPrice * 0.9);
             submitBtn.disabled = true;
 
             try {
-                const res = await fetch(`${apiUrl}/api/briefs/request-change/${token}`, {
+                const res = await fetch(`${apiUrl}/api/quotes/request-change/${token}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ message })
