@@ -4,7 +4,8 @@ import Layout from '../../layouts/Layout.astro';
 export const prerender = false; // Musi być SSR żeby pobierać z tokenu
 
 const { token } = Astro.params;
-const apiUrl = import.meta.env.PUBLIC_CMS_URL || 'http://localhost:3001';
+// Ten sam mechanizm URL co w lib/payload.ts — działa na Netlify (process.env) i lokalnie (.env)
+const apiUrl = (process.env.PAYLOAD_API_URL || import.meta.env.PAYLOAD_API_URL || 'http://localhost:3001').replace(/\/$/, '');
 
 let quoteData = null;
 let errorMsg = null;
@@ -20,35 +21,8 @@ try {
   errorMsg = 'Błąd połączenia z serwerem.';
 }
 
-// Funkcja pomocnicza do renderowania bardzo prostego Lexical JSON do HTML
-function renderLexical(nodes: any[]): string {
-    if (!nodes || !Array.isArray(nodes)) return '';
-    return nodes.map(node => {
-        if (node.type === 'text') {
-            let text = node.text || '';
-            if (node.format === 1) text = `<strong>${text}</strong>`;
-            if (node.format === 2) text = `<em>${text}</em>`;
-            if (node.format === 8) text = `<u>${text}</u>`;
-            return text;
-        }
-        if (node.type === 'paragraph') return `<p class="mb-4 text-steel leading-relaxed">${renderLexical(node.children)}</p>`;
-        if (node.type === 'heading') {
-            const tag = `h${node.tag === 'h1' ? '2' : node.tag.replace('h', '')}`; // shift headings down
-            return `<${tag} class="text-white font-heading text-xl mt-6 mb-3">${renderLexical(node.children)}</${tag}>`;
-        }
-        if (node.type === 'list') {
-            const tag = node.listType === 'number' ? 'ol' : 'ul';
-            const listClass = node.listType === 'number' ? 'list-decimal' : 'list-disc';
-            return `<${tag} class="${listClass} ml-5 mb-4 text-steel">${renderLexical(node.children)}</${tag}>`;
-        }
-        if (node.type === 'listitem') return `<li class="mb-1">${renderLexical(node.children)}</li>`;
-        if (node.type === 'quote') return `<blockquote class="border-l-2 border-brass pl-4 italic text-steel/80 my-4">${renderLexical(node.children)}</blockquote>`;
-        if (node.children) return renderLexical(node.children);
-        return '';
-    }).join('');
-}
-
-const projectPlanHtml = quoteData?.projectPlan?.root?.children ? renderLexical(quoteData.projectPlan.root.children) : '';
+// projectPlan jest teraz textarea (zwykły tekst), nie richText
+const projectPlanText = quoteData?.projectPlan || '';
 const fullPrice = quoteData?.proposedPrice || 0;
 const discountedPrice = Math.round(fullPrice * 0.9);
 ---
@@ -70,7 +44,7 @@ const discountedPrice = Math.round(fullPrice * 0.9);
         <div class="bg-surface/50 border border-white/10 shadow-2xl backdrop-blur-md overflow-hidden">
           
           {/* Header */}
-          <div class="p-8 md:p-12 border-b border-white/5 bg-gradient-to-br from-white/[0.02] to-transparent">
+          <div class="p-8 md:p-12 border-b border-white/5 bg-linear-to-br from-white/2 to-transparent">
             <div class="inline-block px-3 py-1 mb-6 border border-brass/30 text-brass text-xs uppercase tracking-widest font-mono">
                 Propozycja Wdrożenia
             </div>
@@ -87,10 +61,10 @@ const discountedPrice = Math.round(fullPrice * 0.9);
             <div class="lg:col-span-2 space-y-12">
                 
                 {/* Plan prac */}
-                {projectPlanHtml ? (
+                {projectPlanText ? (
                     <section>
                         <h2 class="text-2xl font-heading text-white mb-6 border-b border-white/10 pb-4">Plan prac i Technologie</h2>
-                        <div class="prose prose-invert prose-p:text-steel prose-a:text-brass max-w-none" set:html={projectPlanHtml} />
+                        <div class="text-steel leading-relaxed whitespace-pre-wrap">{projectPlanText}</div>
                     </section>
                 ) : (
                     <section>
