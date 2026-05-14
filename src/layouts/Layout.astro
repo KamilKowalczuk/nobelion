@@ -278,14 +278,19 @@ import '@fontsource/jetbrains-mono/400.css';
             const headerLogo = document.getElementById('header-logo');
             const heroBrand = document.getElementById('hero-brand');
 
-            if (headerLogo && heroBrand) {
-                const logoTransferObs = new IntersectionObserver(([entry]) => {
-                    headerLogo.classList.toggle('is-visible', !entry.isIntersecting);
-                }, {
-                    threshold: 0,
-                    rootMargin: '-80px 0px 0px 0px'
-                });
-                logoTransferObs.observe(heroBrand);
+            if (headerLogo) {
+                if (heroBrand) {
+                    const logoTransferObs = new IntersectionObserver(([entry]) => {
+                        headerLogo.classList.toggle('is-visible', !entry.isIntersecting);
+                    }, {
+                        threshold: 0,
+                        rootMargin: '-80px 0px 0px 0px'
+                    });
+                    logoTransferObs.observe(heroBrand);
+                } else {
+                    // Brak hero-brand (np. na podstronach) -> pokaż logo od razu
+                    headerLogo.classList.add('is-visible');
+                }
             }
 
             // === HEADER: aktywny link nawigacji ===
