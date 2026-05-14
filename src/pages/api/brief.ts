@@ -61,13 +61,15 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     // Sanityzacja danych wejściowych przed walidacją (ochrona XSS w Payload admin panel i mailach)
+    // UWAGA: email i phone NIE przechodzą przez sanitize-html — mają własną walidację
+    //         i sanitizer HTML może uszkodzić znaki specjalne (np. @ w adresie email)
     const sanitizedBody: BriefBody = {
         ...body,
         name: sanitizeInput(body.name),
-        email: sanitizeInput(body.email),
-        phone: sanitizeInput(body.phone),
+        email: (body.email || '').trim(),
+        phone: (body.phone || '').trim(),
         company: sanitizeInput(body.company),
-        nip: sanitizeInput(body.nip),
+        nip: (body.nip || '').trim(),
         problem: sanitizeInput(body.problem),
         tools: sanitizeInput(body.tools),
         triedNotes: sanitizeInput(body.triedNotes),
@@ -85,7 +87,7 @@ export const POST: APIRoute = async ({ request }) => {
             phone: sanitizedBody.phone,
             company: sanitizedBody.company,
             nip: sanitizedBody.nip,
-            diagnosis: sanitizedBody.diagnosis || '',
+            diagnosis: sanitizedBody.diagnosis || undefined,
             industry: sanitizedBody.industry || '',
             size: sanitizedBody.size || '',
             tools: sanitizedBody.tools,
@@ -95,8 +97,8 @@ export const POST: APIRoute = async ({ request }) => {
             growsWithScale: sanitizedBody.growsWithScale || '',
             triedBefore: sanitizedBody.triedBefore,
             triedNotes: sanitizedBody.triedNotes,
-            urgency: sanitizedBody.urgency || '',
-            scope: sanitizedBody.scope || '',
+            urgency: sanitizedBody.urgency || undefined,
+            scope: sanitizedBody.scope || undefined,
             budget: sanitizedBody.budget || '',
             agreedPrivacy: !!sanitizedBody.agreedPrivacy,
             agreedTerms: !!sanitizedBody.agreedTerms,
@@ -105,8 +107,9 @@ export const POST: APIRoute = async ({ request }) => {
         });
 
         if (!payloadDoc || payloadDoc.error) {
-            console.error('[brief API] Błąd Payloada:', payloadDoc);
-            // Zwracamy generyczny komunikat, aby nie ujawniać np. struktury bazy
+            console.error('[brief API] Payload FULL response:', JSON.stringify(payloadDoc, null, 2));
+            console.error('[brief API] Payload status:', payloadDoc?.status);
+            console.error('[brief API] Payload body:', payloadDoc?.body);
             return new Response(JSON.stringify({ 
                 error: 'Nie udało się zapisać briefu - odrzucenie po stronie serwera.'
             }), { 
