@@ -21,7 +21,7 @@ import { divisionsData } from '../../data/content';
     </div>
 
     <div class="relative z-10 max-w-7xl mx-auto flex flex-col">
-        {divisionsData.map((item) => (
+        {divisionsData.map((item: { id: string; title: string; description: string }) => (
             <div class="group relative border-t border-white/10 py-8 md:py-12 transition-all duration-500 hover:bg-white/2">
                 
                 <div class="absolute inset-0 bg-linear-to-r from-brass/0 via-brass/[0.02] to-brass/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-2xl pointer-events-none"></div>

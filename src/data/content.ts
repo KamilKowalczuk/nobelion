@@ -202,3 +202,27 @@ export const bentoGridItems = [
     { title: "Szybkość", description: "Maksymalnie zoptymalizowane działanie", icon: "lightning", colSpan: 2 },
     { title: "Skalowalność", description: "Gotowe na dowolny wzrost", icon: "server", colSpan: 1 }
 ];
+
+export interface DivisionItem {
+    id: string;
+    title: string;
+    description: string;
+}
+
+export const divisionsData: DivisionItem[] = [
+    {
+        id: "01",
+        title: "SYSTEMS",
+        description: "Projektowanie i wdrażanie dedykowanych systemów operacyjnych oraz aplikacji webowych, które zastępują manualną pracę wielu osób."
+    },
+    {
+        id: "02",
+        title: "FLOWS",
+        description: "Orkiestracja procesów biznesowych i integracje API za pomocą narzędzi low-code / no-code (n8n, make.com) bez niepotrzebnych kosztów licencyjnych."
+    },
+    {
+        id: "03",
+        title: "AGENTS",
+        description: "Implementacja autonomicznych agentów AI i modeli LLM wykonujących zaawansowane zadania analityczne, komunikacyjne oraz research."
+    }
+];

@@ -126,7 +126,7 @@ import { servicesData, capabilitiesData } from '../../data/content';
           <span class="nb-showcase__dots"><i></i><i></i><i></i></span>
           <span class="nb-showcase__skeleton"><b></b></span>
         </div>
-        <div class="nb-showcase__img">screenshot placeholder</div>
+        <img class="nb-showcase__img" src="/example_of_system.png" alt="Dedykowany system operacyjny dla firmy" loading="lazy" />
       </div>
     </div>
 
@@ -302,17 +302,11 @@ import { servicesData, capabilitiesData } from '../../data/content';
   background: rgba(255, 255, 255, 0.10);
 }
 .nb-showcase__img {
-  display: flex;
+  display: block;
   width: 100%;
   height: clamp(300px, 30vw, 460px);
-  background: var(--color-paper-3);
-  color: var(--color-ink-3);
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-mono);
-  font-size: 14px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  object-fit: cover;
+  object-position: top center;
 }
 
 /* ── Responsive ── */
