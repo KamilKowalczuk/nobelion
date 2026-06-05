@@ -15,7 +15,7 @@
         /* Styl bazowy - Ciemne szkło, spójne z Bento */
         bg-surface/30 backdrop-blur-md
         border border-white/10
-        focus:outline-none focus:ring-0 interactive cursor-none
+        focus:outline-none focus:ring-0  
         transition-all duration-500 ease-out
         /* Hover: Złota ramka i delikatne uniesienie */
         hover:border-brass/80 hover:bg-surface/50 hover:shadow-[0_0_40px_-10px_rgba(197,160,89,0.15)]

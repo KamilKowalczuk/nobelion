@@ -43,7 +43,7 @@
 
 <div 
     bind:this={svgContainer} 
-    class="relative z-10 mb-12 interactive transform hover:scale-105 transition-transform duration-500 w-48 h-48 md:w-64 md:h-64 flex items-center justify-center"
+    class="relative z-10 mb-12  transform hover:scale-105 transition-transform duration-500 w-48 h-48 md:w-64 md:h-64 flex items-center justify-center"
 >
     <svg width="100%" height="100%" viewBox="0 0 8534 8534" version="1.1" xmlns="http://www.w3.org/2000/svg" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
         <g>

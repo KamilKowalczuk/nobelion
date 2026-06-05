@@ -1,80 +1,112 @@
 ---
 import { audienceData } from '../../data/content';
-import AudienceMonogram from '../decorations/AudienceMonogram.astro';
-import GeometricGrid from '../decorations/GeometricGrid.svelte';
 ---
 
-<section
-    id="audience"
-    class="relative w-full py-24 md:py-40 px-4 md:px-12 lg:px-24 bg-void z-10 border-t border-white/5 overflow-hidden"
->
-    <!-- Animowana siatka geometryczna w tle -->
-    <GeometricGrid client:visible columns={14} rows={8} opacity={0.06} density={0.15} />
-
-    <div class="relative max-w-7xl mx-auto">
-        <header class="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 mb-16 md:mb-24 pb-8 border-b border-white/10">
-            <div class="md:col-span-7">
-                <span class="block text-brass font-mono text-xs tracking-[0.3em] uppercase mb-4">
-                    {audienceData.sectionLabel}
-                </span>
-                <h2 class="font-heading font-bold text-silver tracking-cinematic uppercase leading-[0.9] text-[clamp(2.5rem,7vw,5.5rem)]">
-                    {audienceData.heading}
-                </h2>
-            </div>
-            <p class="md:col-span-5 text-steel font-sans text-base md:text-lg leading-relaxed self-end max-w-md md:ml-auto">
-                {audienceData.subheading}
-            </p>
-        </header>
-
-        <!-- 6 segmentów (3x2 grid) -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-px bg-white/5">
-            {audienceData.segments.map((segment) => (
-                <article class="audience-card group relative bg-void p-8 md:p-10 transition-colors duration-200 ease-out hover:bg-surface min-h-[18rem] flex flex-col">
-                    <!-- Header karty: monogram + numer w jednej linii -->
-                    <div class="flex items-center justify-between mb-8">
-                        <div class="audience-monogram-wrap transition-transform duration-300 ease-out group-hover:scale-110 origin-left">
-                            <AudienceMonogram segment={segment.name} size={56} />
-                        </div>
-                        <span
-                            class="font-mono text-brass/40 text-xs tracking-widest transition-colors duration-200 ease-out group-hover:text-brass"
-                            aria-hidden="true"
-                        >
-                            {segment.number}
-                        </span>
-                    </div>
-
-                    <h3 class="font-heading text-silver text-xl md:text-2xl tracking-cinematic uppercase leading-tight mb-4 transition-colors duration-200 ease-out group-hover:text-white">
-                        {segment.name}
-                    </h3>
-
-                    <p class="font-sans text-steel text-sm md:text-base leading-relaxed flex-1">
-                        {segment.typical}
-                    </p>
-                </article>
-            ))}
-        </div>
-
-        <!-- Closing line -->
-        <div class="mt-16 md:mt-20 text-center">
-            <p class="font-heading text-silver text-lg md:text-xl mb-6 max-w-xl mx-auto">
-                {audienceData.closing}
-            </p>
-            <a
-                href="#brief"
-                class="audience-cta interactive cursor-none group inline-flex items-center gap-3 text-brass font-mono text-xs tracking-[0.3em] uppercase transition-colors duration-200 ease-out hover:text-brass-light"
-            >
-                <span class="inline-block w-8 h-px bg-brass transition-all duration-200 ease-out group-hover:w-12 group-hover:bg-brass-light"></span>
-                <span>WYPEŁNIJ BRIEF</span>
-                <span aria-hidden="true" class="transition-transform duration-200 ease-out group-hover:translate-x-1">→</span>
-            </a>
-        </div>
+<section id="audience" class="section nb-panel bg-paper">
+  <div class="wrap">
+    <div class="nb-sec-head">
+      <span class="eyebrow">{audienceData.sectionLabel}</span>
+      <h2 class="h2 nb-sec-head__title">{audienceData.heading}</h2>
+      <p class="lead nb-sec-head__body">{audienceData.subheading}</p>
     </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-px bg-paper-edge border border-paper-edge">
+      {audienceData.segments.map((segment) => (
+        <article class="audience-card">
+          <div class="flex justify-between items-start mb-8">
+            <span class="audience-card__num">{segment.number}</span>
+          </div>
+          <h3 class="h3 audience-card__title">{segment.name}</h3>
+          <p class="audience-card__desc">{segment.typical}</p>
+        </article>
+      ))}
+    </div>
+
+    <div class="mt-16 text-center">
+        <p class="font-heading text-xl mb-8">{audienceData.closing}</p>
+        <a href="#brief" class="nb-btn nb-btn--ghost nb-btn--lg">
+            <span class="nb-btn__label">WYPEŁNIJ BRIEF</span>
+        </a>
+    </div>
+  </div>
 </section>
 
 <style>
-    .audience-card { will-change: background-color; }
-    .audience-cta:focus-visible {
-        outline: 1px solid var(--color-brass, #C5A059);
-        outline-offset: 6px;
-    }
+/* ---------------- AUDIENCE ---------------- */
+.audience-card {
+  background: var(--color-paper-2);
+  padding: 40px;
+  min-height: 240px;
+  transition: background 300ms;
+}
+.audience-card:hover {
+  background: var(--color-paper-3);
+}
+.audience-card__num {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-brass);
+  letter-spacing: 0.2em;
+}
+.audience-card__title {
+  font-size: 20px;
+  margin: 0 0 16px;
+  color: var(--color-ink);
+}
+.audience-card__desc {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--color-ink-3);
+}
+
+.nb-sec-head {
+  max-width: 680px;
+  margin-bottom: clamp(48px, 6vw, 76px);
+}
+.nb-sec-head__title {
+  margin: 18px 0 0;
+  font-size: clamp(30px, 3.6vw, 52px);
+  font-weight: 700;
+}
+.nb-sec-head__body {
+  margin-top: 22px;
+  font-size: clamp(18px, 1.6vw, 22px);
+  line-height: 1.55;
+  color: var(--color-ink-2);
+}
+
+.nb-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 300ms cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+  text-decoration: none;
+}
+.nb-btn--lg { font-size: 13.5px; padding: 17px 30px; }
+.nb-btn--ghost {
+  background: transparent;
+  color: var(--color-ink);
+  border-color: rgba(21, 23, 29, 0.10);
+}
+.nb-btn--ghost:hover {
+  border-color: var(--color-brass);
+  color: var(--color-brass);
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--color-brass);
+}
 </style>

@@ -1,6 +1,5 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import MagneticCursor from '../../components/core/MagneticCursor.svelte';
 
 export const prerender = false; // Musi być SSR żeby pobierać z tokenu
 
@@ -30,7 +29,6 @@ const briefProblem = quoteData?.brief?.problemDescription || '';
 ---
 
 <Layout title="Wycena Projektu - Nobelion" description="Twoja indywidualna wycena projektu.">
-  <MagneticCursor client:load />
   <main class="min-h-screen bg-void pt-32 pb-24 px-4 md:px-12 selection:bg-brass/30 selection:text-white relative">
     <!-- Grid tła -->
     <div class="fixed inset-0 pointer-events-none opacity-[0.03] z-0" aria-hidden="true">

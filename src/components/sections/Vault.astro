@@ -1,119 +1,159 @@
 ---
-import { contactData, siteConfig } from '../../data/content';
+import { securityData, contactData, navigation } from '../../data/content';
+
+// Vault — Security section + Footer (all in DARK onyx)
 ---
 
-<footer id="vault" class="relative bg-void border-t border-white/10 pt-20 md:pt-28 overflow-hidden z-10">
-
-    <div class="relative z-10 max-w-7xl mx-auto px-4 md:px-12 mb-20 md:mb-28">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-start">
-
-            <!-- LEWA: kontakt jako mocna sygnatura -->
-            <div class="lg:col-span-7 flex flex-col justify-start">
-                <span class="block text-brass font-mono text-xs tracking-[0.3em] uppercase mb-4">
-                    {contactData.cta}
-                </span>
-                <p class="font-heading text-steel text-lg md:text-xl mb-6 max-w-md">
-                    {contactData.subCta}
-                </p>
-
-                <a
-                    href={`mailto:${siteConfig.email}`}
-                    class="vault-mail interactive cursor-none group inline-flex items-center gap-4 self-start"
-                    aria-label={`Wyślij email na ${siteConfig.email}`}
-                >
-                    <span class="font-heading text-silver text-2xl md:text-4xl lg:text-5xl tracking-wider transition-colors duration-200 ease-out group-hover:text-brass">
-                        {contactData.buttonLabel}
-                    </span>
-                    <span aria-hidden="true" class="text-brass text-2xl transition-transform duration-200 ease-out group-hover:translate-x-1">→</span>
-                </a>
-
-                <div class="mt-10 pt-8 border-t border-white/10 max-w-md">
-                    <p class="font-mono text-steel text-xs tracking-widest uppercase">
-                        ALBO WYPEŁNIJ BRIEF, SZYBCIEJ.
-                        <a href="#brief" class="text-brass hover:text-brass-light transition-colors duration-200 ease-out interactive cursor-none ml-2">
-                            ZACZNIJ →
-                        </a>
-                    </p>
-                </div>
-            </div>
-
-            <!-- PRAWA: dane firmy w mosiężnym box -->
-            <aside class="lg:col-span-5 relative">
-                <div class="relative bg-surface/30 backdrop-blur-sm p-6 md:p-8 border border-brass/20">
-                    <h3 class="text-base md:text-lg font-heading text-white mb-6 tracking-widest">
-                        {contactData.companyName}
-                    </h3>
-
-                    <dl class="space-y-3 font-mono text-xs md:text-sm">
-                        {contactData.details.map((item) => (
-                            <div class="flex justify-between items-end border-b border-white/5 pb-1.5">
-                                <dt class="text-steel/90">{item.label}</dt>
-                                <dd class="text-silver tracking-wider select-all text-right ml-4">{item.value}</dd>
-                            </div>
-                        ))}
-                    </dl>
-                </div>
-            </aside>
-
-        </div>
+<div class="onyx nb-vault-wrapper">
+  <!-- SECURITY SECTION -->
+  <section id="security" class="nb-panel nb-panel--dark nb-security overflow-visible">
+    <div class="wrap nb-security__inner">
+      <div class="nb-security__head">
+        <span class="eyebrow">{securityData.sectionLabel}</span>
+        <h2 class="h2">{securityData.heading}</h2>
+        <p class="lead nb-security__body">{securityData.subheading}</p>
+      </div>
+      <div class="nb-security__grid">
+        {securityData.items.map((s, i) => (
+          <div class="nb-sec-card">
+            <span class="nb-sec-card__icon">
+               {s.icon === 'lock' && <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.15" stroke-linecap="square" stroke-linejoin="miter"><rect x="4" y="10" width="16" height="11"/><path d="M8 10 V7 a4 4 0 0 1 8 0 V10"/></svg>}
+               {s.icon === 'shield' && <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.15" stroke-linecap="square" stroke-linejoin="miter"><path d="M12 2 L20 5 V11 C20 16 16.5 19.5 12 22 C7.5 19.5 4 16 4 11 V5 Z"/><path d="M8.5 11.5 L11 14 L15.5 9"/></svg>}
+               {s.icon === 'diamond' && <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.15" stroke-linecap="square" stroke-linejoin="miter"><path d="M12 2 L22 9 L12 22 L2 9 Z M2 9 H22 M8.5 9 L12 2 M15.5 9 L12 2 M12 22 L8.5 9 M12 22 L15.5 9"/></svg>}
+               {s.icon === 'server' && <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.15" stroke-linecap="square" stroke-linejoin="miter"><rect x="3" y="4" width="18" height="7"/><rect x="3" y="13" width="18" height="7"/><path d="M7 7.5 h.01 M7 16.5 h.01"/></svg>}
+            </span>
+            <h3 class="nb-sec-card__title h4">{s.title}</h3>
+            <p class="nb-sec-card__desc">{s.desc}</p>
+          </div>
+        ))}
+      </div>
     </div>
+  </section>
 
-    <!-- Stopka prawna + dekoracja typograficzna -->
-    <div class="relative w-full border-t border-white/10 bg-surface/10">
-
-        <!-- Wielki dekoracyjny napis NOBELION (atmosferyczny ślad) -->
-        <div class="absolute inset-0 overflow-hidden pointer-events-none flex items-center justify-center">
-            <h2 class="text-[clamp(8rem,18vw,22rem)] font-heading font-bold text-center text-white tracking-tighter leading-[0.75] opacity-[0.04] select-none">
-                NOBELION
-            </h2>
+  <!-- FOOTER SECTION -->
+  <footer id="vault" class="nb-footer bg-onyx border-t border-white/5">
+    <div class="wrap nb-footer__inner">
+      <div class="nb-footer__top">
+        <div class="nb-footer__brand">
+          <img src="/logo-icon.png" alt="" class="nb-footer__mark"/>
+          <div>
+            <div class="nb-footer__word">Nobelion</div>
+            <p class="nb-footer__tag mono">Architekci automatyzacji</p>
+          </div>
         </div>
+        <a href="#brief" class="nb-footer__cta">
+          <span>Wypełnij brief</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="square" stroke-linejoin="miter">
+            <path d="M5 12 H19 M13 6 L19 12 L13 18" />
+          </svg>
+        </a>
+      </div>
 
-        <div class="relative z-10 max-w-7xl mx-auto px-4 md:px-12 py-10 flex flex-col md:flex-row justify-between items-center text-[10px] font-mono text-steel/90 uppercase tracking-widest gap-6 md:gap-0">
-            <p class="text-center md:text-left">
-                © {new Date().getFullYear()} NOBELION SP. Z O.O. WSZELKIE PRAWA ZASTRZEŻONE.
-            </p>
-
-            <div class="flex flex-wrap justify-center gap-6 md:gap-8">
-                <button
-                    id="open-privacy"
-                    class="vault-legal interactive cursor-none transition-colors duration-200 ease-out"
-                >
-                    Polityka Prywatności
-                </button>
-                <button
-                    id="open-terms"
-                    class="vault-legal interactive cursor-none transition-colors duration-200 ease-out"
-                >
-                    Regulamin
-                </button>
-                <button
-                    id="open-rodo"
-                    class="vault-legal interactive cursor-none transition-colors duration-200 ease-out"
-                >
-                    RODO
-                </button>
-            </div>
+      <div class="nb-footer__grid">
+        <div class="nb-footer__col">
+          <span class="caption nb-footer__h">Nawigacja</span>
+          {navigation.map(n=>(<a href={n.href} class="nb-footer__link">{n.label}</a>))}
         </div>
+        <div class="nb-footer__col nb-footer__col--data">
+          <span class="caption nb-footer__h">{contactData.company}</span>
+          <div class="nb-footer__rows">
+            {contactData.rows.map(r=>(
+              <div class="nb-footer__row">
+                <span class="nb-footer__rk mono">{r.k}</span>
+                <span class="nb-footer__rv">{r.v}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div class="nb-footer__legal">
+        <span class="caption">© {new Date().getFullYear()} Nobelion Sp. z o.o.</span>
+        <div class="nb-footer__legal-links">
+          <button id="open-privacy-footer" class="caption">Polityka prywatności</button>
+          <button id="open-terms-footer" class="caption">Regulamin</button>
+        </div>
+      </div>
     </div>
-</footer>
+  </footer>
+</div>
 
 <style>
-    .vault-mail:focus-visible {
-        outline: 1px solid var(--color-brass, #C5A059);
-        outline-offset: 8px;
-    }
-    .vault-legal {
-        color: var(--color-steel, #94A3B8);
-        opacity: 0.6;
-        position: relative;
-    }
-    .vault-legal:hover,
-    .vault-legal:focus-visible {
-        color: var(--color-brass, #C5A059);
-        opacity: 1;
-    }
-    .vault-legal:focus-visible {
-        outline: 1px solid var(--color-brass, #C5A059);
-        outline-offset: 4px;
-    }
+.nb-vault-wrapper { background-color: var(--color-onyx); position: relative; z-index: 2; margin-top: -30px; }
+
+/* ---------------- SECURITY ---------------- */
+.nb-security__inner{padding-top:clamp(80px,9vw,130px);padding-bottom:clamp(80px,9vw,130px);position:relative;}
+.nb-security__inner::before{content:"";position:absolute;width:520px;height:520px;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,rgba(197,160,89,0.10),transparent 62%); bottom:-160px;left:-120px;}
+
+.nb-security__head{max-width:640px;margin-bottom:56px;}
+.nb-security__head .h2{margin-top:14px; font-size: clamp(30px, 3.6vw, 52px); font-weight: 700; color: var(--color-silver);}
+.nb-security__body{margin-top:20px;color:var(--color-silver-soft);}
+
+.nb-security__grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.08);}
+
+.nb-sec-card{background:var(--color-onyx);padding:36px 28px;transition:background 300ms;}
+.nb-sec-card:hover{background:var(--color-surface);}
+.nb-sec-card__icon{display:inline-flex;width:50px;height:50px;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.08);color:var(--color-brass-bright);margin-bottom:22px;}
+.nb-sec-card__title{margin:0 0 12px;color:var(--color-silver); font-size: 19px; font-weight: 600;}
+.nb-sec-card__desc{font-size:14px;line-height:1.62;color:var(--color-steel);margin:0;}
+
+/* ---------------- FOOTER ---------------- */
+.nb-footer{padding-top:clamp(64px,7vw,90px);padding-bottom:40px; background-color: var(--color-onyx); color: var(--color-silver);}
+.nb-footer__top{display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;padding-bottom:48px;border-bottom:1px solid rgba(255,255,255,0.08);}
+.nb-footer__brand{display:flex;align-items:center;gap:16px;}
+.nb-footer__mark{width:56px;height:56px;}
+.nb-footer__word{font-family:var(--font-heading);font-weight:700;font-size:24px;letter-spacing:0.16em;text-transform:uppercase;color:var(--color-silver);}
+.nb-footer__tag{margin:4px 0 0;color:var(--color-steel);font-size:12px;letter-spacing:0.16em;text-transform:uppercase;}
+
+.nb-footer__cta{display:inline-flex;align-items:center;gap:12px;white-space:nowrap;font-family:var(--font-mono);font-size:13px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-brass-bright);border:1px solid rgba(255,255,255,0.08);padding:16px 26px;transition:all 300ms; text-decoration: none;}
+.nb-footer__cta:hover{border-color:var(--color-brass-bright);color:#fff;}
+
+.nb-footer__grid{display:grid;grid-template-columns:1fr 2fr;gap:48px;padding:48px 0;}
+.nb-footer__h{display:block;color:var(--color-steel-dim);margin-bottom:20px;}
+.nb-footer__col{display:flex;flex-direction:column;gap:2px;}
+.nb-footer__link{font-family:var(--font-mono);font-size:14px;color:var(--color-silver-soft);padding:7px 0;transition:color 180ms;width:fit-content; text-decoration: none;}
+.nb-footer__link:hover{color:var(--color-brass-bright);}
+
+.nb-footer__rows{display:grid;grid-template-columns:1fr 1fr;gap:18px 40px;}
+.nb-footer__row{display:flex;flex-direction:column;gap:5px;}
+.nb-footer__rk{font-family: var(--font-mono); font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-steel-dim);}
+.nb-footer__rv{font-size:14px;color:var(--color-silver-soft);}
+
+.nb-footer__legal{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;padding-top:32px;border-top:1px solid rgba(255,255,255,0.08);}
+.nb-footer__legal .caption{color:var(--color-steel-dim);}
+.nb-footer__legal-links{display:flex;gap:28px;}
+.nb-footer__legal-links button{background: none; border: none; cursor: pointer; color:var(--color-steel);transition:color 180ms; padding: 0;}
+.nb-footer__legal-links button:hover{color:var(--color-brass-bright);}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--color-brass-bright);
+}
+.caption {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+@media(max-width:880px){.nb-security__grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:520px){.nb-security__grid{grid-template-columns:1fr;}}
+@media(max-width:760px){.nb-footer__grid{grid-template-columns:1fr;gap:36px;}.nb-footer__rows{grid-template-columns:1fr;}}
 </style>
+
+<script>
+    const privacyBtn = document.getElementById('open-privacy-footer');
+    const termsBtn = document.getElementById('open-terms-footer');
+    
+    privacyBtn?.addEventListener('click', () => {
+        document.getElementById('open-privacy')?.click();
+    });
+    termsBtn?.addEventListener('click', () => {
+        document.getElementById('open-terms')?.click();
+    });
+</script>

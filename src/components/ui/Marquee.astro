@@ -1,0 +1,26 @@
+---
+import { marqueeWords } from '../../data/content';
+
+const row = [...marqueeWords, ...marqueeWords, ...marqueeWords];
+---
+
+<div class="nb-marquee" aria-hidden="true">
+  <div class="nb-marquee__track">
+    {row.map((w) => (
+      <span class="nb-marquee__item">
+        <span class="nb-marquee__word">{w}</span>
+        <span class="nb-marquee__sep"></span>
+      </span>
+    ))}
+  </div>
+</div>
+
+<style>
+/* ---------------- MARQUEE ---------------- */
+.nb-marquee{background:var(--color-ink);overflow:hidden;padding:24px 0 64px;position:relative;}
+.nb-marquee__track{display:flex;width:max-content;animation:marquee 38s linear infinite;}
+.nb-marquee__item{display:inline-flex;align-items:center;}
+.nb-marquee__word{font-family:var(--font-heading);font-weight:600;font-size:16px;letter-spacing:0.18em;text-transform:uppercase;color:var(--color-silver-soft);}
+.nb-marquee__sep{width:7px;height:7px;margin:0 34px;background:var(--color-brass-bright);transform:rotate(45deg);opacity:0.85;}
+@keyframes marquee{to{transform:translateX(-33.33%);}}
+</style>

@@ -1,86 +1,144 @@
 ---
-import { examplesData } from '../../data/content';
-import GeometricGrid from '../decorations/GeometricGrid.svelte';
+import { examplesData, marqueeWords } from '../../data/content';
+
+const row = [...marqueeWords, ...marqueeWords, ...marqueeWords];
 ---
 
-<section
-    id="examples"
-    class="relative w-full py-24 md:py-40 px-4 md:px-12 lg:px-24 bg-void z-10 border-t border-white/5 overflow-hidden"
->
-    <!-- Subtelny diagonal pattern w tle (warstwa 1) -->
-    <div
-        class="absolute inset-0 pointer-events-none opacity-[0.025]"
-        style="background-image: repeating-linear-gradient(45deg, transparent, transparent 7px, #ffffff 7px, #ffffff 8px);"
-    ></div>
-
-    <!-- Animowana siatka geometryczna (warstwa 2) -->
-    <GeometricGrid client:visible columns={20} rows={12} opacity={0.04} density={0.08} />
-
-    <div class="relative max-w-7xl mx-auto">
-        <header class="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 mb-16 md:mb-24 pb-8 border-b border-white/10">
-            <div class="md:col-span-7">
-                <span class="block text-brass font-mono text-xs tracking-[0.3em] uppercase mb-4">
-                    {examplesData.sectionLabel}
-                </span>
-                <h2 class="font-heading font-bold text-silver tracking-cinematic uppercase leading-[0.9] text-[clamp(2.25rem,6vw,5rem)]">
-                    {examplesData.heading}
-                </h2>
-            </div>
-            <p class="md:col-span-5 text-steel font-sans text-base md:text-lg leading-relaxed self-end max-w-md md:ml-auto">
-                {examplesData.subheading}
-            </p>
-        </header>
-
-        <!-- Grid 9 przykładów (3x3 desktop, 1 col mobile) -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-px bg-white/5">
-            {examplesData.items.map((item) => (
-                <article class="example-card group relative bg-void p-6 md:p-8 transition-colors duration-200 ease-out hover:bg-surface min-h-[12rem] md:min-h-[14rem] flex flex-col justify-between">
-                    <!-- Tag branży -->
-                    <span class="font-mono text-[10px] md:text-[11px] text-brass tracking-[0.3em] uppercase">
-                        {item.tag}
-                    </span>
-
-                    <!-- Tytuł automatyzacji (główna treść karty) -->
-                    <h3 class="font-heading text-silver text-base md:text-lg leading-snug mt-4 mb-6 transition-colors duration-200 ease-out group-hover:text-white">
-                        {item.title}
-                    </h3>
-
-                    <!-- Mosiężna strzałka w prawym dolnym rogu -->
-                    <div class="flex justify-end">
-                        <span
-                            aria-hidden="true"
-                            class="text-brass/40 text-lg transition-all duration-200 ease-out group-hover:text-brass group-hover:translate-x-1 inline-block"
-                        >
-                            →
-                        </span>
-                    </div>
-                </article>
-            ))}
-        </div>
-
-        <!-- Closing line + pull CTA -->
-        <div class="mt-16 md:mt-20 text-center">
-            <p class="font-heading text-silver text-xl md:text-2xl mb-6 max-w-2xl mx-auto">
-                {examplesData.closing}
-            </p>
-            <a
-                href="#brief"
-                class="examples-cta interactive cursor-none group inline-flex items-center gap-3 text-brass font-mono text-xs tracking-[0.3em] uppercase transition-colors duration-200 ease-out hover:text-brass-light"
-            >
-                <span class="inline-block w-8 h-px bg-brass transition-all duration-200 ease-out group-hover:w-12 group-hover:bg-brass-light"></span>
-                <span>OPISZ SWÓJ POMYSŁ W BRIEFIE</span>
-                <span aria-hidden="true" class="transition-transform duration-200 ease-out group-hover:translate-x-1">→</span>
-            </a>
-        </div>
+<section id="examples" class="section nb-panel bg-paper">
+  <div class="wrap">
+    <div class="nb-sec-head">
+      <span class="eyebrow">{examplesData.sectionLabel}</span>
+      <h2 class="h2 nb-sec-head__title">{examplesData.heading}</h2>
+      <p class="lead nb-sec-head__body">{examplesData.subheading}</p>
     </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-px bg-paper-edge border border-paper-edge">
+      {examplesData.items.map((item) => (
+        <article class="example-card">
+          <span class="nb-tag mb-4 inline-block">{item.tag}</span>
+          <h3 class="h3 example-card__title">{item.title}</h3>
+          <div class="example-card__arrow">→</div>
+        </article>
+      ))}
+    </div>
+
+    <div class="mt-16 text-center">
+        <p class="font-heading text-xl mb-8">{examplesData.closing}</p>
+        <a href="#brief" class="nb-btn nb-btn--primary nb-btn--lg nb-btn--corner">
+            <span class="nb-corner tl"></span><span class="nb-corner tr"></span><span class="nb-corner bl"></span><span class="nb-corner br"></span>
+            <span class="nb-btn__label">OPISZ SWÓJ POMYSŁ</span>
+        </a>
+    </div>
+  </div>
 </section>
 
 <style>
-    .example-card {
-        will-change: background-color;
-    }
-    .examples-cta:focus-visible {
-        outline: 1px solid var(--color-brass, #C5A059);
-        outline-offset: 6px;
-    }
+/* ---------------- MARQUEE ---------------- */
+.nb-marquee{background:var(--color-onyx);overflow:hidden;padding:20px 0 64px;border-top:1px solid rgba(255,255,255,0.06);position:relative;z-index:0;}
+.nb-marquee__track{display:flex;width:max-content;animation:marquee 38s linear infinite;}
+.nb-marquee__item{display:inline-flex;align-items:center;}
+.nb-marquee__word{font-family:var(--font-heading);font-weight:600;font-size:16px;letter-spacing:0.18em;text-transform:uppercase;color:var(--color-silver-soft);}
+.nb-marquee__sep{width:7px;height:7px;margin:0 34px;background:var(--color-brass-bright);transform:rotate(45deg);opacity:0.85;}
+@keyframes marquee{to{transform:translateX(-33.33%);}}
+
+/* ---------------- EXAMPLES ---------------- */
+.example-card {
+  background: var(--color-paper-2);
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 200px;
+  transition: background 300ms;
+}
+.example-card:hover {
+  background: var(--color-paper-3);
+}
+.example-card__title {
+  font-size: 18px;
+  letter-spacing: 0.04em;
+  margin: 0;
+  color: var(--color-ink);
+}
+.example-card__arrow {
+  margin-top: 24px;
+  color: var(--color-brass);
+  font-size: 20px;
+  text-align: right;
+  opacity: 0.4;
+  transition: transform 300ms, opacity 300ms;
+}
+.example-card:hover .example-card__arrow {
+  transform: translateX(4px);
+  opacity: 1;
+}
+
+.nb-tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-ink-3);
+  border: 1px solid rgba(21, 23, 29, 0.10);
+  padding: 4px 8px;
+}
+
+.nb-sec-head {
+  max-width: 680px;
+  margin-bottom: clamp(48px, 6vw, 76px);
+}
+.nb-sec-head__title {
+  margin: 18px 0 0;
+  font-size: clamp(30px, 3.6vw, 52px);
+  font-weight: 700;
+}
+.nb-sec-head__body {
+  margin-top: 22px;
+  font-size: clamp(18px, 1.6vw, 22px);
+  line-height: 1.55;
+  color: var(--color-ink-2);
+}
+
+.nb-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 300ms cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+  text-decoration: none;
+}
+.nb-btn--lg { font-size: 13.5px; padding: 17px 30px; }
+.nb-btn--primary {
+  background: var(--color-brass-bright);
+  color: var(--color-void);
+}
+.nb-btn--primary:hover {
+  background: var(--color-brass-light);
+  box-shadow: 0 12px 32px -10px rgba(197, 160, 89, 0.35);
+}
+
+/* corner marks */
+.nb-btn--corner .nb-corner {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-color: currentColor;
+  opacity: 0;
+  transition: opacity 300ms;
+}
+.nb-btn--corner.nb-btn--primary .nb-corner {
+  border-color: var(--color-void);
+}
+.nb-corner.tl { top: 3px; left: 3px; border-top: 1px solid; border-left: 1px solid; }
+.nb-corner.tr { top: 3px; right: 3px; border-top: 1px solid; border-right: 1px solid; }
+.nb-corner.bl { bottom: 3px; left: 3px; border-bottom: 1px solid; border-left: 1px solid; }
+.nb-corner.br { bottom: 3px; right: 3px; border-bottom: 1px solid; border-right: 1px solid; }
+.nb-btn--corner:hover .nb-corner { opacity: 0.6; }
 </style>

@@ -14,7 +14,7 @@
 <div class="border-b border-white/10">
     <button 
         onclick={onToggle}
-        class="w-full py-8 flex items-center justify-between text-left group focus:outline-none interactive cursor-none"
+        class="w-full py-8 flex items-center justify-between text-left group focus:outline-none  "
     >
         <div class="flex items-center gap-6">
             <div class={`w-1.5 h-1.5 transition-colors duration-300 ${isOpen ? 'bg-brass shadow-[0_0_8px_#C5A059]' : 'bg-steel/30 group-hover:bg-brass'}`}></div>

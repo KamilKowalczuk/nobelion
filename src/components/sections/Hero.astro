@@ -1,165 +1,409 @@
 ---
 import { heroData } from '../../data/content';
-import CinematicText from '../ui/CinematicText.svelte';
-import AnimatedLogo from '../ui/AnimatedLogo.svelte';
+
+// Hero — dark onyx anchor (Split editorial variant).
+// Built to match the Nobelion Light/Onyx design prototype.
 ---
 
-<section
-    id="hero"
-    class="relative min-h-screen w-full flex flex-col items-center justify-center overflow-hidden border-b border-surface/50 px-4 py-16 md:py-20"
->
-    <!-- Tło: radialne źródło światła + subtelna siatka -->
-    <div
-        class="absolute inset-0 -z-10"
-        style="background: radial-gradient(circle at 50% 40%, #0B101C 0%, #050505 70%);"
-    >
-        <div
-            class="absolute inset-0 opacity-10"
-            style="background-image: linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px); background-size: 100px 100px;"
-        >
-        </div>
+<section id="hero" class="onyx hero">
+  <div class="hero-bg" aria-hidden="true">
+    <div class="hero-glow"></div>
+    <div class="hero-grid"></div>
+  </div>
+
+  <div class="wrap hero-inner hero-split">
+    <!-- LEFT COL — copy + actions -->
+    <div class="hero-col-main">
+      <div class="hero-eyebrow">
+        <span class="hero-dot"></span>
+        <span class="eyebrow">{heroData.microTagline}</span>
+      </div>
+
+      <h1 id="hero-title" class="hero-title">
+        <span class="ln"><span class="w">{heroData.line1}</span></span>
+        <span class="ln"><span class="w">{heroData.line2}</span></span>
+        <span class="ln"><span class="w accent">{heroData.line3}</span></span>
+      </h1>
+
+      <p class="hero-sub">{heroData.subheading}</p>
+
+      <div class="hero-actions">
+        <a href={heroData.primaryCta.href} class="nb-btn nb-btn--primary nb-btn--lg">
+          <span class="nb-btn__label">{heroData.primaryCta.label}</span>
+          <span class="nb-btn__icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="square" stroke-linejoin="miter">
+              <path d="M5 12 H19 M13 6 L19 12 L13 18" />
+            </svg>
+          </span>
+        </a>
+        <a href={heroData.secondaryCta.href} class="nb-btn nb-btn--ghost-light nb-btn--lg">
+          <span class="nb-btn__label">{heroData.secondaryCta.label}</span>
+        </a>
+      </div>
     </div>
 
-    <!-- Centralny stack: logo + treść + CTA jako jeden blok wycentrowany w viewport -->
-    <div class="relative z-10 flex flex-col items-center justify-center w-full max-w-5xl mx-auto">
+    <!-- RIGHT COL — medallion + stat stripe -->
+    <div class="hero-col-aside">
+      <div class="hero-medallion">
+        <img src="/logo-icon.svg" alt="Nobelion — logo" width="340" height="340" />
+        <div class="hero-medallion__ring"></div>
+      </div>
 
-        <!-- Animowane logo (sygnatura marki) -->
-        <div class="mb-6 md:mb-8 flex justify-center">
-            <AnimatedLogo client:load />
-        </div>
-
-        <!-- Główna kompozycja słowna -->
-        <div class="text-center w-full space-y-4 md:space-y-6">
-            <!-- Pierwsza linia: NOBELION (brand mark, oryginalny Cinzel) -->
-            <p id="hero-brand" class="font-heading font-bold text-brass uppercase hero-fade text-sm md:text-base tracking-[0.5em] pl-[0.5em]" style="animation-delay: 0.4s;">
-                NOBELION
-            </p>
-
-            <!-- Główne słowo: AUTOMATYZUJEMY (CinematicText decoder reveal) -->
-            <h1 class="font-heading font-bold text-silver leading-[0.95] drop-shadow-2xl text-[clamp(1.4rem,7vw,5.5rem)] tracking-[0.04em] text-center px-2">
-                <CinematicText client:load text={heroData.heading} />
-            </h1>
-
-            <!-- Subheading: emocjonalna obietnica -->
-            <p class="font-sans text-silver/90 text-[clamp(1.05rem,2vw,1.5rem)] leading-snug max-w-xl mx-auto hero-fade" style="animation-delay: 1.4s;">
-                {heroData.subheading}
-            </p>
-
-            <!-- Mikrotagline: kategoryzacja działalności -->
-            <p class="text-[10px] md:text-[11px] font-mono text-brass tracking-[0.3em] uppercase hero-fade max-w-2xl mx-auto leading-relaxed" style="animation-delay: 1.8s;">
-                {heroData.microTagline}
-            </p>
-        </div>
-
-        <!-- CTA pair (kluczowy element konwersji) -->
-        <div class="mt-8 md:mt-10 flex flex-col sm:flex-row items-center gap-4 sm:gap-6 hero-fade" style="animation-delay: 2.2s;">
-            <a
-                href={heroData.primaryCta.href}
-                class="hero-cta-primary interactive cursor-none group inline-flex items-center gap-3 px-7 py-4 md:px-9 md:py-5 bg-brass text-void font-heading font-bold text-xs md:text-sm tracking-[0.2em] uppercase transition-all duration-200 ease-out"
-                aria-label={heroData.primaryCta.label}
-            >
-                <span>{heroData.primaryCta.label}</span>
-                <span aria-hidden="true" class="inline-block transition-transform duration-200 ease-out group-hover:translate-x-1">→</span>
-            </a>
-
-            <a
-                href={heroData.secondaryCta.href}
-                class="hero-cta-secondary interactive cursor-none group inline-flex items-center gap-3 px-5 py-3 border border-brass/30 text-silver font-mono text-[11px] md:text-xs tracking-[0.3em] uppercase transition-all duration-200 ease-out relative overflow-hidden"
-                aria-label={heroData.secondaryCta.label}
-            >
-                <span class="relative z-10">{heroData.secondaryCta.label}</span>
-                <span aria-hidden="true" class="relative z-10 transition-transform duration-200 ease-out group-hover:translate-y-[2px]">↓</span>
-            </a>
-        </div>
+      <div class="hero-stripe is-vert">
+        {heroData.stripe.map((s) => (
+          <div class="hero-stripe__item">
+            <div class="hero-stripe__k">{s.k}</div>
+            <div class="hero-stripe__v">{s.v}</div>
+          </div>
+        ))}
+      </div>
     </div>
+  </div>
 
-    <!-- Scroll cue (przesunięty żeby nie zachodzić na CTA) -->
-    <div class="absolute bottom-0 left-1/2 -translate-x-1/2 flex flex-col items-center pb-6 z-20 pointer-events-none">
-        <div class="w-px h-12 md:h-16 bg-linear-to-b from-transparent via-brass to-transparent opacity-80"></div>
-        <span class="mt-2 text-[10px] font-mono text-steel/90 tracking-[0.4em] uppercase animate-pulse">
-            {heroData.scrollText}
-        </span>
-    </div>
+  <a class="hero-scroll" href="#oferta" aria-label="Przewiń">
+    <span class="caption">{heroData.scrollText}</span>
+    <span class="hero-scroll__line"></span>
+  </a>
 </section>
 
+<!-- word-reveal: add .lit after 80 ms so the CSS transition fires -->
+<script>
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      document.getElementById('hero-title')?.classList.add('lit');
+    }, 80);
+  });
+</script>
+
 <style>
-    /* Hero fade-in: subtelnie, bez bounce. Ease out exponential. */
-    @keyframes heroFade {
-        from {
-            opacity: 0;
-            transform: translateY(0.75rem);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
+/* ---------------- HERO ---------------- */
+.hero {
+  position: relative;
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  padding-top: 110px;
+  padding-bottom: 120px;
+  background-color: var(--color-onyx);
+  color: var(--color-silver);
+}
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.hero-glow {
+  position: absolute;
+  top: -20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(1100px, 120vw);
+  height: 900px;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(197, 160, 89, 0.16),
+    rgba(197, 160, 89, 0.04) 38%,
+    transparent 64%
+  );
+  filter: blur(8px);
+}
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  opacity: 0.5;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, #000 30%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, #000 30%, transparent 75%);
+}
+.hero-inner {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+}
 
-    .hero-fade {
-        animation: heroFade 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
-    }
+/* eyebrow */
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+.hero-dot {
+  width: 7px;
+  height: 7px;
+  background: var(--color-brass-bright);
+  border-radius: 50%;
+  box-shadow: 0 0 12px 1px var(--color-brass-glow);
+  animation: hero-pulse 2.6s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+@keyframes hero-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
 
-    /* Primary CTA: drastyczna zmiana hover - jasne silver tło + outline + lift + glow */
-    .hero-cta-primary {
-        position: relative;
-        box-shadow: 0 0.25rem 1rem 0 rgba(197, 160, 89, 0.25);
-        will-change: transform, box-shadow, background-color;
-        outline: 1px solid transparent;
-        outline-offset: 0;
-    }
+/* title — word reveal */
+.hero-title {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  text-transform: uppercase;
+  line-height: 1.0;
+  letter-spacing: 0.02em;
+  color: var(--color-silver);
+  margin: 0;
+  font-size: clamp(38px, 6.2vw, 86px);
+}
+.hero-title .ln {
+  display: block;
+  overflow: hidden;
+}
+.hero-title .w {
+  display: block;
+  transform: translateY(110%);
+  transition: transform 0.9s cubic-bezier(0.83, 0, 0.17, 1);
+}
+.hero-title .w.accent {
+  color: var(--color-brass-bright);
+}
+.hero-title.lit .w {
+  transform: translateY(0);
+}
+.hero-title.lit .ln:nth-child(2) .w {
+  transition-delay: 0.1s;
+}
+.hero-title.lit .ln:nth-child(3) .w {
+  transition-delay: 0.2s;
+}
 
-    .hero-cta-primary:hover,
-    .hero-cta-primary:focus-visible {
-        background-color: var(--color-silver, #E0E0E0);
-        color: var(--color-void, #050505);
-        transform: translateY(-3px) scale(1.02);
-        box-shadow: 0 0.75rem 3rem 0 rgba(224, 224, 224, 0.35), 0 0 0 2px var(--color-brass, #C5A059);
-        outline-color: var(--color-brass-light, #E6C885);
-        outline-offset: 6px;
-    }
+/* subtitle */
+.hero-sub {
+  max-width: 560px;
+  margin: 30px 0 38px;
+  font-size: clamp(16px, 1.5vw, 19px);
+  line-height: 1.6;
+  color: var(--color-silver-soft);
+  opacity: 0;
+  animation: hero-fade 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.55s forwards;
+}
+@keyframes hero-fade {
+  to { opacity: 1; }
+}
 
-    .hero-cta-primary:focus-visible {
-        outline: 2px solid var(--color-brass-light, #E6C885);
-        outline-offset: 6px;
-    }
+/* actions */
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  opacity: 0;
+  animation: hero-fade 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.7s forwards;
+}
 
-    /* Secondary CTA: ghost z brass border, hover wypełnia mosiądzem od lewej */
-    .hero-cta-secondary {
-        will-change: transform, background-color;
-        background: transparent;
-    }
-    .hero-cta-secondary::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: var(--color-brass, #C5A059);
-        transform: scaleX(0);
-        transform-origin: left center;
-        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        z-index: 0;
-    }
-    .hero-cta-secondary:hover,
-    .hero-cta-secondary:focus-visible {
-        color: var(--color-void, #050505);
-        border-color: var(--color-brass-light, #E6C885);
-        transform: translateY(-3px);
-        box-shadow: 0 0.5rem 2rem 0 rgba(197, 160, 89, 0.35);
-    }
-    .hero-cta-secondary:hover::after,
-    .hero-cta-secondary:focus-visible::after {
-        transform: scaleX(1);
-    }
-    .hero-cta-secondary:focus-visible {
-        outline: 2px solid var(--color-brass-light, #E6C885);
-        outline-offset: 4px;
-    }
+/* split layout */
+.hero-split {
+  display: grid;
+  grid-template-columns: 1.25fr 0.85fr;
+  gap: 64px;
+  align-items: center;
+}
+.hero-col-aside {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
 
-    /* Reduced motion: szanujemy preferencje */
-    @media (prefers-reduced-motion: reduce) {
-        .hero-fade {
-            animation: none !important;
-            opacity: 1 !important;
-            transform: none !important;
-        }
-    }
+/* medallion */
+.hero-medallion {
+  position: relative;
+  width: min(340px, 80%);
+  aspect-ratio: 1;
+  margin: 0 auto;
+}
+.hero-medallion img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 0 60px rgba(197, 160, 89, 0.22));
+  animation: hero-float 7s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+.hero-medallion__ring {
+  position: absolute;
+  inset: -6%;
+  border: 1px solid var(--color-hair-light-2);
+  border-radius: 50%;
+  animation: hero-spin 60s linear infinite;
+}
+.hero-medallion__ring::before {
+  content: "";
+  position: absolute;
+  top: -3px;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: var(--color-brass-bright);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--color-brass-glow);
+}
+@keyframes hero-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+@keyframes hero-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* stat stripe */
+.hero-stripe {
+  display: flex;
+  gap: 0;
+  opacity: 0;
+  animation: hero-fade 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.85s forwards;
+}
+.hero-stripe.is-vert {
+  flex-direction: column;
+  gap: 22px;
+  margin-top: 36px;
+}
+.hero-stripe.is-vert .hero-stripe__item {
+  border-left: 2px solid var(--color-brass-bright);
+  padding-left: 16px;
+}
+.hero-stripe__k {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: clamp(20px, 2vw, 27px);
+  color: var(--color-brass-bright);
+  letter-spacing: 0.01em;
+}
+.hero-stripe__v {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-steel);
+  margin-top: 6px;
+}
+
+/* scroll cue */
+.hero-scroll {
+  position: absolute;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  color: var(--color-steel);
+  text-decoration: none;
+}
+.hero-scroll .caption {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--color-steel);
+}
+.hero-scroll__line {
+  width: 1px;
+  height: 44px;
+  background: linear-gradient(var(--color-brass-bright), transparent);
+  position: relative;
+  overflow: hidden;
+}
+.hero-scroll__line::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: 0;
+  width: 100%;
+  height: 50%;
+  background: var(--color-brass-bright);
+  animation: scroll-cue 2s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+@keyframes scroll-cue {
+  0% { top: -50%; }
+  100% { top: 100%; }
+}
+
+/* ---------------- BUTTONS ---------------- */
+
+
+/* eyebrow */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--color-brass-bright);
+}
+
+/* responsive */
+@media (max-width: 920px) {
+  .hero {
+    height: auto;
+    min-height: 100dvh;
+    padding-top: 140px;
+    padding-bottom: 120px;
+  }
+  .hero-split {
+    grid-template-columns: 1fr;
+    gap: 48px;
+  }
+  .hero-col-main {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .hero-actions {
+    justify-content: center;
+  }
+  .hero-col-aside {
+    align-items: center;
+  }
+  .hero-medallion {
+    width: min(240px, 60%);
+  }
+  .hero-stripe.is-vert {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 24px;
+    margin-top: 24px;
+  }
+  .hero-stripe.is-vert .hero-stripe__item {
+    border-left: none;
+    border-top: 2px solid var(--color-brass-bright);
+    padding-left: 0;
+    padding-top: 10px;
+    text-align: center;
+  }
+}
+@media (max-width: 480px) {
+  .hero-medallion {
+    width: 180px;
+  }
+  .hero-scroll {
+    display: none; /* Hide scroll cue if screen is too small and content overflows anyway */
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-title .w {
+    transform: none !important;
+    transition: none !important;
+  }
+  .hero-sub,
+  .hero-actions,
+  .hero-stripe {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+}
 </style>

@@ -1,37 +1,41 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import MagneticCursor from '../components/core/MagneticCursor.svelte';
 import ScrollChoreography from '../components/core/ScrollChoreography.svelte';
 
 import Hero from '../components/sections/Hero.astro';
-import Problem from '../components/sections/Problem.astro';
+import Marquee from '../components/ui/Marquee.astro';
 import Services from '../components/sections/Services.astro';
-import Examples from '../components/sections/Examples.astro';
+import Benefits from '../components/sections/Benefits.astro';
 import Cases from '../components/sections/Cases.astro';
 import Process from '../components/sections/Process.astro';
-import Audience from '../components/sections/Audience.astro';
-import Benefits from '../components/sections/Benefits.astro';
-import Faq from '../components/sections/Faq.astro';
+import Security from '../components/sections/Security.astro';
 import Brief from '../components/sections/Brief.astro';
-import Vault from '../components/sections/Vault.astro';
+import Faq from '../components/sections/Faq.astro';
+import Footer from '../components/sections/Footer.astro';
 ---
 
 <Layout>
-    <MagneticCursor client:load />
     <ScrollChoreography client:idle />
 
-    <div>
+    <div class="main-shell">
         <Hero />
-        <Problem />
+        <Marquee />
         <Services />
-        <Examples />
+        <Benefits />
         <Cases />
         <Process />
-        <Audience />
-        <Benefits />
-        <Faq />
+        <Security />
         <Brief />
+        <Faq />
     </div>
 
-    <Vault />
+    <Footer />
 </Layout>
+
+<style>
+    .main-shell {
+        position: relative;
+        background-color: var(--color-paper);
+    }
+</style>
+

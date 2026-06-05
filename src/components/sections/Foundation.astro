@@ -19,7 +19,7 @@ import BentoCard from '../ui/BentoCard.svelte';
     </div>
 
     <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
-        {bentoGridItems.map((item) => (
+        {bentoGridItems.map((item: { title: string, description: string, icon: string, colSpan: number }) => (
             <BentoCard 
                 client:visible 
                 title={item.title} 

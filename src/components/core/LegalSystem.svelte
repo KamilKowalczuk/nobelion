@@ -79,7 +79,7 @@
                 
                 <button 
                     onclick={close}
-                    class="group w-10 h-10 flex items-center justify-center border border-white/10 hover:border-brass hover:bg-brass/10 transition-all duration-300 interactive cursor-none"
+                    class="group w-10 h-10 flex items-center justify-center border border-white/10 hover:border-brass hover:bg-brass/10 transition-all duration-300  "
                     aria-label="Zamknij"
                 >
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" class="text-steel group-hover:text-white transition-colors">

@@ -1,222 +1,106 @@
 ---
 import { casesData } from '../../data/content';
-import GeometricGrid from '../decorations/GeometricGrid.svelte';
 
-// Dla każdego case: wybieramy odpowiednią mini-wizualizację (animowaną przy reveal).
-// Anonimizowane wartości — tylko proporcje, żeby budowały wrażenie ROI bez ujawniania klientów.
-const visualForCase: Record<string, 'bar' | 'speed' | 'orbit'> = {
-    '01': 'bar',     // 240k zł — animowany bar wypełniający się od 0
-    '02': 'speed',   // 24x szybciej — porównanie dwóch równoległych pasów
-    '03': 'orbit'    // produkt na abonament — orbita z mosiężnym węzłem
-};
+// Cases — light panel: case studies with product image placeholders + metric
 ---
 
-<section
-    id="cases"
-    class="relative w-full py-24 md:py-40 px-4 md:px-12 lg:px-24 bg-void z-10 border-t border-white/5 overflow-hidden"
->
-    <!-- Atmosferyczna mgła mosiężna od dołu -->
-    <div
-        class="absolute bottom-0 left-0 w-full h-[30rem] pointer-events-none"
-        style="background: radial-gradient(ellipse at 50% 100%, rgba(197,160,89,0.05) 0%, transparent 70%);"
-    ></div>
-
-    <!-- Subtelna animowana siatka -->
-    <GeometricGrid client:visible columns={18} rows={10} opacity={0.035} density={0.1} />
-
-    <div class="relative max-w-7xl mx-auto">
-        <header class="text-center mb-20 md:mb-32 pb-12 md:pb-20 border-b border-white/10">
-            <span class="block text-brass font-mono text-xs tracking-[0.4em] uppercase mb-6">
-                {casesData.sectionLabel}
-            </span>
-            <h2 class="font-heading font-bold text-silver tracking-[0.04em] uppercase leading-[0.88] text-[clamp(3.5rem,10vw,8rem)] mb-8">
-                {casesData.heading}
-            </h2>
-            <p class="font-sans text-steel text-base md:text-lg leading-relaxed max-w-2xl mx-auto">
-                {casesData.subheading}
-            </p>
-        </header>
-
-        <!-- Trzy case studies, każdy jako osobny "rozkład magazynowy" -->
-        <div class="space-y-px bg-white/5">
-            {casesData.items.map((item, idx) => (
-                <article
-                    class="case-row group relative bg-void grid grid-cols-12 gap-4 md:gap-8 py-12 md:py-16 px-2 md:px-6 transition-colors duration-200 ease-out hover:bg-surface/50"
-                    data-case-index={idx}
-                >
-                    <!-- LEWA: numer + branża + duration (col 01-04) -->
-                    <header class="col-span-12 md:col-span-4 flex flex-col gap-4">
-                        <div class="flex items-baseline gap-4">
-                            <span class="font-heading text-brass/60 text-5xl md:text-6xl leading-none transition-colors duration-200 ease-out group-hover:text-brass">
-                                {item.id}
-                            </span>
-                            <span class="font-mono text-brass text-xs tracking-[0.3em] uppercase">
-                                {item.industry}
-                            </span>
-                        </div>
-                        <span class="inline-flex items-center gap-2 self-start px-3 py-1.5 border border-brass/40 text-brass font-mono text-[10px] md:text-xs tracking-widest uppercase">
-                            <span class="inline-block w-1 h-1 bg-brass rounded-full"></span>
-                            {item.duration}
-                        </span>
-                    </header>
-
-                    <!-- PRAWA: challenge → solution → result (col 05-12) -->
-                    <div class="col-span-12 md:col-span-8 space-y-8">
-                        <!-- Challenge -->
-                        <div>
-                            <p class="font-mono text-steel/90 text-[10px] md:text-xs tracking-[0.25em] uppercase mb-2">
-                                WYZWANIE
-                            </p>
-                            <p class="font-sans text-silver/85 text-sm md:text-base leading-relaxed max-w-2xl">
-                                {item.challenge}
-                            </p>
-                        </div>
-
-                        <!-- Solution -->
-                        <div>
-                            <p class="font-mono text-steel/90 text-[10px] md:text-xs tracking-[0.25em] uppercase mb-2">
-                                CO ZROBILIŚMY
-                            </p>
-                            <p class="font-sans text-silver/85 text-sm md:text-base leading-relaxed max-w-2xl">
-                                {item.solution}
-                            </p>
-                        </div>
-
-                        <!-- Result (główna atrakcja, bardzo duży typografią) -->
-                        <div class="pt-6 border-t border-brass/20">
-                            <p class="font-mono text-brass text-[10px] md:text-xs tracking-[0.25em] uppercase mb-3">
-                                EFEKT
-                            </p>
-                            <p class="font-heading text-silver leading-tight text-[clamp(1.5rem,3.5vw,2.75rem)] mb-6">
-                                {item.result}
-                            </p>
-
-                            <!-- Mini wizualizacja efektu (anonimizowana, tylko proporcje) -->
-                            <div class="case-viz mt-6 max-w-md">
-                                <p class="font-mono text-steel/90 text-[10px] tracking-[0.25em] uppercase mb-3">
-                                    {visualForCase[item.id] === 'bar' && 'WZROST PRZYCHODU W CZASIE'}
-                                    {visualForCase[item.id] === 'speed' && 'PORÓWNANIE TEMPA WYKONANIA'}
-                                    {visualForCase[item.id] === 'orbit' && 'MODEL PRZYCHODU'}
-                                </p>
-                                {visualForCase[item.id] === 'bar' && (
-                                    <div class="space-y-2.5">
-                                        <div class="flex items-center gap-3">
-                                            <span class="font-mono text-steel/90 text-[10px] tracking-widest uppercase w-14">START</span>
-                                            <div class="flex-1 h-1 bg-white/5 relative overflow-hidden">
-                                                <div class="absolute top-0 left-0 h-full bg-steel/40 w-[3%]"></div>
-                                            </div>
-                                            <span class="font-mono text-steel/90 text-[10px] w-16 text-right whitespace-nowrap">0 zł</span>
-                                        </div>
-                                        <div class="flex items-center gap-3">
-                                            <span class="font-mono text-brass text-[10px] tracking-widest uppercase w-14">9 MIES.</span>
-                                            <div class="flex-1 h-1 bg-white/5 relative overflow-hidden">
-                                                <div class="case-bar-fill absolute top-0 left-0 h-full bg-brass w-full" style="box-shadow: 0 0 0.5rem rgba(197,160,89,0.5);"></div>
-                                            </div>
-                                            <span class="font-mono text-brass text-[10px] w-16 text-right whitespace-nowrap">240k zł</span>
-                                        </div>
-                                    </div>
-                                )}
-                                {visualForCase[item.id] === 'speed' && (
-                                    <div class="space-y-3">
-                                        <div class="flex items-center gap-3">
-                                            <span class="font-mono text-steel/90 text-[10px] tracking-widest uppercase w-24 whitespace-nowrap">PRACA RĘCZNA</span>
-                                            <div class="flex-1 flex gap-px h-3">
-                                                {Array(24).fill(0).map(() => (
-                                                    <div class="flex-1 bg-steel/30"></div>
-                                                ))}
-                                            </div>
-                                            <span class="font-mono text-steel/90 text-[10px] w-12 text-right whitespace-nowrap">24j</span>
-                                        </div>
-                                        <div class="flex items-center gap-3">
-                                            <span class="font-mono text-brass text-[10px] tracking-widest uppercase w-24 whitespace-nowrap">SYSTEM</span>
-                                            <div class="flex-1 flex gap-px h-3">
-                                                <div class="case-speed-fill flex-1 bg-brass" style="box-shadow: 0 0 0.4rem rgba(197,160,89,0.6); max-width: 4.16%;"></div>
-                                                <div class="flex-1"></div>
-                                            </div>
-                                            <span class="font-mono text-brass text-[10px] w-12 text-right whitespace-nowrap">1j</span>
-                                        </div>
-                                        <p class="font-mono text-steel/80 text-[10px] tracking-widest uppercase pt-1">
-                                            j = jednostka czasu (np. tydzień)
-                                        </p>
-                                    </div>
-                                )}
-                                {visualForCase[item.id] === 'orbit' && (
-                                    <div class="flex items-center gap-5 pt-2">
-                                        <svg width="72" height="72" viewBox="0 0 72 72" fill="none" aria-hidden="true" class="flex-shrink-0">
-                                            <circle cx="36" cy="36" r="32" stroke="var(--color-brass, #C5A059)" stroke-width="1" stroke-opacity="0.25" />
-                                            <circle cx="36" cy="36" r="22" stroke="var(--color-brass, #C5A059)" stroke-width="1" stroke-opacity="0.5" stroke-dasharray="2 4" />
-                                            <circle cx="36" cy="36" r="3" fill="var(--color-brass, #C5A059)" />
-                                            <g class="case-orbit-node" style="transform-origin: 36px 36px;">
-                                                <circle cx="58" cy="36" r="2.5" fill="var(--color-brass, #C5A059)" style="filter: drop-shadow(0 0 0.3rem rgba(197,160,89,0.8));" />
-                                            </g>
-                                        </svg>
-                                        <div class="leading-relaxed">
-                                            <p class="font-mono text-brass text-[11px] tracking-[0.25em] uppercase">STAŁY PRZYCHÓD MIESIĘCZNY</p>
-                                            <p class="font-mono text-steel/90 text-[10px] tracking-widest uppercase mt-1">model abonamentowy, klient płaci co miesiąc</p>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        <!-- Note (drobna stopka) -->
-                        <p class="font-mono text-steel/80 text-[11px] tracking-wide italic">
-                            {item.note}
-                        </p>
-                    </div>
-                </article>
-            ))}
-        </div>
+<section id="wdrozenia" class="section nb-cases nb-panel bg-paper">
+  <div class="wrap">
+    <div class="nb-sec-head" data-reveal>
+      <span class="eyebrow">{casesData.sectionLabel}</span>
+      <h2 class="h2 nb-sec-head__title">{casesData.heading}</h2>
+      <p class="lead nb-sec-head__body">{casesData.subheading}</p>
     </div>
+
+    <div class="nb-cases__list">
+      {casesData.items.map((c, i) => (
+        <article class={`nb-case ${i % 2 ? 'is-rev' : ''}`} data-reveal data-reveal-delay={String(i + 1)}>
+          <div class="nb-case__body">
+            <div class="nb-case__head">
+              <span class="nb-case__num">{c.id}</span>
+              <span class="nb-case__kicker caption">{c.kicker}</span>
+            </div>
+            <h3 class="h3 nb-case__title">{c.title}</h3>
+            <p class="nb-case__desc">{c.desc}</p>
+            <div class="nb-case__steps">
+              {c.steps.map((s, si) => (
+                <span class="nb-case__step">
+                  <span class="nb-case__step-n">{String(si+1).padStart(2,"0")}</span>{s}
+                </span>
+              ))}
+            </div>
+          </div>
+          <div class="nb-case__visual">
+            <div class="nb-case__frame">
+              <span class="nb-case__dots"><i></i><i></i><i></i></span>
+              <div class="nb-case__img-wrap">
+                  <img src={c.image} alt={c.title} class="nb-case__img" />
+              </div>
+            </div>
+            <div class="nb-case__metric">
+              <span class="nb-case__metric-big">{c.metric}</span>
+              <span class="nb-case__metric-label">{c.metricLabel}</span>
+            </div>
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
 </section>
 
 <style>
-    .case-row {
-        will-change: background-color;
-    }
+/* ---------------- CASES ---------------- */
+.nb-cases{background:var(--color-paper-2);}
+.nb-cases__list{display:flex;flex-direction:column;gap:clamp(48px, 6vw, 96px);}
+.nb-case{position:relative;display:grid;grid-template-columns:1fr minmax(320px, 440px);gap:clamp(32px, 5vw, 72px);align-items:center;outline:none;}
+.nb-case.is-rev .nb-case__body{order:2;}
+.nb-case.is-rev .nb-case__visual{order:1;}
 
-    /* Mini-wizualizacje: w stanie spoczynku zerowane, po wejściu w viewport rosną. */
-    .case-bar-fill {
-        width: 0%;
-        transition: width 1.4s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .case-row.in-view .case-bar-fill {
-        width: 100%;
-    }
+.nb-case__head{display:flex;align-items:center;gap:18px;margin-bottom:18px;}
+.nb-case__num{font-family:var(--font-heading);font-weight:700;font-size:clamp(40px, 4vw, 58px);color:var(--color-ink-4);line-height:1;transition:color 300ms;}
+.nb-case:hover .nb-case__num{color:var(--color-brass);}
+.nb-case__kicker{color:var(--color-brass);}
+.nb-case__title{margin:0 0 14px;font-size:clamp(22px, 2.2vw, 30px); color: var(--color-ink);}
+.nb-case__desc{font-size:15px;line-height:1.65;color:var(--color-ink-2);margin:0 0 22px;max-width:520px;}
+.nb-case__steps{display:flex;flex-wrap:wrap;gap:10px;}
+.nb-case__step{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:0.04em;color:var(--color-ink-3);border:1px solid rgba(21, 23, 29, 0.10);padding:7px 12px;}
+.nb-case__step-n{color:var(--color-brass);font-weight:600;}
 
-    .case-speed-fill {
-        max-width: 0% !important;
-        transition: max-width 1.4s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .case-row.in-view .case-speed-fill {
-        max-width: 4.16% !important;
-    }
+.nb-case__visual{position:relative;}
+.nb-case__frame{background:#0E121C;border:1px solid var(--color-paper-edge);border-radius:10px;overflow:hidden;box-shadow: 0 2px 6px rgba(21,23,29,0.06), 0 28px 60px -24px rgba(21,23,29,0.22);transition:transform 300ms, box-shadow 300ms;}
+.nb-case:hover .nb-case__frame{transform:translateY(-4px);box-shadow:0 32px 70px -28px rgba(21,23,29,0.32);}
+.nb-case__dots{display:flex;gap:7px;padding:13px 16px;background:#10131c;border-bottom:1px solid rgba(255,255,255,0.05);}
+.nb-case__dots i{width:9px;height:9px;border-radius:50%;background:#2a3142;}
+.nb-case__dots i:first-child{background:var(--color-brass-bright);opacity:0.7;}
+.nb-case__img-wrap{display:block;width:100%;height:clamp(220px, 24vw, 300px);background:var(--color-paper-3);overflow:hidden;position:relative;}
+.nb-case__img{width:100%;height:100%;object-fit:cover;opacity:0.85;transition:opacity 500ms,transform 500ms;}
+.nb-case:hover .nb-case__img{opacity:1;transform:scale(1.04);}
+.nb-case__metric{position:absolute;bottom:-22px;left:-22px;background:var(--color-ink);border:1px solid var(--color-brass);padding:16px 22px;box-shadow: 0 2px 6px rgba(21,23,29,0.06), 0 28px 60px -24px rgba(21,23,29,0.22);z-index: 2;}
+.nb-case.is-rev .nb-case__metric{left:auto;right:-22px;}
+.nb-case__metric-big{display:block;font-family:var(--font-heading);font-weight:700;font-size:clamp(26px, 2.6vw, 38px);color:var(--color-brass-bright);line-height:1;white-space:nowrap;}
+.nb-case__metric-label{display:block;font-family:var(--font-mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-steel);margin-top:8px;}
 
-    .case-orbit-node {
-        transform-origin: 32px 32px;
-        animation: orbitRotate 12s linear infinite;
-    }
-    @keyframes orbitRotate {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-    }
+.nb-sec-head {
+  max-width: 680px;
+  margin-bottom: clamp(48px, 6vw, 76px);
+}
+.nb-sec-head__title {
+  margin: 18px 0 0;
+  font-size: clamp(30px, 3.6vw, 52px);
+  font-weight: 700;
+}
+.nb-sec-head__body {
+  margin-top: 22px;
+  font-size: clamp(18px, 1.6vw, 22px);
+  line-height: 1.55;
+  color: var(--color-ink-2);
+}
 
-    @media (prefers-reduced-motion: reduce) {
-        .case-bar-fill { transition: none; width: 100%; }
-        .case-speed-fill { transition: none; max-width: 4.16% !important; }
-        .case-orbit-node { animation: none; }
-    }
+@media(max-width:860px){
+  .nb-case{grid-template-columns:1fr;gap:32px;}
+  .nb-case.is-rev .nb-case__body{order:1;}
+  .nb-case.is-rev .nb-case__visual{order:2;}
+  .nb-case__metric{left:16px;bottom:-18px;}
+  .nb-case.is-rev .nb-case__metric{right:auto;left:16px;}
+}
 </style>
-
-<script>
-    // Reveal data viz tylko gdy karta wjedzie w viewport (powtarzalnie przy ponownym scrollu).
-    const caseRows = document.querySelectorAll('.case-row');
-    const caseObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('in-view');
-            }
-        });
-    }, { threshold: 0.35 });
-    caseRows.forEach(row => caseObserver.observe(row));
-</script>

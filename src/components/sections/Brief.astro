@@ -1,55 +1,30 @@
 ---
-import { briefCta } from '../../data/content';
+import { contactData } from '../../data/content';
 import BriefFlow from '../core/BriefFlow.svelte';
 ---
 
-<section
-    id="brief"
-    class="relative w-full py-32 md:py-48 px-4 md:px-12 lg:px-24 bg-void z-10 border-t border-white/5 overflow-hidden"
->
-    <!-- Atmosferyczne radialne mosiężne źródło światła w centrum (sygnatura konwersji) -->
-    <div
-        class="absolute inset-0 pointer-events-none -z-0"
-        style="background: radial-gradient(circle at 50% 30%, rgba(197,160,89,0.08) 0%, transparent 55%);"
-    ></div>
-
-    <!-- Górny micro-divider (separator wizualny od poprzedniej sekcji) -->
-    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-px h-16 bg-linear-to-b from-brass/0 via-brass/40 to-brass/0" aria-hidden="true"></div>
-
-    <div class="relative max-w-5xl mx-auto text-center">
-        <!-- Section label -->
-        <span class="block text-brass font-mono text-xs tracking-[0.4em] uppercase mb-8">
-            {briefCta.sectionLabel}
-        </span>
-
-        <!-- Główne wezwanie -->
-        <h2 class="font-heading font-bold text-silver tracking-[0.06em] leading-[1.05] uppercase text-[clamp(2rem,5.5vw,4.5rem)] mb-8 max-w-5xl mx-auto text-center text-balance">
-            {briefCta.heading}
-        </h2>
-
-        <!-- Subheading -->
-        <p class="font-sans text-steel text-lg md:text-xl leading-relaxed max-w-2xl mx-auto mb-10">
-            {briefCta.subheading}
-        </p>
-
-        <!-- Trust indicators -->
-        <div class="flex flex-wrap items-center justify-center gap-3 mb-16">
-            {briefCta.trustIndicators.map((indicator) => (
-                <span class="inline-flex items-center gap-2 px-4 py-2 border border-brass/40 text-brass font-mono text-xs tracking-[0.2em] uppercase">
-                    <span class="w-1.5 h-1.5 bg-brass rounded-full flex-shrink-0" aria-hidden="true"></span>
-                    {indicator}
-                </span>
-            ))}
-        </div>
-
-        <!-- Trust line w stylu mono -->
-        <p class="font-mono text-steel/90 text-[11px] md:text-xs tracking-widest uppercase mb-2">
-            {briefCta.trustLine}
-        </p>
+<section id="brief" class="section nb-brief nb-panel bg-paper-3">
+  <div class="wrap">
+    <div class="nb-sec-head nb-sec-head--center" data-reveal>
+      <span class="eyebrow">{contactData.eyebrow}</span>
+      <h2 class="h2 nb-sec-head__title">{contactData.heading}</h2>
+      <p class="lead nb-sec-head__body">{contactData.body}</p>
     </div>
 
-    <!-- BriefFlow component (właściwy multi-step) -->
-    <div id="brief-flow" class="relative max-w-5xl mx-auto mt-16 md:mt-20">
+    <div class="nb-brief__flow-container">
         <BriefFlow client:load />
     </div>
+  </div>
 </section>
+
+<style>
+/* ---------------- BRIEF ---------------- */
+.nb-brief{background:var(--color-paper-3);position:relative;}
+
+
+
+.nb-brief__flow-container {
+    max-width: 1080px;
+    margin: 0 auto;
+}
+</style>

@@ -16,79 +16,28 @@
 
     onMount(() => {
         const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        if (reduced) return;
+        if (reduced) {
+            // If reduced motion is preferred, add .in to all reveals immediately
+            document.querySelectorAll('[data-reveal]').forEach(el => el.classList.add('in'));
+            return;
+        }
 
         gsap.registerPlugin(ScrollTrigger);
 
-        // === 1. Section headers stagger reveal ===
-        const sectionHeaders = document.querySelectorAll(
-            'section header, footer #vault > div'
-        );
-
-        sectionHeaders.forEach((header) => {
-            const labels = header.querySelectorAll('span.text-brass.font-mono');
-            const headings = header.querySelectorAll('h2, h3');
-            const paragraphs = header.querySelectorAll('p');
-            const elements = [...labels, ...headings, ...paragraphs];
-            if (elements.length === 0) return;
-
-            gsap.set(elements, { opacity: 0, y: 16 });
-
-            ScrollTrigger.create({
-                trigger: header,
-                start: 'top 85%',
-                once: true,
-                onEnter: () => {
-                    gsap.to(elements, {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.7,
-                        ease: 'power3.out',
-                        stagger: 0.08
-                    });
-                }
-            });
-        });
-
-        // === 2. Karty/itemy z data-reveal stagger ===
-        const revealGroups = document.querySelectorAll('[data-reveal-group]');
-        revealGroups.forEach((group) => {
-            const items = group.querySelectorAll('[data-reveal-item]');
-            if (items.length === 0) return;
-
-            gsap.set(items, { opacity: 0, y: 24 });
-
-            ScrollTrigger.create({
-                trigger: group,
-                start: 'top 80%',
-                once: true,
-                onEnter: () => {
-                    gsap.to(items, {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.6,
-                        ease: 'power3.out',
-                        stagger: 0.06
-                    });
-                }
-            });
-        });
-
-        // === 3. Generic single-element reveal (data-reveal) ===
-        const singles = document.querySelectorAll('[data-reveal]:not([data-reveal-item])');
-        singles.forEach((el) => {
-            gsap.set(el, { opacity: 0, y: 20 });
+        // === 1. All [data-reveal] elements: trigger .in class on scroll ===
+        const reveals = document.querySelectorAll('[data-reveal]');
+        reveals.forEach((el) => {
             ScrollTrigger.create({
                 trigger: el,
                 start: 'top 88%',
                 once: true,
                 onEnter: () => {
-                    gsap.to(el, { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' });
+                    el.classList.add('in');
                 }
             });
         });
 
-        // === 4. Parallax na dekoracjach z data-parallax ===
+        // === 2. Parallax na dekoracjach z data-parallax ===
         const parallaxEls = document.querySelectorAll('[data-parallax]');
         parallaxEls.forEach((el) => {
             const speed = parseFloat((el as HTMLElement).dataset.parallax || '0.3');
