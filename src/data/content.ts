@@ -16,7 +16,7 @@ export const heroData = {
     line2: "którego nie wiedziałeś,",
     line3: "że tracisz.",
     subheading: "Projektujemy automatyzacje i aplikacje, które oszczędzają godziny i podnoszą przychód. AI lub bez. Własne serwery lub n8n. Dedykowany kod lub make.com.",
-    microTagline: "Architekci automatyzacji · 2025",
+    microTagline: "Architekci automatyzacji · 2026",
     scrollText: "Przewiń",
     primaryCta: { label: "Wypełnij brief", href: "#brief" },
     secondaryCta: { label: "Zobacz wdrożenia", href: "#cases" },
