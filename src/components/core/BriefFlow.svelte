@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount, tick } from "svelte";
   import { slide } from "svelte/transition";
 
   type Diagnosis = "biuro" | "strona" | "sprzedaz" | "wizja" | null;
@@ -12,11 +12,17 @@
   let submitState = $state<"idle" | "success" | "error">("idle");
   let placeholderIndex = $state(0);
   let shake = $state(false);
+  let shellEl = $state<HTMLElement | null>(null);
+  let mainEl = $state<HTMLElement | null>(null);
+  let qEl = $state<HTMLElement | null>(null);
+  let shellMinHeight = $state(0);
+  let mainMinHeight = $state(820);
 
   let f = $state({
     diagnosis: null as Diagnosis,
     industry: "",
     size: "",
+    laborRate: "mid",
     tools: "",
     problem: "",
     helperOpen: false,
@@ -53,11 +59,36 @@
 
   onMount(() => {
     const t = setInterval(() => placeholderIndex = (placeholderIndex + 1) % placeholders.length, 4500);
-    return () => clearInterval(t);
+    const ro = new ResizeObserver(() => {
+      void updateMainMinHeight();
+      void updateShellMinHeight();
+    });
+    if (qEl) ro.observe(qEl);
+    if (mainEl) ro.observe(mainEl);
+    if (shellEl) ro.observe(shellEl);
+    const onResize = () => {
+      void updateMainMinHeight();
+      void updateShellMinHeight();
+    };
+    window.addEventListener("resize", onResize);
+    void updateMainMinHeight(true);
+    void updateShellMinHeight(true);
+    return () => {
+      clearInterval(t);
+      ro.disconnect();
+      window.removeEventListener("resize", onResize);
+    };
   });
 
   const peopleMult = (v: string) => ({ "1":1, "2-3":2.5, "4-10":7, "10+":15 }[v] || 0);
-  const annualCost = $derived((f.hoursWeek > 0 && f.peopleInvolved) ? Math.round(f.hoursWeek * peopleMult(f.peopleInvolved) * 100 * 52) : 0);
+  const laborRateOpts = [
+    { v:"low", l:"Niski", d:"31,40 zł / h" },
+    { v:"mid", l:"Średni", d:"50 zł / h" },
+    { v:"high", l:"Wysoki", d:"100 zł / h" }
+  ];
+  const laborRateMap: Record<string, number> = { low: 31.4, mid: 50, high: 100 };
+  const laborRateLabel = $derived((laborRateOpts.find(r => r.v === f.laborRate) || laborRateOpts[1]).d);
+  const annualCost = $derived((f.hoursWeek > 0 && f.peopleInvolved) ? Math.round(f.hoursWeek * peopleMult(f.peopleInvolved) * laborRateMap[f.laborRate] * 52) : 0);
   const fmt = (n: number) => new Intl.NumberFormat("pl-PL").format(n);
 
   function canProceed(s: number): boolean {
@@ -75,10 +106,51 @@
 
   function doShake() { shake = true; setTimeout(() => shake = false, 420); }
 
-  function goto(s: number) {
+  async function updateMainMinHeight(force = false) {
+    await tick();
+    if (!mainEl || !qEl) return;
+    const nav = mainEl.querySelector(".nb-brief__nav") as HTMLElement | null;
+    const progress = mainEl.querySelector(".nb-brief__progress") as HTMLElement | null;
+    const qStyles = window.getComputedStyle(qEl);
+    const qTop = parseFloat(qStyles.marginTop || "0") || 0;
+    const qBottom = parseFloat(qStyles.marginBottom || "0") || 0;
+    const navMarginTop = nav ? (parseFloat(window.getComputedStyle(nav).marginTop || "0") || 0) : 0;
+    const progressH = progress ? progress.offsetHeight : 0;
+    const qH = qEl.offsetHeight;
+    const navH = nav ? nav.offsetHeight : 0;
+    const total = Math.ceil(progressH + qTop + qH + qBottom + navMarginTop + navH);
+    if (force) {
+      mainMinHeight = total;
+      return;
+    }
+    mainMinHeight = Math.max(mainMinHeight, total);
+  }
+
+  async function updateShellMinHeight(force = false) {
+    await tick();
+    if (!shellEl) return;
+    if (window.innerWidth < 860) {
+      shellMinHeight = 0;
+      return;
+    }
+    const total = shellEl.offsetHeight;
+    if (force) {
+      shellMinHeight = total;
+      return;
+    }
+    if (total > shellMinHeight) {
+      shellMinHeight = total;
+    }
+  }
+
+  async function goto(s: number) {
     if (s < 1 || s > TOTAL) return;
     if (s > step && !canProceed(step)) { doShake(); return; }
     step = s; maxStep = Math.max(maxStep, s);
+    if (window.innerWidth >= 860) {
+      await updateMainMinHeight();
+      await updateShellMinHeight();
+    }
   }
 
   async function submit() {
@@ -102,7 +174,7 @@
 
   const STEPS = ["", "Diagnoza", "Kontekst", "Problem", "Skala", "Próby", "Ramy", "Kontakt"];
   const QHEAD: Record<number, [string, string]> = {
-    1: ["Zacznijmy od bólu", "Wybierz najbliższe Twojej sytuacji — doprecyzujemy później."],
+    1: ["Co dziś najbardziej spowalnia proces?", "Wybierz najbliższe Twojej sytuacji — doprecyzujemy później."],
     2: ["Poznajemy Twój świat", "Dzięki temu nie pytamy o oczywiste rzeczy później."],
     3: ["Własnym językiem, bez żargonu", "Im konkretniej, tym lepsza wycena. Pisz jak do kolegi."],
     4: ["Zmierzmy skalę problemu", "Liczymy, jaki ROI ma sens, zanim cokolwiek wdrożymy."],
@@ -111,11 +183,12 @@
     7: ["Ostatni krok", "Odzywamy się w 24h robocze. Nie sprzedajemy — rozmawiamy, czy ma to sens."]
   };
 
+
   const diagnosis = [
-    { id:"biuro", t:"Powtarzalna praca biurowa", b:"kopiowanie danych, ręczne maile, raporty" },
-    { id:"strona", t:"Strona nie sprzedaje (lub jej nie mam)", b:"potrzebuję czegoś, co konwertuje" },
-    { id:"sprzedaz", t:"Sprzedaż potrzebuje boostu", b:"lead generation, outreach, follow-up" },
-    { id:"wizja", t:"Mam wizję, potrzebuję egzekucji", b:"wiem, czego chcę, szukam wykonawcy" }
+    { id:"biuro", t:"Zespół traci czas na ręczne operacje", b:"kopiowanie danych, przepisywanie, raporty i poprawki" },
+    { id:"strona", t:"Strona nie dowozi leadów lub sprzedaży", b:"ruch jest, ale brakuje zapytań i konwersji" },
+    { id:"sprzedaz", t:"Sprzedaż działa zbyt wolno i nierówno", b:"prospecting, follow-up i domykanie zajmują za dużo czasu" },
+    { id:"wizja", t:"Mam konkretny pomysł i chcę go wdrożyć", b:"potrzebuję partnera, który dowiezie od planu do działania" }
   ];
   const industries = ["E-commerce","Usługi B2B","Produkcja i hurt","Edukacja / e-learning","Biuro księgowe / prawne","Marketing / agencja","SaaS / aplikacja","Inne"];
   const sizes = ["1","2-10","11-50","50+"];
@@ -129,7 +202,7 @@
   function toggleTried(v: string) { f.triedBefore = f.triedBefore.includes(v) ? f.triedBefore.filter(x=>x!==v) : [...f.triedBefore, v]; }
 
   const diagLabel = $derived(f.diagnosis ? (diagnosis.find(d=>d.id===f.diagnosis)||{}).t : null);
-  const pct = $derived(Math.round((step / TOTAL) * 100));
+  const pct = $derived(Math.round(((step - 1) / (TOTAL - 1)) * 100));
 
   const dossier = $derived.by(() => {
     const d: [string, string][] = [];
@@ -142,7 +215,7 @@
   });
 </script>
 
-<div class="nb-brief__shell" class:nb-brief__shell--done={submitState === "success"}>
+<div class="nb-brief__shell" bind:this={shellEl} style={shellMinHeight > 0 ? `min-height:${shellMinHeight}px` : undefined} class:nb-brief__shell--done={submitState === "success"}>
   {#if submitState === "success"}
     <div class="nb-brief__check">
       <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square" stroke-linejoin="miter">
@@ -157,10 +230,10 @@
     <aside class="nb-brief__rail onyx">
       <div class="nb-brief__rail-top">
         <img src="/logo-icon.png" alt="" class="nb-brief__rail-mark"/>
-        <div>
-          <div class="nb-brief__rail-name">Brief Nobelion</div>
-          <div class="nb-brief__rail-sub mono">Wycena w 24h roboczych</div>
-        </div>
+          <div>
+            <div class="nb-brief__rail-name">Brief Nobelion</div>
+            <div class="nb-brief__rail-sub mono">Wycena w 24h roboczych</div>
+          </div>
       </div>
 
       <ol class="nb-brief__steps">
@@ -168,25 +241,27 @@
           {@const n = idx + 1}
           {@const st = n === step ? "active" : n < step ? "done" : "next"}
           {@const reachable = n <= maxStep}
-          <li class="nb-brief__step is-{st}" class:reach={reachable} onclick={() => reachable && goto(n)}>
-            <span class="nb-brief__step-mark">
-              {#if n < step}
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="square" stroke-linejoin="miter">
-                  <path d="M5 12.5 L10 17.5 L19 6.5" />
-                </svg>
-              {:else}
-                {String(n).padStart(2,"0")}
-              {/if}
-            </span>
-            <span class="nb-brief__step-label">{label}</span>
+          <li class="nb-brief__step is-{st}" class:reach={reachable}>
+            <button type="button" class="nb-brief__step-btn" disabled={!reachable} onclick={() => reachable && goto(n)}>
+              <span class="nb-brief__step-mark">
+                {#if n < step}
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="square" stroke-linejoin="miter">
+                    <path d="M5 12.5 L10 17.5 L19 6.5" />
+                  </svg>
+                {:else}
+                  {String(n).padStart(2,"0")}
+                {/if}
+              </span>
+              <span class="nb-brief__step-label">{label}</span>
+            </button>
           </li>
         {/each}
       </ol>
 
-      <div class="nb-brief__dossier">
+      <div class="nb-brief__dossier" class:is-empty={dossier.length === 0 && annualCost === 0}>
         <span class="caption nb-brief__dossier-h">Twój profil</span>
         {#if dossier.length === 0}
-          <p class="nb-brief__dossier-empty">Uzupełnia się w miarę odpowiedzi.</p>
+          <p class="nb-brief__dossier-empty">Podsumowanie uzupełni się automatycznie po pierwszych odpowiedziach.</p>
         {/if}
         {#each dossier as [k,v]}
           <div class="nb-brief__drow" transition:slide|local>
@@ -198,14 +273,14 @@
           <div class="nb-brief__roi" transition:slide|local>
             <span class="caption">Szac. koszt roczny problemu</span>
             <span class="nb-brief__roi-big">~ {fmt(annualCost)} zł</span>
-            <span class="nb-brief__roi-note mono">przy 100 zł/h pracy</span>
+            <span class="nb-brief__roi-note mono">przy {laborRateLabel} pracy</span>
           </div>
         {/if}
       </div>
     </aside>
 
     <!-- RIGHT: light focused Q&A -->
-    <div class="nb-brief__main">
+    <div class="nb-brief__main" bind:this={mainEl} style={`min-height:${mainMinHeight}px`}>
       <div class="nb-brief__progress">
         <div class="nb-brief__progress-meta">
           <span class="mono">Krok {String(step).padStart(2,"0")} — {STEPS[step]}</span>
@@ -214,7 +289,7 @@
         <div class="nb-brief__bar"><div class="nb-brief__bar-fill" style="width: {pct}%"></div></div>
       </div>
 
-      <div class="nb-brief__q" class:shake={shake}>
+      <div class="nb-brief__q" bind:this={qEl} class:shake={shake}>
         <h3 class="nb-brief__q-title">{QHEAD[step][0]}</h3>
         <p class="nb-brief__q-sub">{QHEAD[step][1]}</p>
 
@@ -300,6 +375,15 @@
                 </div>
               </div>
               <div class="nb-field">
+                <span class="nb-field__label caption">Szacowany koszt 1 roboczogodziny</span>
+                <div class="nb-pills nb-pills--3">
+                  {#each laborRateOpts as r}
+                    <button type="button" class="nb-pill" class:sel={f.laborRate===r.v} onclick={()=>f.laborRate=r.v}>{r.l} · {r.d}</button>
+                  {/each}
+                </div>
+                <span class="nb-field__hint">Niski: ustawowe minimum 2026 (31,40 zł/h)</span>
+              </div>
+              <div class="nb-field">
                 <span class="nb-field__label caption">Czy problem rośnie ze skalą firmy?</span>
                 <div class="nb-pills nb-pills--3">
                   {#each growsOpts as g}<button type="button" class="nb-pill" class:sel={f.growsWithScale===g} onclick={()=>f.growsWithScale=g}>{g}</button>{/each}
@@ -367,8 +451,8 @@
               </div>
               <div class="nb-field"><span class="nb-field__label caption">NIP (opcjonalnie, do faktury)</span><input class="nb-input nb-input--narrow" type="text" bind:value={f.nip} maxlength={15}/></div>
               <div class="nb-consents">
-                <label class="nb-check"><input type="checkbox" bind:checked={f.agreedPrivacy}/><span class="nb-check__box"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><path d="M5 12.5 L10 17.5 L19 6.5" /></svg></span><span>Wyrażam zgodę na przetwarzanie danych zgodnie z <a class="nb-link" href="#" onclick={(e)=>e.preventDefault()}>Polityką Prywatności</a>.</span></label>
-                <label class="nb-check"><input type="checkbox" bind:checked={f.agreedTerms}/><span class="nb-check__box"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><path d="M5 12.5 L10 17.5 L19 6.5" /></svg></span><span>Akceptuję <a class="nb-link" href="#" onclick={(e)=>e.preventDefault()}>Regulamin</a>.</span></label>
+                <label class="nb-check"><input type="checkbox" bind:checked={f.agreedPrivacy}/><span class="nb-check__box"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><path d="M5 12.5 L10 17.5 L19 6.5" /></svg></span><span>Wyrażam zgodę na przetwarzanie danych zgodnie z <a class="nb-link" href="/polityka-prywatnosci">Polityką Prywatności</a>.</span></label>
+                <label class="nb-check"><input type="checkbox" bind:checked={f.agreedTerms}/><span class="nb-check__box"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><path d="M5 12.5 L10 17.5 L19 6.5" /></svg></span><span>Akceptuję <a class="nb-link" href="/regulamin">Regulamin</a>.</span></label>
               </div>
             </div>
           {/if}
@@ -412,7 +496,7 @@
 .nb-brief{background:var(--paper-3);position:relative;}
 
 .nb-brief__shell{display:grid;grid-template-columns:330px 1fr;max-width:1080px;margin:0 auto;
-  background:var(--paper-2);border:1px solid var(--paper-edge);box-shadow:var(--shadow-lift);overflow:hidden;}
+  background:var(--paper-2);border:1px solid var(--paper-edge);box-shadow:var(--shadow-lift);overflow:hidden;transition:min-height 0.28s var(--ease-out);}
 
 /* ---- LEFT rail (dark) ---- */
 .nb-brief__rail{padding:clamp(28px,3vw,38px);display:flex;flex-direction:column;}
@@ -421,9 +505,12 @@
 .nb-brief__rail-name{font-family:var(--font-heading);font-weight:700;font-size:16px;letter-spacing:0.1em;text-transform:uppercase;color:var(--silver);}
 .nb-brief__rail-sub{font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--steel);margin-top:3px;}
 
+
 .nb-brief__steps{list-style:none;margin:26px 0 0;padding:0;display:flex;flex-direction:column;gap:2px;}
-.nb-brief__step{display:flex;align-items:center;gap:14px;padding:10px 0;cursor:default;}
-.nb-brief__step.reach{cursor:pointer;}
+.nb-brief__step{padding:0;}
+.nb-brief__step-btn{display:flex;align-items:center;gap:14px;padding:10px 0;width:100%;background:none;border:none;text-align:left;cursor:default;}
+.nb-brief__step.reach .nb-brief__step-btn{cursor:pointer;}
+.nb-brief__step-btn:disabled{cursor:default;opacity:1;}
 .nb-brief__step-mark{width:30px;height:30px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border:1px solid var(--hair-light);font-family:var(--font-mono);font-size:12px;color:var(--steel);transition:all var(--dur-base) var(--ease-out);}
 .nb-brief__step-label{font-family:var(--font-sans);font-weight:500;font-size:14px;letter-spacing:0.02em;color:var(--steel-dim);transition:color var(--dur-base);}
 .nb-brief__step.is-done .nb-brief__step-mark{background:var(--brass-bright);border-color:var(--brass-bright);color:var(--void);}
@@ -444,8 +531,9 @@
 .nb-brief__roi-note{font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--steel);}
 
 /* ---- RIGHT main (light) ---- */
-.nb-brief__main{padding:clamp(26px,3.2vw,44px);display:flex;flex-direction:column;min-width:0;}
+.nb-brief__main{padding:clamp(26px,3.2vw,44px);display:flex;flex-direction:column;min-width:0;transition:min-height 0.32s var(--ease-out);}
 .nb-brief__progress{margin-bottom:8px;}
+
 .nb-brief__progress-meta{display:flex;justify-content:space-between;margin-bottom:12px;}
 .nb-brief__progress-meta .mono{font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-3);}
 .nb-brief__progress-meta .mono:first-child{color:var(--brass);}
@@ -458,6 +546,8 @@
 @keyframes nb-shake{0%,100%{transform:translateX(0);}20%,60%{transform:translateX(7px);}40%,80%{transform:translateX(-7px);}}
 .nb-brief__q-title{font-family:var(--font-heading);font-weight:700;font-size:clamp(23px,2.6vw,33px);letter-spacing:0.03em;text-transform:uppercase;color:var(--ink);margin:0 0 10px;line-height:1.12;text-wrap:balance;}
 .nb-brief__q-sub{font-size:15px;line-height:1.55;color:var(--ink-3);margin:0 0 28px;max-width:520px;}
+
+.nb-brief__fields{display:block;overflow:visible;}
 
 .nb-stack{display:flex;flex-direction:column;gap:22px;}
 .nb-stack--sm{gap:10px;}
@@ -489,12 +579,14 @@
 .nb-diag{display:flex;align-items:flex-start;gap:18px;width:100%;text-align:left;background:var(--paper);border:1px solid var(--paper-edge);padding:18px 20px;cursor:pointer;transition:border-color var(--dur-base),background var(--dur-base),box-shadow var(--dur-base);}
 .nb-diag:hover{border-color:rgba(184,137,62,0.5);}
 .nb-diag.sel{border-color:var(--brass);background:rgba(184,137,62,0.05);box-shadow:0 8px 24px -14px rgba(184,137,62,0.5);}
+
 .nb-diag__n{font-family:var(--font-mono);font-size:15px;color:var(--brass);flex-shrink:0;padding-top:2px;}
 .nb-diag__txt{flex:1;display:flex;flex-direction:column;gap:4px;}
 .nb-diag__t{font-family:var(--font-heading);font-weight:600;font-size:15px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink);}
 .nb-diag__b{font-size:14px;color:var(--ink-3);}
 .nb-diag__check{flex-shrink:0;width:24px;height:24px;border:1px solid var(--paper-edge);display:flex;align-items:center;justify-content:center;color:transparent;transition:all var(--dur-base);}
 .nb-diag.sel .nb-diag__check{background:var(--brass);border-color:var(--brass);color:var(--void);}
+
 
 /* pills */
 .nb-pills{display:grid;gap:10px;}
@@ -505,6 +597,7 @@
 .nb-pill--wide{text-align:left;letter-spacing:0.04em;font-size:12.5px;}
 .nb-pill:hover{border-color:rgba(184,137,62,0.5);color:var(--brass);}
 .nb-pill.sel{border-color:var(--brass);background:rgba(184,137,62,0.08);color:var(--brass-dark);font-weight:600;}
+
 @media(max-width:520px){.nb-pills--4{grid-template-columns:1fr 1fr;}.nb-pills--2{grid-template-columns:1fr;}}
 
 /* slider */
@@ -530,14 +623,17 @@
 .nb-check{display:flex;align-items:flex-start;gap:13px;padding:13px 15px;border:1px solid var(--paper-edge);background:var(--paper);cursor:pointer;font-size:14px;color:var(--ink-2);line-height:1.5;transition:border-color var(--dur-fast),background var(--dur-fast);}
 .nb-check:hover{border-color:rgba(184,137,62,0.45);}
 .nb-check.sel{border-color:var(--brass);background:rgba(184,137,62,0.05);}
+
 .nb-check input{position:absolute;opacity:0;width:0;height:0;}
 .nb-check__box{flex-shrink:0;width:20px;height:20px;border:1px solid var(--paper-edge);display:flex;align-items:center;justify-content:center;color:transparent;margin-top:1px;transition:all var(--dur-fast);}
 .nb-check input:checked + .nb-check__box{background:var(--brass);border-color:var(--brass);color:var(--void);}
+
 
 /* scope */
 .nb-scope{display:flex;flex-direction:column;gap:4px;width:100%;text-align:left;background:var(--paper);border:1px solid var(--paper-edge);padding:16px 18px;cursor:pointer;transition:all var(--dur-fast);}
 .nb-scope:hover{border-color:rgba(184,137,62,0.5);}
 .nb-scope.sel{border-color:var(--brass);background:rgba(184,137,62,0.06);}
+
 .nb-scope__l{font-family:var(--font-heading);font-weight:600;font-size:15px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink);}
 .nb-scope__d{font-size:13px;color:var(--ink-3);}
 
@@ -566,28 +662,29 @@
 .nb-brief__done-mail{color:var(--brass);}
 
 @media(max-width:860px){
-  .nb-brief__shell{grid-template-columns:1fr;}
-  .nb-brief__rail{border-bottom:1px solid var(--hair-light);}
-  .nb-brief__steps{flex-direction:row;flex-wrap:wrap;gap:8px 18px;}
-  .nb-brief__step{padding:4px 0;}
-  .nb-brief__dossier{margin-top:24px;}
+  .nb-brief__shell{grid-template-columns:1fr;min-height:unset !important;}
+  .nb-brief__main{order:1;padding:22px 18px;min-height:unset !important;}
+  .nb-brief__rail{order:2;border-top:1px solid var(--hair-light);padding:18px;gap:14px;}
+  .nb-brief__rail-top{display:none;}
+  .nb-brief__steps{display:none;}
+  .nb-brief__dossier{margin-top:0;padding-top:0;border-top:none;}
+  .nb-brief__dossier.is-empty{display:none;}
+  .nb-brief__dossier-h{margin-bottom:10px;}
+  .nb-brief__dossier-empty{font-size:12px;line-height:1.45;}
+  .nb-brief__drow{padding:7px 0;}
+  .nb-brief__roi{margin-top:12px;padding:12px 14px;}
+  .nb-brief__nav{position:sticky;bottom:0;background:var(--paper-2);padding-top:16px;padding-bottom:env(safe-area-inset-bottom,0);z-index:2;}
 }
 
 /* ============================================================
    RADIUS SYSTEM — radius scales with element size.
-   Big surfaces = soft (architecture, echoes the round medallion).
-   Controls = gently soft (instruments, same family).
-   Grid-seam cells stay sharp (intentional hairline dividers).
-   Default = soft; body[data-corners="sharp"] restores brand 0px.
-   This block is appended last so it wins on border-radius.
    ============================================================ */
 :root{
-  --r-inset:6px;     /* tiny tiles: checkboxes, icon squares, chips, step marks */
-  --r-control:9px;   /* buttons, inputs, pills, selectable rows */
-  --r-card:14px;     /* standalone cards, frames, callout boxes */
-  --r-shell:18px;    /* large composite surfaces (brief shell) */
+  --r-inset:6px;
+  --r-control:9px;
+  --r-card:14px;
+  --r-shell:18px;
 }
-body[data-corners="sharp"]{--r-inset:0px;--r-control:0px;--r-card:0px;--r-shell:0px;}
 
 /* controls */
 .nb-btn,
@@ -607,13 +704,5 @@ body[data-corners="sharp"]{--r-inset:0px;--r-control:0px;--r-card:0px;--r-shell:
 
 /* large composite surfaces */
 .nb-brief__shell{border-radius:var(--r-shell);}
-
-/* corner brackets belong to the sharp/technical register — only show there */
-body:not([data-corners="sharp"]) .nb-corner{display:none;}
-
-@media(max-width:860px){
-  /* brief shell becomes a stacked single column; keep top soft, square the seam */
-  body:not([data-corners="sharp"]) .nb-brief__rail{border-top-left-radius:var(--r-shell);border-top-right-radius:var(--r-shell);}
-}
 
 </style>
