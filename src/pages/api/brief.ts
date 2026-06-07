@@ -21,6 +21,7 @@ type BriefBody = {
     scope?: string;
     peopleInvolved?: string;
     hoursWeek?: number;
+    laborRate?: string;
     growsWithScale?: string;
     triedBefore?: string[];
     triedNotes?: string;
@@ -44,6 +45,17 @@ function sanitizeInput(text: string | undefined): string {
         allowedTags: [],
         allowedAttributes: {},
     }).trim();
+}
+
+function normalizeUrgency(value?: string): string | undefined {
+    if (!value) return undefined;
+    const normalized = value.trim().toLowerCase();
+    if (normalized === 'palace') return 'urgent';
+    if (normalized === 'miesiac') return 'high';
+    if (normalized === 'kwartal') return 'medium';
+    if (normalized === 'rozwazam') return 'low';
+    if (normalized === 'urgent' || normalized === 'high' || normalized === 'medium' || normalized === 'low') return normalized;
+    return undefined;
 }
 
 function validate(body: BriefBody): string | null {
@@ -140,11 +152,12 @@ export const POST: APIRoute = async ({ request }) => {
             problemDescription: sanitizedBody.problem,
             attachments: uploadedAttachmentIds,
             hoursWeek: Number(sanitizedBody.hoursWeek || 0),
+            laborRate: (sanitizedBody.laborRate === 'low' || sanitizedBody.laborRate === 'mid' || sanitizedBody.laborRate === 'high') ? sanitizedBody.laborRate : 'mid',
             peopleInvolved: sanitizedBody.peopleInvolved || '',
             growsWithScale: sanitizedBody.growsWithScale || '',
             triedBefore: sanitizedBody.triedBefore,
             triedNotes: sanitizedBody.triedNotes,
-            urgency: sanitizedBody.urgency || undefined,
+            urgency: normalizeUrgency(sanitizedBody.urgency),
             scope: sanitizedBody.scope || undefined,
             budget: sanitizedBody.budget || '',
             agreedPrivacy: !!sanitizedBody.agreedPrivacy,

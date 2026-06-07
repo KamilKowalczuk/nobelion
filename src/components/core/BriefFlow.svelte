@@ -250,7 +250,7 @@
   const peopleOpts = ["1","2-3","4-10","10+"];
   const growsOpts = ["Tak","Nie","Nie wiem"];
   const triedOpts = ["Zatrudnić nową osobę","Inny software","Inna agencja","Coś w Excelu","Nic nie próbowaliśmy"];
-  const urgencyOpts = [{v:"palace",l:"Wczoraj, palące"},{v:"miesiac",l:"W tym miesiącu"},{v:"kwartal",l:"W tym kwartale"},{v:"rozwazam",l:"Rozważam, brak deadline"}];
+  const urgencyOpts = [{v:"urgent",l:"Wczoraj, palące"},{v:"high",l:"W tym miesiącu"},{v:"medium",l:"W tym kwartale"},{v:"low",l:"Rozważam, brak deadline"}];
   const scopeOpts = [{v:"mvp",l:"Tylko MVP",d:"najszybciej, działa, koszt minimalny"},{v:"pelny",l:"Pełny system",d:"solidnie, długoterminowo"},{v:"doradzcie",l:"Nie wiem, doradźcie",d:"pomóżcie wybrać"}];
   const budgetOpts = ["< 5 000 zł","5 000 – 15 000 zł","15 000 – 50 000 zł","> 50 000 zł","Nie wiem, dopasujcie"];
   
