@@ -10,6 +10,7 @@
   
   let isSubmitting = $state(false);
   let submitState = $state<"idle" | "success" | "error">("idle");
+  let submitError = $state("");
   let placeholderIndex = $state(0);
   let shake = $state(false);
   let shellEl = $state<HTMLElement | null>(null);
@@ -209,20 +210,27 @@
     if (f.honeypot !== "") { submitState = "success"; return; }
 
     isSubmitting = true;
+    submitError = "";
     try {
-      const formData = new FormData();
-      formData.set("data", JSON.stringify(f));
-      for (const attachment of attachments) {
-        formData.append("attachments", attachment.file);
+      const init: RequestInit = { method: "POST" };
+      if (attachments.length > 0) {
+        const formData = new FormData();
+        formData.set("data", JSON.stringify(f));
+        for (const attachment of attachments) {
+          formData.append("attachments", attachment.file);
+        }
+        init.body = formData;
+      } else {
+        init.headers = { "Content-Type": "application/json" };
+        init.body = JSON.stringify(f);
       }
-      const res = await fetch("/api/brief", {
-        method:"POST",
-        body: formData
-      });
-      if (!res.ok) throw new Error("Submit failed");
+      const res = await fetch("/api/brief", init);
+      const data = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(data?.error || "Nie udało się wysłać briefu.");
       submitState = "success";
     } catch (e) {
       console.error(e);
+      submitError = e instanceof Error ? e.message : "Nie udało się wysłać briefu.";
       submitState = "error";
     } finally { isSubmitting = false; }
   }
@@ -529,6 +537,9 @@
           {/if}
 
           <input type="text" tabindex={-1} autocomplete="off" bind:value={f.honeypot} class="nb-honeypot" aria-hidden="true"/>
+          {#if submitState === "error" && submitError}
+            <div class="nb-brief__submit-error">{submitError}</div>
+          {/if}
         </div>
       </div>
 
@@ -696,6 +707,7 @@
 .nb-drop__size{font-family:var(--font-mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-4);}
 .nb-drop__remove{background:none;border:none;padding:0;font-family:var(--font-mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--danger);cursor:pointer;}
 .nb-drop__error{font-family:var(--font-mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--danger);}
+.nb-brief__submit-error{margin-top:18px;padding:12px 14px;border:1px solid rgba(180,40,40,0.35);background:rgba(180,40,40,0.06);border-radius:var(--r-control);font-size:13px;line-height:1.45;color:var(--danger);}
 
 /* checkboxes */
 .nb-checks{display:flex;flex-direction:column;gap:8px;}
