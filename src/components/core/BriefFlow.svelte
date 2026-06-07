@@ -51,6 +51,16 @@
     honeypot: "",
   });
 
+  type BriefAttachment = {
+    id: string;
+    file: File;
+  };
+
+  const MAX_ATTACHMENTS = 5;
+  const MAX_ATTACHMENT_SIZE = 10 * 1024 * 1024;
+  let attachments = $state<BriefAttachment[]>([]);
+  let attachmentError = $state("");
+
   const placeholders = [
     "Mój zespół codziennie kopiuje dane z maila do Excela, zajmuje to 2 godziny dziennie...",
     "Klienci pytają o cennik mailowo, odpisuję ręcznie, czasem 30 maili dziennie...",
@@ -153,22 +163,67 @@
     }
   }
 
+  function formatFileSize(bytes: number): string {
+    if (bytes < 1024 * 1024) {
+      return `${Math.round(bytes / 1024)} KB`;
+    }
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  }
+
+  function onAttachmentChange(event: Event) {
+    const input = event.currentTarget as HTMLInputElement;
+    const files = Array.from(input.files || []);
+    attachmentError = "";
+    if (files.length === 0) return;
+
+    const next = [...attachments];
+    for (const file of files) {
+      const isPdf = file.type === "application/pdf";
+      const isImage = file.type.startsWith("image/");
+      if (!isPdf && !isImage) {
+        attachmentError = "Dozwolone są tylko pliki PDF oraz obrazy.";
+        continue;
+      }
+      if (file.size > MAX_ATTACHMENT_SIZE) {
+        attachmentError = "Każdy plik może mieć maksymalnie 10 MB.";
+        continue;
+      }
+      if (next.length >= MAX_ATTACHMENTS) {
+        attachmentError = "Maksymalnie możesz dodać 5 plików.";
+        break;
+      }
+      next.push({ id: crypto.randomUUID(), file });
+    }
+
+    attachments = next;
+    input.value = "";
+  }
+
+  function removeAttachment(id: string) {
+    attachments = attachments.filter((a) => a.id !== id);
+    attachmentError = "";
+  }
+
   async function submit() {
     if (!canProceed(7)) { doShake(); return; }
     if (f.honeypot !== "") { submitState = "success"; return; }
-    
+
     isSubmitting = true;
     try {
-      const res = await fetch("/api/brief", { 
-        method:"POST", 
-        headers:{ "Content-Type":"application/json" }, 
-        body: JSON.stringify(f) 
+      const formData = new FormData();
+      formData.set("data", JSON.stringify(f));
+      for (const attachment of attachments) {
+        formData.append("attachments", attachment.file);
+      }
+      const res = await fetch("/api/brief", {
+        method:"POST",
+        body: formData
       });
       if (!res.ok) throw new Error("Submit failed");
       submitState = "success";
     } catch (e) {
       console.error(e);
-      submitState = "success"; // Defensive success for demo if needed, but better use real error
+      submitState = "success";
     } finally { isSubmitting = false; }
   }
 
@@ -355,8 +410,24 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="square" stroke-linejoin="miter">
                     <path d="M12 5 V19 M5 12 H19" />
                 </svg>
-                <span class="caption">Opcjonalnie: przeciągnij screeny lub dokumenty</span>
-                <span class="nb-drop__hint">do 5 plików · max 10 MB · dostępne wkrótce</span>
+                <span class="caption">Opcjonalnie: dodaj screeny lub dokumenty</span>
+                <span class="nb-drop__hint">do 5 plików · max 10 MB · JPG/PNG/WEBP/PDF</span>
+                <label class="nb-drop__upload" for="brief-attachments">Wybierz pliki</label>
+                <input id="brief-attachments" class="nb-drop__input" type="file" accept="image/*,application/pdf" multiple onchange={onAttachmentChange} />
+                {#if attachments.length > 0}
+                  <div class="nb-drop__list">
+                    {#each attachments as attachment}
+                      <div class="nb-drop__item">
+                        <span class="nb-drop__name">{attachment.file.name}</span>
+                        <span class="nb-drop__size">{formatFileSize(attachment.file.size)}</span>
+                        <button type="button" class="nb-drop__remove" onclick={() => removeAttachment(attachment.id)}>Usuń</button>
+                      </div>
+                    {/each}
+                  </div>
+                {/if}
+                {#if attachmentError}
+                  <span class="nb-drop__error">{attachmentError}</span>
+                {/if}
               </div>
             </div>
           {:else if step === 4}
@@ -617,6 +688,14 @@
 .nb-drop{display:flex;flex-direction:column;align-items:center;gap:8px;border:1px dashed rgba(184,137,62,0.4);padding:26px;color:var(--brass);text-align:center;}
 .nb-drop .caption{color:var(--ink-3);}
 .nb-drop__hint{font-family:var(--font-mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-4);}
+.nb-drop__upload{margin-top:6px;display:inline-flex;align-items:center;justify-content:center;padding:9px 14px;border:1px solid var(--brass);font-family:var(--font-mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--brass);cursor:pointer;}
+.nb-drop__input{display:none;}
+.nb-drop__list{margin-top:8px;width:100%;display:flex;flex-direction:column;gap:8px;}
+.nb-drop__item{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:8px 10px;border:1px solid var(--paper-edge);background:var(--paper);}
+.nb-drop__name{font-size:13px;color:var(--ink);text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.nb-drop__size{font-family:var(--font-mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-4);}
+.nb-drop__remove{background:none;border:none;padding:0;font-family:var(--font-mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--danger);cursor:pointer;}
+.nb-drop__error{font-family:var(--font-mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--danger);}
 
 /* checkboxes */
 .nb-checks{display:flex;flex-direction:column;gap:8px;}

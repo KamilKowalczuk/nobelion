@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { createDoc } from '../../lib/payload';
+import { createDoc, uploadFile } from '../../lib/payload';
 import { sendBriefConfirmation, sendInternalNewBrief } from '../../lib/email';
 import sanitizeHtml from 'sanitize-html';
 
@@ -29,6 +29,10 @@ type BriefBody = {
     honeypot?: string;
 };
 
+type PayloadUploadDoc = {
+    id: string | number;
+};
+
 function isEmail(value: string): boolean {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
@@ -54,15 +58,35 @@ function validate(body: BriefBody): string | null {
 
 export const POST: APIRoute = async ({ request }) => {
     let body: BriefBody;
-    try {
-        body = await request.json();
-    } catch {
-        return new Response(JSON.stringify({ error: 'Nieprawidłowy JSON' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+    let files: File[] = [];
+
+    const contentType = request.headers.get('content-type') || '';
+
+    if (contentType.includes('multipart/form-data')) {
+        let formData: FormData;
+        try {
+            formData = await request.formData();
+        } catch {
+            return new Response(JSON.stringify({ error: 'Nieprawidłowe dane formularza' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+        }
+        const dataRaw = formData.get('data');
+        if (typeof dataRaw !== 'string') {
+            return new Response(JSON.stringify({ error: 'Brak danych briefu' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+        }
+        try {
+            body = JSON.parse(dataRaw) as BriefBody;
+        } catch {
+            return new Response(JSON.stringify({ error: 'Nieprawidłowy JSON w polu data' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+        }
+        files = formData.getAll('attachments').filter((entry): entry is File => entry instanceof File && entry.size > 0);
+    } else {
+        try {
+            body = await request.json();
+        } catch {
+            return new Response(JSON.stringify({ error: 'Nieprawidłowy JSON' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+        }
     }
 
-    // Sanityzacja danych wejściowych przed walidacją (ochrona XSS w Payload admin panel i mailach)
-    // UWAGA: email i phone NIE przechodzą przez sanitize-html — mają własną walidację
-    //         i sanitizer HTML może uszkodzić znaki specjalne (np. @ w adresie email)
     const sanitizedBody: BriefBody = {
         ...body,
         name: sanitizeInput(body.name),
@@ -81,6 +105,28 @@ export const POST: APIRoute = async ({ request }) => {
     if (error) return new Response(JSON.stringify({ error }), { status: 400, headers: { 'Content-Type': 'application/json' } });
 
     try {
+        const uploadedAttachmentIds: Array<string | number> = [];
+        const allowedMimeTypes = new Set(['application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'image/gif']);
+        for (const file of files) {
+            if (!allowedMimeTypes.has(file.type)) {
+                return new Response(JSON.stringify({ error: 'Dozwolone są tylko pliki PDF oraz obrazy.' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+            }
+            if (file.size > 10 * 1024 * 1024) {
+                return new Response(JSON.stringify({ error: 'Każdy załącznik może mieć maksymalnie 10 MB.' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+            }
+        }
+        if (files.length > 5) {
+            return new Response(JSON.stringify({ error: 'Maksymalnie 5 załączników.' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+        }
+
+        for (const file of files) {
+            const uploaded = await uploadFile('media', file) as PayloadUploadDoc | null;
+            if (!uploaded?.id) {
+                return new Response(JSON.stringify({ error: 'Nie udało się przesłać załączników.' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+            }
+            uploadedAttachmentIds.push(uploaded.id);
+        }
+
         const payloadDoc = await createDoc('briefs', {
             clientName: sanitizedBody.name,
             clientEmail: sanitizedBody.email,
@@ -92,6 +138,7 @@ export const POST: APIRoute = async ({ request }) => {
             size: sanitizedBody.size || '',
             tools: sanitizedBody.tools,
             problemDescription: sanitizedBody.problem,
+            attachments: uploadedAttachmentIds,
             hoursWeek: Number(sanitizedBody.hoursWeek || 0),
             peopleInvolved: sanitizedBody.peopleInvolved || '',
             growsWithScale: sanitizedBody.growsWithScale || '',

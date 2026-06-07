@@ -9,10 +9,12 @@ function getBaseUrl(): string {
     return url;
 }
 
-function getHeaders(): Record<string, string> {
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+function getHeaders(json = true): Record<string, string> {
+    const headers: Record<string, string> = {};
+    if (json) {
+        headers['Content-Type'] = 'application/json';
+    }
     const apiKey = env.PAYLOAD_API_KEY;
-    // Tylko dodaj nagłówek autoryzacji jeśli klucz jest ustawiony i nie jest placeholderem
     if (apiKey && !apiKey.includes('PASTE_') && apiKey.length > 10) {
         headers.Authorization = `users API-Key ${apiKey}`;
     }
@@ -61,6 +63,28 @@ export async function createDoc(collection: string, data: Record<string, unknown
     } catch (err: any) {
         console.error(`[payload] createDoc ${collection} network error:`, err?.message);
         return { error: true, message: err?.message };
+    }
+}
+
+export async function uploadFile(collection: string, file: File): Promise<any | null> {
+    const url = `${getBaseUrl()}/api/${collection}`;
+    const formData = new FormData();
+    formData.set('file', file, file.name);
+    try {
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: getHeaders(false),
+            body: formData,
+        });
+        if (!res.ok) {
+            const body = await res.text().catch(() => '');
+            console.error(`[payload] uploadFile ${collection} failed: ${res.status}`, body);
+            return null;
+        }
+        return await res.json();
+    } catch (err: any) {
+        console.error(`[payload] uploadFile ${collection} network error:`, err?.message);
+        return null;
     }
 }
 
