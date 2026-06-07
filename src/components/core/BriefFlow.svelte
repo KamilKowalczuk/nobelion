@@ -223,7 +223,7 @@
       submitState = "success";
     } catch (e) {
       console.error(e);
-      submitState = "success";
+      submitState = "error";
     } finally { isSubmitting = false; }
   }
 
