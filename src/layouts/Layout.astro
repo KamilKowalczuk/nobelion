@@ -269,14 +269,16 @@ import '@fontsource/jetbrains-mono/400.css';
             // === FLOATING CTA ===
             const floatingCta = document.getElementById('floating-cta');
             const heroEl = document.getElementById('hero');
+            const briefEl = document.getElementById('brief');
             const footerEl = document.querySelector('.nb-footer');
 
             if (floatingCta && heroEl) {
                 let heroVisible = true;
+                let briefVisible = false;
                 let bottomVisible = false;
 
                 const refreshCta = () => {
-                    const show = !heroVisible && !bottomVisible;
+                    const show = !heroVisible && !briefVisible && !bottomVisible;
                     floatingCta.classList.toggle('opacity-0', !show);
                     floatingCta.classList.toggle('pointer-events-none', !show);
                     floatingCta.classList.toggle('opacity-100', show);
@@ -286,6 +288,13 @@ import '@fontsource/jetbrains-mono/400.css';
                     heroVisible = entry.isIntersecting;
                     refreshCta();
                 }, { threshold: 0.1 }).observe(heroEl);
+
+                if (briefEl) {
+                    new IntersectionObserver(([entry]) => {
+                        briefVisible = entry.isIntersecting;
+                        refreshCta();
+                    }, { threshold: 0.05 }).observe(briefEl);
+                }
 
                 if (footerEl) {
                     new IntersectionObserver(([entry]) => {
