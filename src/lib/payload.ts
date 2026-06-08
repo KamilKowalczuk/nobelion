@@ -76,12 +76,14 @@ export async function uploadFile(collection: string, file: File): Promise<any | 
             headers: getHeaders(false),
             body: formData,
         });
+        const responseText = await res.text().catch(() => '');
         if (!res.ok) {
-            const body = await res.text().catch(() => '');
-            console.error(`[payload] uploadFile ${collection} failed: ${res.status}`, body);
+            console.error(`[payload] uploadFile ${collection} failed: ${res.status}`, responseText);
             return null;
         }
-        return await res.json();
+        if (!responseText) return null;
+        const data = JSON.parse(responseText);
+        return data?.doc || data;
     } catch (err: any) {
         console.error(`[payload] uploadFile ${collection} network error:`, err?.message);
         return null;

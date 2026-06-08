@@ -134,6 +134,7 @@ export const POST: APIRoute = async ({ request }) => {
         for (const file of files) {
             const uploaded = await uploadFile('media', file) as PayloadUploadDoc | null;
             if (!uploaded?.id) {
+                console.error('[brief API] Upload attachment failed or returned no id:', JSON.stringify(uploaded));
                 return new Response(JSON.stringify({ error: 'Nie udało się przesłać załączników.' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
             }
             uploadedAttachmentIds.push(uploaded.id);
