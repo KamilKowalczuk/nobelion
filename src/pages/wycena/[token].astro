@@ -20,213 +20,193 @@ try {
   errorMsg = 'Błąd połączenia z serwerem.';
 }
 
-const blocks: any[] = quoteData?.content || [];
 const fullPrice: number = quoteData?.totalPrice || 0;
 const discountedPrice = Math.round(fullPrice * 0.9);
 const briefCompany: string = quoteData?.brief?.company || 'Klienta';
 const briefProblem: string = quoteData?.brief?.problemDescription || '';
+const timelinePhases: any[] = quoteData?.timelinePhases || [];
+const scopeItems: any[] = quoteData?.scopeItems || [];
 
-// ─── Lexical JSON → HTML ────────────────────────────────────────────────────
-function lexicalToHtml(editorState: unknown): string {
-  if (!editorState || typeof editorState !== 'object') return '';
-  const state = editorState as { root?: { children?: unknown[] } };
-  if (!state.root?.children) return '';
+// ─── Lexical JSON → HTML ────────────────────────────────────────────────
+function lexicalToHtml(state: unknown): string {
+  if (!state || typeof state !== 'object') return '';
+  const s = state as { root?: { children?: unknown[] } };
+  if (!s.root?.children) return '';
 
   const BOLD = 1, ITALIC = 2, UNDERLINE = 8;
 
-  function serializeNode(node: any): string {
-    if (node.type === 'text') {
-      let t = (node.text || '')
-        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-      if (node.format & BOLD) t = `<strong>${t}</strong>`;
-      if (node.format & ITALIC) t = `<em>${t}</em>`;
-      if (node.format & UNDERLINE) t = `<u>${t}</u>`;
+  function node(n: any): string {
+    if (n.type === 'text') {
+      let t = (n.text || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      if (n.format & BOLD) t = `<strong>${t}</strong>`;
+      if (n.format & ITALIC) t = `<em>${t}</em>`;
+      if (n.format & UNDERLINE) t = `<u>${t}</u>`;
       return t;
     }
-    if (node.type === 'linebreak') return '<br>';
+    if (n.type === 'linebreak') return '<br>';
 
-    const children = (node.children || []).map(serializeNode).join('');
+    const ch = (n.children || []).map(node).join('');
 
-    switch (node.type) {
-      case 'paragraph': return children ? `<p class="mb-4 text-steel leading-relaxed">${children}</p>` : '';
-      case 'heading': {
-        const tag = node.tag || 'h3';
-        const cls = tag === 'h2'
-          ? 'text-xl font-heading text-white mb-3 mt-8 tracking-wide uppercase'
-          : 'text-lg font-heading text-white/90 mb-2 mt-6 tracking-wide uppercase';
-        return `<${tag} class="${cls}">${children}</${tag}>`;
-      }
-      case 'list': return node.listType === 'number'
-        ? `<ol class="list-decimal list-inside space-y-2 mb-4 text-steel">${children}</ol>`
-        : `<ul class="space-y-2 mb-4 text-steel">${children}</ul>`;
-      case 'listitem': return node.listType === 'number'
-        ? `<li>${children}</li>`
-        : `<li class="flex items-start gap-2"><span class="text-brass mt-0.5">—</span><span>${children}</span></li>`;
-      case 'link': return `<a href="${node.url || '#'}" target="_blank" rel="noopener noreferrer" class="text-brass underline underline-offset-2 hover:text-white transition-colors">${children}</a>`;
-      case 'quote': return `<blockquote class="border-l-2 border-brass/40 pl-4 my-4 italic text-steel">${children}</blockquote>`;
-      default: return children;
+    switch (n.type) {
+      case 'paragraph': return ch ? `<p>${ch}</p>` : '';
+      case 'heading':
+        return `<h3 class="ql-h3">${ch}</h3>`;
+      case 'list': return n.listType === 'number'
+        ? `<ol class="ql-ol">${ch}</ol>`
+        : `<ul class="ql-ul">${ch}</ul>`;
+      case 'listitem': return `<li>${ch}</li>`;
+      case 'link':
+        return `<a href="${n.url || '#'}" target="_blank" rel="noopener noreferrer" class="ql-link">${ch}</a>`;
+      case 'quote':
+        return `<blockquote class="ql-blockquote">${ch}</blockquote>`;
+      default: return ch;
     }
   }
 
-  return (state.root.children as any[]).map(serializeNode).join('');
+  return (s.root.children as any[]).map(node).join('');
 }
 
-// Tekst z textarea → HTML z akapitami (zachowuje puste linie)
-function textareaToHtml(text: string): string {
-  if (!text) return '';
-  return text
-    .split(/\n\n+/)
-    .map(para => `<p class="mb-4 text-steel leading-relaxed">${para.replace(/\n/g, '<br>')}</p>`)
-    .join('');
-}
-
-// Bezpieczne renderowanie bloku richText (obsługuje zarówno textarea string jak i Lexical JSON)
-function renderRichText(value: unknown): string {
-  if (typeof value === 'string') return textareaToHtml(value);
-  return lexicalToHtml(value);
-}
+const introHtml = lexicalToHtml(quoteData?.intro);
 ---
 
-<Layout title="Wycena Projektu — Nobelion" description="Twoja indywidualna wycena projektu.">
-  <main class="min-h-screen bg-void pt-32 pb-24 px-4 md:px-12 selection:bg-brass/30 selection:text-white relative">
+<Layout title={`Wycena projektu — ${briefCompany} | Nobelion`} description="Twoja indywidualna wycena projektu.">
 
-    <!-- Subtelny grid tła -->
-    <div class="fixed inset-0 pointer-events-none opacity-[0.025] z-0" aria-hidden="true">
-      <div class="absolute inset-0" style="background-image: linear-gradient(to right, #ffffff 1px, transparent 1px), linear-gradient(to bottom, #ffffff 1px, transparent 1px); background-size: 4rem 4rem;"></div>
+<style>
+  /* Rich text styles dla intro (dark context) */
+  .rt p { color: #9AA3B4; line-height: 1.7; margin-bottom: 1rem; }
+  .rt .ql-h3 { font-family: var(--font-heading, serif); font-size: 1.1rem; letter-spacing: 0.1em; text-transform: uppercase; color: #fff; margin: 2rem 0 0.75rem; }
+  .rt .ql-ul, .rt .ql-ol { color: #9AA3B4; padding-left: 0; margin-bottom: 1rem; }
+  .rt .ql-ul li, .rt .ql-ol li { display: flex; gap: 0.625rem; align-items: baseline; margin-bottom: 0.5rem; list-style: none; }
+  .rt .ql-ul li::before { content: "—"; color: #B8893E; flex-shrink: 0; }
+  .rt .ql-ol { counter-reset: ol-counter; }
+  .rt .ql-ol li { counter-increment: ol-counter; }
+  .rt .ql-ol li::before { content: counter(ol-counter) "."; color: #B8893E; flex-shrink: 0; min-width: 1.25rem; }
+  .rt .ql-link { color: #C5A059; text-decoration: underline; text-underline-offset: 3px; }
+  .rt .ql-link:hover { color: #fff; }
+  .rt .ql-blockquote { border-left: 2px solid rgba(197,160,89,0.4); padding-left: 1rem; margin: 1rem 0; color: #9AA3B4; font-style: italic; }
+  .rt strong { color: #ECEAE4; }
+</style>
+
+  <main class="min-h-screen pt-32 pb-24 px-4 md:px-12 relative selection:bg-brass/30 selection:text-white" style="background: #060709;">
+
+    <!-- Subtelny grid -->
+    <div class="fixed inset-0 pointer-events-none z-0" style="opacity:0.02;" aria-hidden="true">
+      <div class="absolute inset-0" style="background-image:linear-gradient(to right,#fff 1px,transparent 1px),linear-gradient(to bottom,#fff 1px,transparent 1px);background-size:4rem 4rem;"></div>
     </div>
 
     <div class="max-w-5xl mx-auto relative z-10">
       {errorMsg ? (
-        <div class="text-center py-20">
-          <p class="font-mono text-brass text-xs tracking-[0.3em] uppercase mb-4">Błąd</p>
+        <div class="text-center py-24">
+          <p class="font-mono text-xs uppercase tracking-[0.3em] mb-4" style="color:#C5A059;">Błąd</p>
           <h1 class="text-3xl font-heading text-white mb-4 tracking-wide uppercase">Nie znaleziono wyceny</h1>
-          <p class="text-steel">{errorMsg}</p>
+          <p style="color:#9AA3B4;">{errorMsg}</p>
         </div>
       ) : (
-        <div class="border border-white/10 shadow-2xl overflow-hidden" style="background: #0E121C;">
+        <div class="border overflow-hidden" style="border-color:rgba(255,255,255,0.08);background:#0E121C;">
 
           {/* ── Header ── */}
-          <div class="p-8 md:p-12 border-b border-white/5" style="background: linear-gradient(135deg, rgba(197,160,89,0.08) 0%, transparent 60%);">
-            <div class="inline-block px-3 py-1 mb-6 border border-brass/30 text-brass text-xs uppercase tracking-widest font-mono">
+          <div class="p-8 md:p-12 border-b" style="border-color:rgba(255,255,255,0.05);background:linear-gradient(135deg,rgba(197,160,89,0.07) 0%,transparent 60%);">
+            <div class="inline-block px-3 py-1 mb-6 border text-xs uppercase tracking-widest font-mono" style="border-color:rgba(197,160,89,0.3);color:#C5A059;">
               Propozycja Wdrożenia
             </div>
             <h1 class="text-3xl md:text-5xl font-heading font-light tracking-[0.08em] text-white mb-4 uppercase">
-              Wycena dla <span class="text-brass font-normal">{briefCompany}</span>
+              Wycena dla <span style="color:#C5A059;">{briefCompany}</span>
             </h1>
-            <p class="text-steel text-lg max-w-2xl leading-relaxed">
+            <p style="color:#9AA3B4;" class="text-lg max-w-2xl leading-relaxed">
               Zgodnie z naszymi ustaleniami, przedstawiamy dedykowany plan inwestycji oraz szczegóły technologiczne dla Twojego rozwiązania.
             </p>
           </div>
 
-          {/* ── Body: lewa + prawa kolumna ── */}
+          {/* ── Ciało ── */}
           <div class="p-8 md:p-12 grid grid-cols-1 lg:grid-cols-3 gap-12">
 
-            {/* Lewa kolumna: bloki treści */}
+            {/* Lewa kolumna: treść */}
             <div class="lg:col-span-2 space-y-10">
 
-              {blocks.length > 0 ? blocks.map((block: any) => {
+              {/* Intro (richText) */}
+              {introHtml ? (
+                <section class="rt" set:html={introHtml} />
+              ) : briefProblem ? (
+                <section>
+                  <h2 class="text-lg font-heading text-white mb-4 pb-3 border-b tracking-wide uppercase" style="border-color:rgba(255,255,255,0.08);">Wyzwanie</h2>
+                  <p style="color:#9AA3B4;" class="leading-relaxed whitespace-pre-wrap">{briefProblem}</p>
+                </section>
+              ) : null}
 
-                // ── Sekcja Tekstowa ──────────────────────────────────
-                if (block.blockType === 'richText') {
-                  return (
-                    <section>
-                      {block.heading && (
-                        <h2 class="text-xl font-heading text-white mb-5 pb-3 border-b border-white/10 tracking-wide uppercase">
-                          {block.heading}
-                        </h2>
-                      )}
-                      <div set:html={renderRichText(block.text)} />
-                    </section>
-                  );
-                }
-
-                // ── Etap Prac ────────────────────────────────────────
-                if (block.blockType === 'timeline') {
-                  return (
-                    <section class="border-l border-brass/30 pl-6 relative">
-                      <div class="absolute w-2.5 h-2.5 bg-brass rounded-full -left-[5px] top-1.5" aria-hidden="true"></div>
-                      <div class="flex items-baseline gap-3 mb-2 flex-wrap">
-                        <h3 class="text-lg font-heading text-white tracking-wide uppercase">{block.phaseName}</h3>
-                        {block.duration && (
-                          <span class="font-mono text-xs text-brass bg-brass/10 border border-brass/20 px-2 py-0.5">
-                            {block.duration}
-                          </span>
+              {/* Timeline (etapy) */}
+              {timelinePhases.length > 0 && (
+                <section>
+                  <h2 class="text-lg font-heading text-white mb-6 pb-3 border-b tracking-wide uppercase" style="border-color:rgba(255,255,255,0.08);">Plan realizacji</h2>
+                  <div class="space-y-6">
+                    {timelinePhases.map((phase: any) => (
+                      <div class="border-l pl-6 relative" style="border-color:rgba(197,160,89,0.3);">
+                        <div class="absolute w-2.5 h-2.5 rounded-full -left-[5px] top-1.5" style="background:#C5A059;" aria-hidden="true"></div>
+                        <div class="flex items-baseline gap-3 mb-1.5 flex-wrap">
+                          <h3 class="font-heading text-white tracking-wide uppercase text-base">{phase.phaseName}</h3>
+                          {phase.duration && (
+                            <span class="font-mono text-xs px-2 py-0.5 border" style="color:#C5A059;border-color:rgba(197,160,89,0.25);background:rgba(197,160,89,0.07);">
+                              {phase.duration}
+                            </span>
+                          )}
+                        </div>
+                        {phase.description && (
+                          <p style="color:#9AA3B4;" class="leading-relaxed whitespace-pre-wrap text-sm">{phase.description}</p>
                         )}
                       </div>
-                      {block.description && (
-                        <p class="text-steel leading-relaxed whitespace-pre-wrap">{block.description}</p>
-                      )}
-                    </section>
-                  );
-                }
+                    ))}
+                  </div>
+                </section>
+              )}
 
-                // ── Lista Deliverables ───────────────────────────────
-                if (block.blockType === 'deliverables') {
-                  return (
-                    <section>
-                      {block.title && (
-                        <h2 class="text-xl font-heading text-white mb-5 pb-3 border-b border-white/10 tracking-wide uppercase">
-                          {block.title}
-                        </h2>
-                      )}
-                      <ul class="space-y-3">
-                        {(block.items || []).map((item: any) => {
-                          const isIncluded = item.included !== 'excluded';
-                          return (
-                            <li class="flex items-start gap-3">
-                              <span class={`mt-0.5 shrink-0 text-sm font-bold ${isIncluded ? 'text-brass' : 'text-steel-dim'}`}>
-                                {isIncluded ? '✓' : '✗'}
-                              </span>
-                              <span class={`leading-relaxed ${isIncluded ? 'text-silver' : 'text-steel line-through opacity-60'}`}>
-                                {item.item}
-                              </span>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    </section>
-                  );
-                }
-
-                return null;
-              }) : (
-                // Fallback: pokaż opis problemu z briefu jeśli brak bloków
+              {/* Scope items (deliverables) */}
+              {scopeItems.length > 0 && (
                 <section>
-                  <h2 class="text-xl font-heading text-white mb-5 pb-3 border-b border-white/10 tracking-wide uppercase">Wyzwanie</h2>
-                  <p class="text-steel leading-relaxed whitespace-pre-wrap">{briefProblem}</p>
+                  <h2 class="text-lg font-heading text-white mb-4 pb-3 border-b tracking-wide uppercase" style="border-color:rgba(255,255,255,0.08);">Zakres prac</h2>
+                  <ul class="space-y-3">
+                    {scopeItems.map((s: any) => {
+                      const ok = s.included !== 'excluded';
+                      return (
+                        <li class="flex items-start gap-3">
+                          <span class="shrink-0 mt-0.5 text-sm font-bold" style={ok ? 'color:#C5A059;' : 'color:#5C6478;'}>
+                            {ok ? '✓' : '✗'}
+                          </span>
+                          <span class={ok ? '' : 'opacity-50 line-through'} style={ok ? 'color:#ECEAE4;' : 'color:#9AA3B4;'}>
+                            {s.item}
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
                 </section>
               )}
 
               {/* Utrzymanie */}
               {quoteData.maintenancePrice ? (
-                <section class="relative overflow-hidden p-6 md:p-8 border border-white/10" style="background: rgba(255,255,255,0.03);">
-                  <div class="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl -mr-10 -mt-10" style="background: rgba(197,160,89,0.08);" aria-hidden="true"></div>
-                  <h2 class="text-xl font-heading text-white mb-4 tracking-wide uppercase">Opcjonalne wsparcie i utrzymanie</h2>
-                  <div class="text-3xl font-heading text-brass mb-4">
+                <section class="relative overflow-hidden p-6 md:p-8 border" style="border-color:rgba(255,255,255,0.08);background:rgba(255,255,255,0.02);">
+                  <h2 class="text-lg font-heading text-white mb-4 tracking-wide uppercase">Opcjonalne wsparcie i utrzymanie</h2>
+                  <div class="text-3xl font-heading mb-4" style="color:#C5A059;">
                     {new Intl.NumberFormat('pl-PL').format(quoteData.maintenancePrice)} PLN
-                    <span class="text-sm text-steel font-sans font-normal uppercase tracking-wider ml-2">/ miesiąc</span>
+                    <span class="text-sm font-sans font-normal uppercase tracking-wider ml-2" style="color:#9AA3B4;">/ miesiąc</span>
                   </div>
                   {quoteData.maintenanceDescription && (
-                    <p class="text-steel mb-6 whitespace-pre-wrap leading-relaxed">{quoteData.maintenanceDescription}</p>
+                    <p class="mb-5 leading-relaxed whitespace-pre-wrap text-sm" style="color:#9AA3B4;">{quoteData.maintenanceDescription}</p>
                   )}
-                  <label class="flex items-start gap-4 cursor-pointer p-4 border border-white/10 hover:border-brass/50 transition-colors duration-200" style="background: rgba(6,7,9,0.5);">
-                    <div class="pt-1">
-                      <input type="checkbox" id="maintenance-checkbox" class="w-5 h-5 accent-brass" checked={quoteData.clientSelectedMaintenance} />
-                    </div>
+                  <label class="flex items-start gap-4 cursor-pointer p-4 border hover:border-brass/50 transition-colors duration-200" style="border-color:rgba(255,255,255,0.08);background:rgba(6,7,9,0.5);">
+                    <input type="checkbox" id="maintenance-checkbox" class="w-5 h-5 mt-0.5" style="accent-color:#C5A059;" checked={quoteData.clientSelectedMaintenance} />
                     <div>
-                      <span class="block text-white font-bold mb-1">Tak, chcę dodać pakiet utrzymania</span>
-                      <span class="block text-sm text-steel leading-relaxed">Zaznaczając to pole, deklarujesz chęć nawiązania współpracy abonamentowej. Płatność za utrzymanie zostanie uruchomiona po wdrożeniu projektu.</span>
+                      <span class="block text-white font-bold mb-1 text-sm">Tak, chcę dodać pakiet utrzymania</span>
+                      <span class="block text-xs leading-relaxed" style="color:#9AA3B4;">Płatność za utrzymanie zostanie uruchomiona po wdrożeniu projektu w oddzielnym procesie.</span>
                     </div>
                   </label>
                 </section>
               ) : null}
 
-              {/* Prośba o zmiany */}
-              <section class="pt-8 border-t border-white/10 flex flex-col items-start">
-                <p class="text-steel mb-4 text-sm">Masz pytania lub chciałbyś zmodyfikować zakres tej wyceny?</p>
-                <button id="open-change-modal" class="inline-flex items-center text-brass hover:text-white transition-colors duration-200 group text-sm">
-                  <svg class="w-4 h-4 mr-2 group-hover:-rotate-12 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="square" stroke-linejoin="miter" stroke-width="1.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                  <span class="border-b border-brass/30 group-hover:border-white">Poproś o poprawki do wyceny</span>
+              {/* Poprawki */}
+              <section class="pt-6 border-t flex flex-col items-start" style="border-color:rgba(255,255,255,0.08);">
+                <p class="text-sm mb-4" style="color:#9AA3B4;">Masz pytania lub chciałbyś zmodyfikować zakres tej wyceny?</p>
+                <button id="open-change-modal" class="inline-flex items-center text-sm group transition-colors duration-200" style="color:#C5A059;">
+                  <svg class="w-4 h-4 mr-2 group-hover:-rotate-12 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="square" stroke-linejoin="miter" stroke-width="1.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                  <span class="border-b group-hover:text-white group-hover:border-white transition-colors" style="border-color:rgba(197,160,89,0.3);">Poproś o poprawki do wyceny</span>
                 </button>
               </section>
             </div>
@@ -235,37 +215,37 @@ function renderRichText(value: unknown): string {
             <div class="lg:col-span-1" id="payment-options" data-token={token} data-api={apiUrl}>
               <div class="sticky top-32 space-y-5">
                 <div class="mb-6">
-                  <p class="font-mono text-brass text-xs uppercase tracking-widest mb-2">Całkowita wartość</p>
-                  <div class="text-4xl font-heading text-white/40 line-through mb-1">
+                  <p class="font-mono text-xs uppercase tracking-widest mb-2" style="color:#C5A059;">Całkowita wartość</p>
+                  <div class="text-4xl font-heading line-through mb-1" style="color:rgba(255,255,255,0.3);">
                     {new Intl.NumberFormat('pl-PL').format(fullPrice)} PLN
                   </div>
-                  <p class="text-xs text-steel">Cena podstawowa (netto)</p>
+                  <p class="text-xs uppercase tracking-wider" style="color:#9AA3B4;">Cena podstawowa (netto)</p>
                 </div>
 
-                <!-- Jednorazowa z rabatem 10% -->
-                <button type="button" data-model="100" class="payment-btn w-full text-left relative p-6 border border-brass group flex flex-col overflow-hidden transition-colors duration-200 hover:bg-brass/5" style="background: rgba(197,160,89,0.04);">
-                  <div class="absolute top-0 right-0 bg-brass text-void text-[10px] font-bold px-3 py-1 uppercase tracking-wider">
+                {/* Jednorazowa –10% */}
+                <button type="button" data-model="100" class="payment-btn w-full text-left relative p-6 border transition-colors duration-200" style="border-color:#B8893E;background:rgba(197,160,89,0.04);" onmouseover="this.style.background='rgba(197,160,89,0.08)'" onmouseout="this.style.background='rgba(197,160,89,0.04)'">
+                  <div class="absolute top-0 right-0 text-[10px] font-bold px-3 py-1 uppercase tracking-wider" style="background:#C5A059;color:#060709;">
                     Rabat 10%
                   </div>
                   <h4 class="text-xl font-heading text-white mb-2 uppercase tracking-wide">Płatność jednorazowa</h4>
-                  <p class="text-steel text-sm mb-5 grow leading-relaxed">Opłacasz z góry całą kwotę i otrzymujesz gwarantowany rabat 10%.</p>
-                  <div class="text-3xl font-heading text-brass mb-4">
+                  <p class="text-sm mb-5 leading-relaxed grow" style="color:#9AA3B4;">Opłacasz z góry całą kwotę i otrzymujesz gwarantowany rabat 10%.</p>
+                  <div class="text-3xl font-heading mb-4" style="color:#C5A059;">
                     {new Intl.NumberFormat('pl-PL').format(discountedPrice)} PLN
                   </div>
-                  <div class="btn-text inline-flex items-center justify-center w-full bg-brass text-void font-bold py-3 px-6 hover:brightness-110 transition-all text-sm uppercase tracking-wider">
+                  <div class="btn-text inline-flex items-center justify-center w-full font-bold py-3 px-6 text-sm uppercase tracking-wider transition-all" style="background:#C5A059;color:#060709;">
                     Opłać całość z rabatem
                   </div>
                 </button>
 
-                <!-- 50% na start -->
-                <button type="button" data-model="50" class="payment-btn w-full text-left p-6 border border-white/10 hover:border-white/30 transition-colors duration-200 group flex flex-col" style="background: #0E121C;">
+                {/* 50% na start */}
+                <button type="button" data-model="50" class="payment-btn w-full text-left p-6 border transition-colors duration-200" style="border-color:rgba(255,255,255,0.1);background:#0E121C;" onmouseover="this.style.borderColor='rgba(255,255,255,0.25)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'">
                   <h4 class="text-xl font-heading text-white mb-2 uppercase tracking-wide">Płatność etapowa</h4>
-                  <p class="text-steel text-sm mb-5 grow leading-relaxed">Płacisz 50% na start, resztę po zakończeniu projektu (bez rabatu).</p>
+                  <p class="text-sm mb-5 leading-relaxed" style="color:#9AA3B4;">Płacisz 50% na start, resztę po zakończeniu projektu (bez rabatu).</p>
                   <div class="text-2xl font-heading text-white mb-1">
                     {new Intl.NumberFormat('pl-PL').format(fullPrice / 2)} PLN
                   </div>
-                  <p class="text-xs text-steel uppercase tracking-wider mb-4">Pierwsza rata</p>
-                  <div class="btn-text inline-flex items-center justify-center w-full border border-white/20 text-white font-bold py-3 px-6 group-hover:border-white transition-colors text-sm uppercase tracking-wider">
+                  <p class="text-xs uppercase tracking-wider mb-4" style="color:#9AA3B4;">Pierwsza rata</p>
+                  <div class="btn-text inline-flex items-center justify-center w-full border font-bold py-3 px-6 text-sm uppercase tracking-wider text-white transition-colors" style="border-color:rgba(255,255,255,0.2);">
                     Opłać I ratę (50%)
                   </div>
                 </button>
@@ -276,32 +256,28 @@ function renderRichText(value: unknown): string {
       )}
     </div>
 
-    <!-- Modal: prośba o zmiany -->
-    <div id="change-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4" style="background: rgba(6,7,9,0.85); backdrop-filter: blur(8px); opacity: 0; pointer-events: none; transition: opacity 0.25s;">
-      <div class="border border-white/10 p-8 max-w-lg w-full relative shadow-2xl transition-transform duration-250" id="change-modal-content" style="background: #0E121C; transform: scale(0.96);">
-        <button id="close-change-modal" class="absolute top-4 right-4 text-steel hover:text-white transition-colors" aria-label="Zamknij">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="square" stroke-linejoin="miter" stroke-width="1.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+    {/* Modal poprawki */}
+    <div id="change-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4" style="background:rgba(6,7,9,0.88);backdrop-filter:blur(8px);opacity:0;pointer-events:none;transition:opacity 0.22s;">
+      <div id="change-modal-content" class="border p-8 max-w-lg w-full relative shadow-2xl" style="background:#0E121C;border-color:rgba(255,255,255,0.1);transform:scale(0.96);transition:transform 0.22s;">
+        <button id="close-change-modal" class="absolute top-4 right-4 transition-colors" style="color:#9AA3B4;" aria-label="Zamknij">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="square" stroke-linejoin="miter" stroke-width="1.5" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
-
         <div id="change-form-state">
-          <p class="font-mono text-brass text-xs uppercase tracking-widest mb-3">Poprawki</p>
+          <p class="font-mono text-xs uppercase tracking-widest mb-3" style="color:#C5A059;">Poprawki</p>
           <h3 class="text-2xl font-heading text-white mb-2 uppercase tracking-wide">Zgłoś zmiany</h3>
-          <p class="text-steel text-sm mb-6 leading-relaxed">Napisz co chciałbyś zmienić w zakresie lub wycenie. Przygotujemy nową ofertę.</p>
-          <textarea id="change-message" rows="5" class="w-full border border-white/10 text-white p-4 focus:outline-none focus:border-brass transition-colors resize-none mb-5 text-sm" style="background: #060709;" placeholder="Twoje uwagi..."></textarea>
-          <button id="submit-change" class="w-full bg-white text-void font-bold py-3 px-6 hover:bg-brass transition-colors text-sm uppercase tracking-wider">
+          <p class="text-sm mb-6 leading-relaxed" style="color:#9AA3B4;">Napisz co chciałbyś zmienić w zakresie lub wycenie. Przygotujemy nową ofertę.</p>
+          <textarea id="change-message" rows="5" class="w-full border text-white p-4 focus:outline-none text-sm resize-none mb-5 transition-colors" style="background:#060709;border-color:rgba(255,255,255,0.1);" placeholder="Twoje uwagi..." onfocus="this.style.borderColor='#C5A059'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'"></textarea>
+          <button id="submit-change" class="w-full bg-white text-void font-bold py-3 px-6 hover:bg-brass transition-colors text-sm uppercase tracking-wider" style="color:#060709;">
             Wyślij prośbę o zmiany
           </button>
         </div>
-
         <div id="change-success-state" class="hidden text-center py-8">
-          <div class="w-14 h-14 rounded-full border border-brass flex items-center justify-center mx-auto mb-5 text-brass">
-            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+          <div class="w-14 h-14 rounded-full border flex items-center justify-center mx-auto mb-5" style="border-color:#C5A059;color:#C5A059;">
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
           </div>
           <h3 class="text-xl font-heading text-white mb-3 uppercase tracking-wide">Prośba przyjęta</h3>
-          <p class="text-steel text-sm leading-relaxed">Otrzymaliśmy Twoje uwagi. Wrócimy z poprawioną wersją wyceny na Twój e-mail.</p>
-          <button id="close-success-modal" class="mt-7 border border-white/20 text-white py-2 px-6 hover:border-white transition-colors text-sm uppercase tracking-wider">
-            Zamknij
-          </button>
+          <p class="text-sm leading-relaxed" style="color:#9AA3B4;">Otrzymaliśmy Twoje uwagi. Wrócimy z poprawioną wersją wyceny na Twój e-mail.</p>
+          <button id="close-success-modal" class="mt-7 border text-white py-2 px-6 transition-colors text-sm uppercase tracking-wider" style="border-color:rgba(255,255,255,0.2);">Zamknij</button>
         </div>
       </div>
     </div>
@@ -309,107 +285,81 @@ function renderRichText(value: unknown): string {
 </Layout>
 
 <script>
-  // @ts-nocheck
-  document.addEventListener('DOMContentLoaded', () => {
-    const container = document.getElementById('payment-options');
-    if (!container) return;
+// @ts-nocheck
+document.addEventListener('DOMContentLoaded', () => {
+  const container = document.getElementById('payment-options');
+  if (!container) return;
+  const token = container.dataset.token;
+  const apiUrl = container.dataset.api;
 
-    const token = container.dataset.token;
-    const apiUrl = container.dataset.api;
-
-    // ── Płatności Stripe ───────────────────────────────────────────
-    container.querySelectorAll('.payment-btn').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const btnText = btn.querySelector('.btn-text');
-        const originalText = btnText.innerHTML;
-        btnText.innerHTML = 'Przetwarzanie&hellip;';
-        btn.disabled = true;
-
-        try {
-          const res = await fetch(`${apiUrl}/api/quotes/checkout/${token}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ paymentModel: btn.dataset.model })
-          });
-          const data = await res.json();
-          if (data.url) {
-            window.location.href = data.url;
-          } else {
-            alert('Błąd: ' + (data.error || 'Spróbuj ponownie.'));
-            btnText.innerHTML = originalText;
-            btn.disabled = false;
-          }
-        } catch {
-          alert('Błąd połączenia z serwerem.');
-          btnText.innerHTML = originalText;
-          btn.disabled = false;
-        }
-      });
-    });
-
-    // ── Checkbox utrzymanie ────────────────────────────────────────
-    const maintenanceCheckbox = document.getElementById('maintenance-checkbox');
-    if (maintenanceCheckbox) {
-      maintenanceCheckbox.addEventListener('change', async (e) => {
-        try {
-          await fetch(`${apiUrl}/api/quotes/client/${token}/maintenance`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ wantsMaintenance: e.target.checked })
-          });
-        } catch {}
-      });
-    }
-
-    // ── Modal zmian ────────────────────────────────────────────────
-    const modal = document.getElementById('change-modal');
-    const modalContent = document.getElementById('change-modal-content');
-
-    const toggleModal = (show) => {
-      if (show) {
-        modal.style.opacity = '1';
-        modal.style.pointerEvents = 'auto';
-        modalContent.style.transform = 'scale(1)';
-      } else {
-        modal.style.opacity = '0';
-        modal.style.pointerEvents = 'none';
-        modalContent.style.transform = 'scale(0.96)';
-      }
-    };
-
-    document.getElementById('open-change-modal')?.addEventListener('click', () => toggleModal(true));
-    document.getElementById('close-change-modal')?.addEventListener('click', () => toggleModal(false));
-    document.getElementById('close-success-modal')?.addEventListener('click', () => toggleModal(false));
-
-    document.getElementById('submit-change')?.addEventListener('click', async () => {
-      const message = document.getElementById('change-message').value.trim();
-      if (!message) { alert('Wpisz treść uwag.'); return; }
-
-      const btn = document.getElementById('submit-change');
-      const orig = btn.innerHTML;
-      btn.innerHTML = 'Wysyłanie&hellip;';
+  // ── Płatności ─────────────────────────────────────────────────
+  container.querySelectorAll('.payment-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const btnText = btn.querySelector('.btn-text');
+      const orig = btnText.innerHTML;
+      btnText.innerHTML = 'Przetwarzanie&hellip;';
       btn.disabled = true;
-
       try {
-        const res = await fetch(`${apiUrl}/api/quotes/request-change/${token}`, {
+        const res = await fetch(`${apiUrl}/api/quotes/checkout/${token}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message })
+          body: JSON.stringify({ paymentModel: btn.dataset.model })
         });
-        if (res.ok) {
-          document.getElementById('change-form-state').classList.add('hidden');
-          document.getElementById('change-success-state').classList.remove('hidden');
-        } else {
-          const d = await res.json();
-          alert('Błąd: ' + (d.error || 'Spróbuj ponownie.'));
-          btn.innerHTML = orig;
-          btn.disabled = false;
-        }
-      } catch {
-        alert('Błąd połączenia z serwerem.');
-        btn.innerHTML = orig;
-        btn.disabled = false;
-      }
+        const data = await res.json();
+        if (data.url) { window.location.href = data.url; return; }
+        alert('Błąd: ' + (data.error || 'Spróbuj ponownie.'));
+      } catch { alert('Błąd połączenia z serwerem.'); }
+      btnText.innerHTML = orig;
+      btn.disabled = false;
     });
   });
+
+  // ── Utrzymanie ─────────────────────────────────────────────────
+  document.getElementById('maintenance-checkbox')?.addEventListener('change', async (e) => {
+    try {
+      await fetch(`${apiUrl}/api/quotes/client/${token}/maintenance`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ wantsMaintenance: e.target.checked })
+      });
+    } catch {}
+  });
+
+  // ── Modal ──────────────────────────────────────────────────────
+  const modal = document.getElementById('change-modal');
+  const mc = document.getElementById('change-modal-content');
+  const show = (v) => {
+    modal.style.opacity = v ? '1' : '0';
+    modal.style.pointerEvents = v ? 'auto' : 'none';
+    mc.style.transform = v ? 'scale(1)' : 'scale(0.96)';
+  };
+  document.getElementById('open-change-modal')?.addEventListener('click', () => show(true));
+  document.getElementById('close-change-modal')?.addEventListener('click', () => show(false));
+  document.getElementById('close-success-modal')?.addEventListener('click', () => show(false));
+
+  document.getElementById('submit-change')?.addEventListener('click', async () => {
+    const msg = document.getElementById('change-message').value.trim();
+    if (!msg) { alert('Wpisz treść uwag.'); return; }
+    const btn = document.getElementById('submit-change');
+    const orig = btn.innerHTML;
+    btn.innerHTML = 'Wysyłanie&hellip;';
+    btn.disabled = true;
+    try {
+      const res = await fetch(`${apiUrl}/api/quotes/request-change/${token}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: msg })
+      });
+      if (res.ok) {
+        document.getElementById('change-form-state').classList.add('hidden');
+        document.getElementById('change-success-state').classList.remove('hidden');
+        return;
+      }
+      const d = await res.json();
+      alert('Błąd: ' + (d.error || 'Spróbuj ponownie.'));
+    } catch { alert('Błąd połączenia.'); }
+    btn.innerHTML = orig;
+    btn.disabled = false;
+  });
+});
 </script>
