@@ -24,8 +24,6 @@ const fullPrice: number = quoteData?.totalPrice || 0;
 const discountedPrice = Math.round(fullPrice * 0.9);
 const briefCompany: string = quoteData?.brief?.company || 'Klienta';
 const briefProblem: string = quoteData?.brief?.problemDescription || '';
-const timelinePhases: any[] = quoteData?.timelinePhases || [];
-const scopeItems: any[] = quoteData?.scopeItems || [];
 
 // ─── Lexical JSON → HTML ────────────────────────────────────────────────
 function lexicalToHtml(state: unknown): string {
@@ -67,6 +65,8 @@ function lexicalToHtml(state: unknown): string {
 }
 
 const introHtml = lexicalToHtml(quoteData?.intro);
+const timelineHtml = lexicalToHtml(quoteData?.timelinePlan);
+const scopeHtml = lexicalToHtml(quoteData?.scopePlan);
 ---
 
 <Layout title={`Wycena projektu — ${briefCompany} | Nobelion`} description="Twoja indywidualna wycena projektu.">
@@ -133,50 +133,19 @@ const introHtml = lexicalToHtml(quoteData?.intro);
                 </section>
               ) : null}
 
-              {/* Timeline (etapy) */}
-              {timelinePhases.length > 0 && (
+              {/* Plan realizacji */}
+              {timelineHtml && (
                 <section>
-                  <h2 class="text-lg font-heading text-white mb-6 pb-3 border-b tracking-wide uppercase" style="border-color:rgba(255,255,255,0.08);">Plan realizacji</h2>
-                  <div class="space-y-6">
-                    {timelinePhases.map((phase: any) => (
-                      <div class="border-l pl-6 relative" style="border-color:rgba(197,160,89,0.3);">
-                        <div class="absolute w-2.5 h-2.5 rounded-full -left-[5px] top-1.5" style="background:#C5A059;" aria-hidden="true"></div>
-                        <div class="flex items-baseline gap-3 mb-1.5 flex-wrap">
-                          <h3 class="font-heading text-white tracking-wide uppercase text-base">{phase.phaseName}</h3>
-                          {phase.duration && (
-                            <span class="font-mono text-xs px-2 py-0.5 border" style="color:#C5A059;border-color:rgba(197,160,89,0.25);background:rgba(197,160,89,0.07);">
-                              {phase.duration}
-                            </span>
-                          )}
-                        </div>
-                        {phase.description && (
-                          <p style="color:#9AA3B4;" class="leading-relaxed whitespace-pre-wrap text-sm">{phase.description}</p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
+                  <h2 class="text-lg font-heading text-white mb-5 pb-3 border-b tracking-wide uppercase" style="border-color:rgba(255,255,255,0.08);">Plan realizacji</h2>
+                  <div class="rt" set:html={timelineHtml} />
                 </section>
               )}
 
-              {/* Scope items (deliverables) */}
-              {scopeItems.length > 0 && (
+              {/* Zakres prac */}
+              {scopeHtml && (
                 <section>
-                  <h2 class="text-lg font-heading text-white mb-4 pb-3 border-b tracking-wide uppercase" style="border-color:rgba(255,255,255,0.08);">Zakres prac</h2>
-                  <ul class="space-y-3">
-                    {scopeItems.map((s: any) => {
-                      const ok = s.included !== 'excluded';
-                      return (
-                        <li class="flex items-start gap-3">
-                          <span class="shrink-0 mt-0.5 text-sm font-bold" style={ok ? 'color:#C5A059;' : 'color:#5C6478;'}>
-                            {ok ? '✓' : '✗'}
-                          </span>
-                          <span class={ok ? '' : 'opacity-50 line-through'} style={ok ? 'color:#ECEAE4;' : 'color:#9AA3B4;'}>
-                            {s.item}
-                          </span>
-                        </li>
-                      );
-                    })}
-                  </ul>
+                  <h2 class="text-lg font-heading text-white mb-5 pb-3 border-b tracking-wide uppercase" style="border-color:rgba(255,255,255,0.08);">Zakres prac</h2>
+                  <div class="rt" set:html={scopeHtml} />
                 </section>
               )}
 
