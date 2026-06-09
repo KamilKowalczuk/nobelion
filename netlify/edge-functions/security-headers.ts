@@ -24,6 +24,7 @@ export default async (request: Request, context: Context) => {
     const isLocal = url.hostname === 'localhost';
     const connectSrc = [
         "'self'",
+        'https://admin.nobelion.pl',
         'https://www.googletagmanager.com',
         'https://www.google-analytics.com',
         'https://*.google-analytics.com',
