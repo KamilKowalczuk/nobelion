@@ -47,16 +47,11 @@ function lexicalToHtml(state: unknown): string {
 
     switch (n.type) {
       case 'paragraph': return ch ? `<p>${ch}</p>` : '';
-      case 'heading':
-        return `<h3 class="ql-h3">${ch}</h3>`;
-      case 'list': return n.listType === 'number'
-        ? `<ol class="ql-ol">${ch}</ol>`
-        : `<ul class="ql-ul">${ch}</ul>`;
+      case 'heading': return `<h3>${ch}</h3>`;
+      case 'list': return n.listType === 'number' ? `<ol>${ch}</ol>` : `<ul>${ch}</ul>`;
       case 'listitem': return `<li>${ch}</li>`;
-      case 'link':
-        return `<a href="${n.url || '#'}" target="_blank" rel="noopener noreferrer" class="ql-link">${ch}</a>`;
-      case 'quote':
-        return `<blockquote class="ql-blockquote">${ch}</blockquote>`;
+      case 'link': return `<a href="${n.url || '#'}" target="_blank" rel="noopener noreferrer">${ch}</a>`;
+      case 'quote': return `<blockquote>${ch}</blockquote>`;
       default: return ch;
     }
   }
@@ -67,191 +62,433 @@ function lexicalToHtml(state: unknown): string {
 const introHtml = lexicalToHtml(quoteData?.intro);
 const timelineHtml = lexicalToHtml(quoteData?.timelinePlan);
 const scopeHtml = lexicalToHtml(quoteData?.scopePlan);
+
+const fmt = (n: number) => new Intl.NumberFormat('pl-PL').format(n);
 ---
 
-<Layout title={`Wycena projektu — ${briefCompany} | Nobelion`} description="Twoja indywidualna wycena projektu.">
-
-<style>
-  /* Rich text styles dla intro (dark context) */
-  .rt p { color: #9AA3B4; line-height: 1.7; margin-bottom: 1rem; }
-  .rt .ql-h3 { font-family: var(--font-heading, serif); font-size: 1.1rem; letter-spacing: 0.1em; text-transform: uppercase; color: #fff; margin: 2rem 0 0.75rem; }
-  .rt .ql-ul, .rt .ql-ol { color: #9AA3B4; padding-left: 0; margin-bottom: 1rem; }
-  .rt .ql-ul li, .rt .ql-ol li { display: flex; gap: 0.625rem; align-items: baseline; margin-bottom: 0.5rem; list-style: none; }
-  .rt .ql-ul li::before { content: "—"; color: #B8893E; flex-shrink: 0; }
-  .rt .ql-ol { counter-reset: ol-counter; }
-  .rt .ql-ol li { counter-increment: ol-counter; }
-  .rt .ql-ol li::before { content: counter(ol-counter) "."; color: #B8893E; flex-shrink: 0; min-width: 1.25rem; }
-  .rt .ql-link { color: #C5A059; text-decoration: underline; text-underline-offset: 3px; }
-  .rt .ql-link:hover { color: #fff; }
-  .rt .ql-blockquote { border-left: 2px solid rgba(197,160,89,0.4); padding-left: 1rem; margin: 1rem 0; color: #9AA3B4; font-style: italic; }
-  .rt strong { color: #ECEAE4; }
-</style>
-
-  <main class="min-h-screen pt-32 pb-24 px-4 md:px-12 relative selection:bg-brass/30 selection:text-white" style="background: #060709;">
-
-    <!-- Subtelny grid -->
-    <div class="fixed inset-0 pointer-events-none z-0" style="opacity:0.02;" aria-hidden="true">
-      <div class="absolute inset-0" style="background-image:linear-gradient(to right,#fff 1px,transparent 1px),linear-gradient(to bottom,#fff 1px,transparent 1px);background-size:4rem 4rem;"></div>
-    </div>
-
-    <div class="max-w-5xl mx-auto relative z-10">
-      {errorMsg ? (
-        <div class="text-center py-24">
-          <p class="font-mono text-xs uppercase tracking-[0.3em] mb-4" style="color:#C5A059;">Błąd</p>
-          <h1 class="text-3xl font-heading text-white mb-4 tracking-wide uppercase">Nie znaleziono wyceny</h1>
-          <p style="color:#9AA3B4;">{errorMsg}</p>
+<Layout>
+  {errorMsg ? (
+    <section class="onyx q-error">
+      <div class="wrap q-error__inner">
+        <span class="eyebrow">Błąd</span>
+        <h1 class="h2 q-error__title">Nie znaleziono wyceny</h1>
+        <p class="lead">{errorMsg}</p>
+        <a href="/" class="nb-btn nb-btn--ghost-light nb-btn--lg q-error__cta">
+          <span class="nb-btn__label">Wróć na stronę główną</span>
+        </a>
+      </div>
+    </section>
+  ) : (
+    <>
+      {/* ───────── ONYX HERO BAND ───────── */}
+      <section class="onyx q-hero">
+        <div class="q-hero__bg" aria-hidden="true">
+          <div class="q-hero__glow"></div>
+          <div class="q-hero__grid"></div>
         </div>
-      ) : (
-        <div class="border overflow-hidden" style="border-color:rgba(255,255,255,0.08);background:#0E121C;">
-
-          {/* ── Header ── */}
-          <div class="p-8 md:p-12 border-b" style="border-color:rgba(255,255,255,0.05);background:linear-gradient(135deg,rgba(197,160,89,0.07) 0%,transparent 60%);">
-            <div class="inline-block px-3 py-1 mb-6 border text-xs uppercase tracking-widest font-mono" style="border-color:rgba(197,160,89,0.3);color:#C5A059;">
-              Propozycja Wdrożenia
-            </div>
-            <h1 class="text-3xl md:text-5xl font-heading font-light tracking-[0.08em] text-white mb-4 uppercase">
-              Wycena dla <span style="color:#C5A059;">{briefCompany}</span>
-            </h1>
-            <p style="color:#9AA3B4;" class="text-lg max-w-2xl leading-relaxed">
-              Zgodnie z naszymi ustaleniami, przedstawiamy dedykowany plan inwestycji oraz szczegóły technologiczne dla Twojego rozwiązania.
-            </p>
+        <div class="wrap q-hero__inner">
+          <div class="q-hero__eyebrow">
+            <span class="q-hero__dot"></span>
+            <span class="eyebrow">Propozycja wdrożenia</span>
           </div>
+          <h1 class="q-hero__title">
+            Wycena dla <span class="q-hero__accent">{briefCompany}</span>
+          </h1>
+          <p class="q-hero__sub">
+            Zgodnie z naszymi ustaleniami, przedstawiamy dedykowany plan inwestycji oraz
+            szczegóły technologiczne dla Twojego rozwiązania.
+          </p>
+        </div>
+      </section>
 
-          {/* ── Ciało ── */}
-          <div class="p-8 md:p-12 grid grid-cols-1 lg:grid-cols-3 gap-12">
+      {/* ───────── LIGHT BODY (overlapping panel) ───────── */}
+      <section class="section q-body nb-panel bg-paper">
+        <div class="wrap">
+          <div class="q-grid">
 
-            {/* Lewa kolumna: treść */}
-            <div class="lg:col-span-2 space-y-10">
+            {/* LEFT — treść */}
+            <div class="q-content">
 
-              {/* Intro (richText) */}
               {introHtml ? (
-                <section class="rt" set:html={introHtml} />
+                <div class="rt" set:html={introHtml} />
               ) : briefProblem ? (
-                <section>
-                  <h2 class="text-lg font-heading text-white mb-4 pb-3 border-b tracking-wide uppercase" style="border-color:rgba(255,255,255,0.08);">Wyzwanie</h2>
-                  <p style="color:#9AA3B4;" class="leading-relaxed whitespace-pre-wrap">{briefProblem}</p>
+                <section class="q-section">
+                  <h2 class="q-h"><span class="q-h__mark" aria-hidden="true"></span>Wyzwanie</h2>
+                  <p class="q-problem">{briefProblem}</p>
                 </section>
               ) : null}
 
-              {/* Plan realizacji */}
               {timelineHtml && (
-                <section>
-                  <h2 class="text-lg font-heading text-white mb-5 pb-3 border-b tracking-wide uppercase" style="border-color:rgba(255,255,255,0.08);">Plan realizacji</h2>
+                <section class="q-section">
+                  <h2 class="q-h"><span class="q-h__mark" aria-hidden="true"></span>Plan realizacji</h2>
                   <div class="rt" set:html={timelineHtml} />
                 </section>
               )}
 
-              {/* Zakres prac */}
               {scopeHtml && (
-                <section>
-                  <h2 class="text-lg font-heading text-white mb-5 pb-3 border-b tracking-wide uppercase" style="border-color:rgba(255,255,255,0.08);">Zakres prac</h2>
+                <section class="q-section">
+                  <h2 class="q-h"><span class="q-h__mark" aria-hidden="true"></span>Zakres prac</h2>
                   <div class="rt" set:html={scopeHtml} />
                 </section>
               )}
 
-              {/* Utrzymanie */}
               {quoteData.maintenancePrice ? (
-                <section class="relative overflow-hidden p-6 md:p-8 border" style="border-color:rgba(255,255,255,0.08);background:rgba(255,255,255,0.02);">
-                  <h2 class="text-lg font-heading text-white mb-4 tracking-wide uppercase">Opcjonalne wsparcie i utrzymanie</h2>
-                  <div class="text-3xl font-heading mb-4" style="color:#C5A059;">
-                    {new Intl.NumberFormat('pl-PL').format(quoteData.maintenancePrice)} PLN
-                    <span class="text-sm font-sans font-normal uppercase tracking-wider ml-2" style="color:#9AA3B4;">/ miesiąc</span>
+                <section class="q-maint">
+                  <span class="eyebrow">Opcjonalnie</span>
+                  <h2 class="h4 q-maint__title">Wsparcie i utrzymanie</h2>
+                  <div class="q-maint__price">
+                    {fmt(quoteData.maintenancePrice)} <span class="q-maint__cur">PLN / miesiąc</span>
                   </div>
                   {quoteData.maintenanceDescription && (
-                    <p class="mb-5 leading-relaxed whitespace-pre-wrap text-sm" style="color:#9AA3B4;">{quoteData.maintenanceDescription}</p>
+                    <p class="q-maint__desc">{quoteData.maintenanceDescription}</p>
                   )}
-                  <label class="flex items-start gap-4 cursor-pointer p-4 border hover:border-brass/50 transition-colors duration-200" style="border-color:rgba(255,255,255,0.08);background:rgba(6,7,9,0.5);">
-                    <input type="checkbox" id="maintenance-checkbox" class="w-5 h-5 mt-0.5" style="accent-color:#C5A059;" checked={quoteData.clientSelectedMaintenance} />
-                    <div>
-                      <span class="block text-white font-bold mb-1 text-sm">Tak, chcę dodać pakiet utrzymania</span>
-                      <span class="block text-xs leading-relaxed" style="color:#9AA3B4;">Płatność za utrzymanie zostanie uruchomiona po wdrożeniu projektu w oddzielnym procesie.</span>
-                    </div>
+                  <label class="q-maint__opt">
+                    <input type="checkbox" id="maintenance-checkbox" checked={quoteData.clientSelectedMaintenance} />
+                    <span>
+                      <strong>Tak, chcę dodać pakiet utrzymania</strong>
+                      Płatność za utrzymanie zostanie uruchomiona po wdrożeniu projektu, w oddzielnym procesie.
+                    </span>
                   </label>
                 </section>
               ) : null}
 
-              {/* Poprawki */}
-              <section class="pt-6 border-t flex flex-col items-start" style="border-color:rgba(255,255,255,0.08);">
-                <p class="text-sm mb-4" style="color:#9AA3B4;">Masz pytania lub chciałbyś zmodyfikować zakres tej wyceny?</p>
-                <button id="open-change-modal" class="inline-flex items-center text-sm group transition-colors duration-200" style="color:#C5A059;">
-                  <svg class="w-4 h-4 mr-2 group-hover:-rotate-12 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="square" stroke-linejoin="miter" stroke-width="1.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                  <span class="border-b group-hover:text-white group-hover:border-white transition-colors" style="border-color:rgba(197,160,89,0.3);">Poproś o poprawki do wyceny</span>
-                </button>
-              </section>
-            </div>
-
-            {/* Prawa kolumna: płatności */}
-            <div class="lg:col-span-1" id="payment-options" data-token={token} data-api={apiUrl}>
-              <div class="sticky top-32 space-y-5">
-                <div class="mb-6">
-                  <p class="font-mono text-xs uppercase tracking-widest mb-2" style="color:#C5A059;">Całkowita wartość</p>
-                  <div class="text-4xl font-heading line-through mb-1" style="color:rgba(255,255,255,0.3);">
-                    {new Intl.NumberFormat('pl-PL').format(fullPrice)} PLN
-                  </div>
-                  <p class="text-xs uppercase tracking-wider" style="color:#9AA3B4;">Cena podstawowa (netto)</p>
-                </div>
-
-                {/* Jednorazowa –10% */}
-                <button type="button" data-model="100" class="payment-btn w-full text-left relative p-6 border transition-colors duration-200" style="border-color:#B8893E;background:rgba(197,160,89,0.04);" onmouseover="this.style.background='rgba(197,160,89,0.08)'" onmouseout="this.style.background='rgba(197,160,89,0.04)'">
-                  <div class="absolute top-0 right-0 text-[10px] font-bold px-3 py-1 uppercase tracking-wider" style="background:#C5A059;color:#060709;">
-                    Rabat 10%
-                  </div>
-                  <h4 class="text-xl font-heading text-white mb-2 uppercase tracking-wide">Płatność jednorazowa</h4>
-                  <p class="text-sm mb-5 leading-relaxed grow" style="color:#9AA3B4;">Opłacasz z góry całą kwotę i otrzymujesz gwarantowany rabat 10%.</p>
-                  <div class="text-3xl font-heading mb-4" style="color:#C5A059;">
-                    {new Intl.NumberFormat('pl-PL').format(discountedPrice)} PLN
-                  </div>
-                  <div class="btn-text inline-flex items-center justify-center w-full font-bold py-3 px-6 text-sm uppercase tracking-wider transition-all" style="background:#C5A059;color:#060709;">
-                    Opłać całość z rabatem
-                  </div>
-                </button>
-
-                {/* 50% na start */}
-                <button type="button" data-model="50" class="payment-btn w-full text-left p-6 border transition-colors duration-200" style="border-color:rgba(255,255,255,0.1);background:#0E121C;" onmouseover="this.style.borderColor='rgba(255,255,255,0.25)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'">
-                  <h4 class="text-xl font-heading text-white mb-2 uppercase tracking-wide">Płatność etapowa</h4>
-                  <p class="text-sm mb-5 leading-relaxed" style="color:#9AA3B4;">Płacisz 50% na start, resztę po zakończeniu projektu (bez rabatu).</p>
-                  <div class="text-2xl font-heading text-white mb-1">
-                    {new Intl.NumberFormat('pl-PL').format(fullPrice / 2)} PLN
-                  </div>
-                  <p class="text-xs uppercase tracking-wider mb-4" style="color:#9AA3B4;">Pierwsza rata</p>
-                  <div class="btn-text inline-flex items-center justify-center w-full border font-bold py-3 px-6 text-sm uppercase tracking-wider text-white transition-colors" style="border-color:rgba(255,255,255,0.2);">
-                    Opłać I ratę (50%)
-                  </div>
+              <div class="q-change">
+                <p>Masz pytania lub chciałbyś zmodyfikować zakres tej wyceny?</p>
+                <button id="open-change-modal" class="q-change__btn" type="button">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" stroke-linejoin="miter">
+                    <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                  </svg>
+                  <span>Poproś o poprawki do wyceny</span>
                 </button>
               </div>
             </div>
-          </div>
-        </div>
-      )}
-    </div>
 
-    {/* Modal poprawki */}
-    <div id="change-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4" style="background:rgba(6,7,9,0.88);backdrop-filter:blur(8px);opacity:0;pointer-events:none;transition:opacity 0.22s;">
-      <div id="change-modal-content" class="border p-8 max-w-lg w-full relative shadow-2xl" style="background:#0E121C;border-color:rgba(255,255,255,0.1);transform:scale(0.96);transition:transform 0.22s;">
-        <button id="close-change-modal" class="absolute top-4 right-4 transition-colors" style="color:#9AA3B4;" aria-label="Zamknij">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="square" stroke-linejoin="miter" stroke-width="1.5" d="M6 18L18 6M6 6l12 12"/></svg>
-        </button>
-        <div id="change-form-state">
-          <p class="font-mono text-xs uppercase tracking-widest mb-3" style="color:#C5A059;">Poprawki</p>
-          <h3 class="text-2xl font-heading text-white mb-2 uppercase tracking-wide">Zgłoś zmiany</h3>
-          <p class="text-sm mb-6 leading-relaxed" style="color:#9AA3B4;">Napisz co chciałbyś zmienić w zakresie lub wycenie. Przygotujemy nową ofertę.</p>
-          <textarea id="change-message" rows="5" class="w-full border text-white p-4 focus:outline-none text-sm resize-none mb-5 transition-colors" style="background:#060709;border-color:rgba(255,255,255,0.1);" placeholder="Twoje uwagi..." onfocus="this.style.borderColor='#C5A059'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'"></textarea>
-          <button id="submit-change" class="w-full bg-white text-void font-bold py-3 px-6 hover:bg-brass transition-colors text-sm uppercase tracking-wider" style="color:#060709;">
-            Wyślij prośbę o zmiany
-          </button>
-        </div>
-        <div id="change-success-state" class="hidden text-center py-8">
-          <div class="w-14 h-14 rounded-full border flex items-center justify-center mx-auto mb-5" style="border-color:#C5A059;color:#C5A059;">
-            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            {/* RIGHT — płatność */}
+            <aside class="q-pay" id="payment-options" data-token={token} data-api={apiUrl}>
+              <div class="q-pay__sticky">
+                <div class="q-pay__head">
+                  <span class="eyebrow">Całkowita wartość</span>
+                  <div class="q-pay__full">{fmt(fullPrice)} PLN</div>
+                  <span class="caption">Cena podstawowa (netto)</span>
+                </div>
+
+                {/* Jednorazowa — rabat 10% */}
+                <button type="button" data-model="100" class="payment-btn q-opt q-opt--primary">
+                  <span class="q-opt__ribbon">Rabat 10%</span>
+                  <h3 class="h4 q-opt__title">Płatność jednorazowa</h3>
+                  <p class="q-opt__desc">Opłacasz z góry całą kwotę i otrzymujesz gwarantowany rabat 10%.</p>
+                  <div class="q-opt__price q-opt__price--accent">{fmt(discountedPrice)} PLN</div>
+                  <span class="btn-text q-opt__cta q-opt__cta--solid">Opłać całość z rabatem</span>
+                </button>
+
+                {/* Etapowa — 50% */}
+                <button type="button" data-model="50" class="payment-btn q-opt">
+                  <h3 class="h4 q-opt__title">Płatność etapowa</h3>
+                  <p class="q-opt__desc">Płacisz 50% na start, resztę po zakończeniu projektu (bez rabatu).</p>
+                  <div class="q-opt__price">{fmt(fullPrice / 2)} PLN</div>
+                  <span class="caption q-opt__sub">Pierwsza rata</span>
+                  <span class="btn-text q-opt__cta q-opt__cta--ghost">Opłać I ratę (50%)</span>
+                </button>
+              </div>
+            </aside>
+
           </div>
-          <h3 class="text-xl font-heading text-white mb-3 uppercase tracking-wide">Prośba przyjęta</h3>
-          <p class="text-sm leading-relaxed" style="color:#9AA3B4;">Otrzymaliśmy Twoje uwagi. Wrócimy z poprawioną wersją wyceny na Twój e-mail.</p>
-          <button id="close-success-modal" class="mt-7 border text-white py-2 px-6 transition-colors text-sm uppercase tracking-wider" style="border-color:rgba(255,255,255,0.2);">Zamknij</button>
+        </div>
+      </section>
+
+      {/* ───────── MODAL ───────── */}
+      <div id="change-modal" class="q-modal">
+        <div id="change-modal-content" class="q-modal__box">
+          <button id="close-change-modal" class="q-modal__close" aria-label="Zamknij" type="button">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" stroke-linejoin="miter">
+              <path d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+          <div id="change-form-state">
+            <span class="eyebrow">Poprawki</span>
+            <h3 class="h3 q-modal__title">Zgłoś zmiany</h3>
+            <p class="q-modal__lead">Napisz co chciałbyś zmienić w zakresie lub wycenie. Przygotujemy nową ofertę.</p>
+            <textarea id="change-message" rows="5" class="q-modal__field" placeholder="Twoje uwagi..."></textarea>
+            <button id="submit-change" class="nb-btn nb-btn--primary nb-btn--lg q-modal__submit" type="button">
+              <span class="nb-btn__label">Wyślij prośbę o zmiany</span>
+            </button>
+          </div>
+          <div id="change-success-state" class="q-modal__success">
+            <div class="q-modal__check">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter">
+                <path d="M5 13l4 4L19 7"/>
+              </svg>
+            </div>
+            <h3 class="h3 q-modal__title">Prośba przyjęta</h3>
+            <p class="q-modal__lead">Otrzymaliśmy Twoje uwagi. Wrócimy z poprawioną wersją wyceny na Twój e-mail.</p>
+            <button id="close-success-modal" class="nb-btn nb-btn--ghost-light nb-btn--md q-modal__close-btn" type="button" style="border-color:var(--color-hair-ink);color:var(--color-ink-2);">
+              <span class="nb-btn__label">Zamknij</span>
+            </button>
+          </div>
         </div>
       </div>
-    </div>
-  </main>
+    </>
+  )}
 </Layout>
+
+<style>
+/* ============================================================
+   QUOTE — onyx hero + light editorial body (Nobelion design system)
+   ============================================================ */
+
+/* ── ONYX HERO BAND ── */
+.q-hero {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--color-onyx);
+  color: var(--color-silver);
+  padding-top: clamp(128px, 17vh, 196px);
+  padding-bottom: clamp(96px, 12vw, 168px);
+}
+.q-hero__bg { position: absolute; inset: 0; z-index: 0; }
+.q-hero__glow {
+  position: absolute; top: -30%; left: 50%; transform: translateX(-50%);
+  width: min(900px, 110vw); height: 700px;
+  background: radial-gradient(ellipse at center, rgba(197,160,89,0.18), rgba(197,160,89,0.04) 40%, transparent 66%);
+  filter: blur(8px);
+}
+.q-hero__grid {
+  position: absolute; inset: 0; opacity: 0.5;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, #000 30%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, #000 30%, transparent 75%);
+}
+.q-hero__inner { position: relative; z-index: 2; }
+.q-hero__eyebrow { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 26px; }
+.q-hero__dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--color-brass-bright);
+  box-shadow: 0 0 12px 1px var(--color-brass-glow);
+  animation: q-pulse 2.6s cubic-bezier(0.65,0,0.35,1) infinite;
+}
+@keyframes q-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+.q-hero__title {
+  font-family: var(--font-heading); font-weight: 700; text-transform: uppercase;
+  line-height: 1.04; letter-spacing: 0.04em; color: var(--color-silver);
+  margin: 0; font-size: clamp(34px, 5vw, 68px); max-width: 16ch;
+}
+.q-hero__accent { color: var(--color-brass-bright); }
+.q-hero__sub {
+  max-width: 60ch; margin: 28px 0 0;
+  font-size: clamp(16px, 1.4vw, 19px); line-height: 1.6;
+  color: var(--color-silver-soft);
+}
+
+/* ── LIGHT BODY ── */
+.q-body { background: var(--color-paper); padding-top: clamp(56px, 7vw, 96px); }
+.q-grid {
+  display: grid; grid-template-columns: 1.6fr 0.9fr; gap: clamp(40px, 5vw, 80px);
+  align-items: start;
+}
+
+/* left content */
+.q-content { min-width: 0; }
+.q-section { margin-bottom: clamp(40px, 5vw, 64px); }
+.q-h {
+  display: flex; align-items: center; gap: 14px;
+  font-family: var(--font-heading); font-weight: 600; font-size: var(--fs-h4);
+  letter-spacing: var(--tracking-cinematic); text-transform: uppercase;
+  color: var(--color-ink); margin: 0 0 22px; padding-bottom: 18px;
+  border-bottom: 1px solid var(--color-hair-ink);
+}
+.q-h__mark {
+  width: 11px; height: 11px; flex-shrink: 0;
+  border: 1px solid var(--color-brass); transform: rotate(45deg);
+  position: relative;
+}
+.q-h__mark::after {
+  content: ""; position: absolute; inset: 3px; background: var(--color-brass);
+}
+.q-problem { color: var(--color-ink-2); line-height: var(--lh-body); white-space: pre-wrap; }
+
+/* ── rich text (light) ── */
+.rt { color: var(--color-ink-2); }
+.rt :global(p) { color: var(--color-ink-2); line-height: 1.72; margin: 0 0 1.1rem; }
+.rt :global(h3) {
+  font-family: var(--font-heading); font-weight: 600; font-size: var(--fs-h4);
+  letter-spacing: var(--tracking-cinematic); text-transform: uppercase;
+  color: var(--color-ink); margin: 2rem 0 0.85rem;
+}
+.rt :global(ul), .rt :global(ol) { margin: 0 0 1.1rem; padding: 0; list-style: none; }
+.rt :global(li) {
+  display: flex; gap: 0.7rem; align-items: baseline;
+  color: var(--color-ink-2); line-height: 1.6; margin-bottom: 0.55rem;
+}
+.rt :global(ul li)::before { content: "—"; color: var(--color-brass); flex-shrink: 0; }
+.rt :global(ol) { counter-reset: c; }
+.rt :global(ol li) { counter-increment: c; }
+.rt :global(ol li)::before {
+  content: counter(c) "."; color: var(--color-brass); flex-shrink: 0;
+  font-family: var(--font-mono); min-width: 1.4rem;
+}
+.rt :global(a) { color: var(--color-brass); text-decoration: underline; text-underline-offset: 3px; transition: color var(--dur-fast) var(--ease-out); }
+.rt :global(a):hover { color: var(--color-brass-dark); }
+.rt :global(strong) { color: var(--color-ink); font-weight: 600; }
+.rt :global(blockquote) {
+  border-left: 2px solid var(--color-brass); padding-left: 1.1rem;
+  margin: 1.2rem 0; color: var(--color-ink-3); font-style: italic;
+}
+
+/* ── maintenance (standalone card) ── */
+.q-maint {
+  margin-bottom: clamp(36px, 4vw, 56px);
+  padding: clamp(24px, 3vw, 36px);
+  background: var(--color-paper-2);
+  border: 1px solid var(--color-hair-ink);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-card);
+}
+.q-maint__title { margin: 14px 0 0; color: var(--color-ink); }
+.q-maint__price {
+  font-family: var(--font-heading); font-weight: 700;
+  font-size: clamp(26px, 3vw, 34px); color: var(--color-brass-dark);
+  margin: 16px 0 0; line-height: 1;
+}
+.q-maint__cur { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-ink-3); margin-left: 8px; }
+.q-maint__desc { color: var(--color-ink-2); line-height: 1.65; margin: 16px 0 0; white-space: pre-wrap; }
+.q-maint__opt {
+  display: flex; gap: 14px; align-items: flex-start; cursor: pointer;
+  margin-top: 22px; padding: 16px;
+  border: 1px solid var(--color-hair-ink);
+  border-radius: var(--r-control);
+  transition: border-color var(--dur-base) var(--ease-out);
+}
+.q-maint__opt:hover { border-color: var(--color-brass); }
+.q-maint__opt input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--color-brass); flex-shrink: 0; }
+.q-maint__opt span { font-size: 14px; line-height: 1.6; color: var(--color-ink-3); }
+.q-maint__opt strong { display: block; color: var(--color-ink); font-weight: 600; margin-bottom: 4px; }
+
+/* ── change request ── */
+.q-change { padding-top: clamp(28px, 3vw, 40px); border-top: 1px solid var(--color-hair-ink); }
+.q-change p { font-size: 14px; color: var(--color-ink-3); margin: 0 0 16px; }
+.q-change__btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.06em;
+  color: var(--color-brass-dark); background: none; border: none; cursor: pointer; padding: 0;
+  transition: color var(--dur-base) var(--ease-out);
+}
+.q-change__btn svg { transition: transform var(--dur-base) var(--ease-out); }
+.q-change__btn:hover { color: var(--color-ink); }
+.q-change__btn:hover svg { transform: rotate(-12deg); }
+.q-change__btn span { border-bottom: 1px solid var(--color-brass-glow); padding-bottom: 2px; }
+
+/* ── payment (right) ── */
+.q-pay { min-width: 0; }
+.q-pay__sticky { position: sticky; top: 96px; display: flex; flex-direction: column; gap: 18px; }
+.q-pay__head { margin-bottom: 6px; }
+.q-pay__full {
+  font-family: var(--font-heading); font-weight: 700;
+  font-size: clamp(32px, 3.4vw, 42px); color: var(--color-ink-4);
+  text-decoration: line-through; line-height: 1; margin: 12px 0 8px;
+}
+
+.q-opt {
+  position: relative; display: flex; flex-direction: column; text-align: left;
+  width: 100%; cursor: pointer; padding: clamp(22px, 2.4vw, 30px);
+  background: var(--color-paper-2);
+  border: 1px solid var(--color-hair-ink);
+  border-radius: var(--r-card);
+  transition: border-color var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out);
+}
+.q-opt:hover { border-color: var(--color-ink-4); box-shadow: var(--shadow-lift); transform: translateY(-2px); }
+.q-opt:disabled { opacity: 0.6; cursor: wait; transform: none; }
+
+.q-opt--primary {
+  border-color: var(--color-brass);
+  background: linear-gradient(160deg, color-mix(in srgb, var(--color-brass) 7%, var(--color-paper-2)), var(--color-paper-2));
+}
+.q-opt--primary:hover { border-color: var(--color-brass-dark); box-shadow: var(--glow-brass), var(--shadow-lift); }
+
+.q-opt__ribbon {
+  position: absolute; top: 0; right: 0;
+  background: var(--color-brass); color: var(--color-void);
+  font-family: var(--font-mono); font-size: 10px; font-weight: 600;
+  letter-spacing: 0.14em; text-transform: uppercase; padding: 6px 12px;
+  border-bottom-left-radius: var(--r-inset);
+}
+.q-opt__title { margin: 0 0 10px; color: var(--color-ink); }
+.q-opt__desc { font-size: 14px; line-height: 1.6; color: var(--color-ink-3); margin: 0 0 20px; flex-grow: 1; }
+.q-opt__price {
+  font-family: var(--font-heading); font-weight: 700;
+  font-size: clamp(24px, 2.6vw, 30px); color: var(--color-ink); line-height: 1; margin-bottom: 4px;
+}
+.q-opt__price--accent { color: var(--color-brass-dark); }
+.q-opt__sub { display: block; margin-bottom: 18px; }
+.q-opt__cta {
+  display: inline-flex; align-items: center; justify-content: center; width: 100%;
+  font-family: var(--font-mono); font-weight: 600; font-size: 12.5px;
+  letter-spacing: 0.14em; text-transform: uppercase; padding: 14px 20px;
+  margin-top: auto; border-radius: var(--r-control);
+  transition: background var(--dur-base) var(--ease-out), border-color var(--dur-base) var(--ease-out), color var(--dur-base) var(--ease-out);
+}
+.q-opt__cta--solid { background: var(--color-brass-bright); color: var(--color-void); }
+.q-opt--primary:hover .q-opt__cta--solid { background: var(--color-brass-light); }
+.q-opt__cta--ghost { border: 1px solid var(--color-hair-ink); color: var(--color-ink); }
+.q-opt:hover .q-opt__cta--ghost { border-color: var(--color-ink); }
+
+/* ── error state ── */
+.q-error { background: var(--color-onyx); color: var(--color-silver); min-height: 70vh; display: flex; align-items: center; padding-top: 120px; padding-bottom: 80px; }
+.q-error__inner { text-align: center; }
+.q-error__title { margin: 16px 0; color: var(--color-silver); }
+.q-error__cta { margin-top: 28px; }
+
+/* ── modal ── */
+.q-modal {
+  position: fixed; inset: 0; z-index: 1200; display: flex; align-items: center; justify-content: center;
+  padding: 20px; background: rgba(8,9,12,0.6); backdrop-filter: blur(8px);
+  opacity: 0; pointer-events: none; transition: opacity var(--dur-base) var(--ease-out);
+}
+.q-modal.is-open { opacity: 1; pointer-events: auto; }
+.q-modal__box {
+  position: relative; width: 100%; max-width: 30rem;
+  background: var(--color-paper-2); border: 1px solid var(--color-hair-ink);
+  border-radius: var(--r-shell); padding: clamp(28px, 4vw, 40px);
+  box-shadow: var(--shadow-lift); transform: scale(0.96);
+  transition: transform var(--dur-base) var(--ease-out);
+}
+.q-modal.is-open .q-modal__box { transform: scale(1); }
+.q-modal__close {
+  position: absolute; top: 18px; right: 18px; background: none; border: none;
+  color: var(--color-ink-3); cursor: pointer; transition: color var(--dur-fast) var(--ease-out);
+}
+.q-modal__close:hover { color: var(--color-ink); }
+.q-modal__title { margin: 12px 0 10px; color: var(--color-ink); }
+.q-modal__lead { color: var(--color-ink-2); font-size: 15px; line-height: 1.6; margin: 0 0 22px; }
+.q-modal__field {
+  width: 100%; padding: 14px; font-family: var(--font-sans); font-size: 14px;
+  color: var(--color-ink); background: var(--color-paper);
+  border: 1px solid var(--color-hair-ink); border-radius: var(--r-control);
+  resize: none; margin-bottom: 20px; transition: border-color var(--dur-base) var(--ease-out);
+}
+.q-modal__field:focus { outline: none; border-color: var(--color-brass); }
+.q-modal__submit { width: 100%; justify-content: center; }
+.q-modal__success { display: none; text-align: center; padding: 16px 0; }
+.q-modal__check {
+  width: 56px; height: 56px; border-radius: 50%; margin: 0 auto 20px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--color-brass); color: var(--color-brass-dark);
+}
+.q-modal__close-btn { margin-top: 26px; }
+
+/* ── responsive ── */
+@media (max-width: 980px) {
+  .q-grid { grid-template-columns: 1fr; gap: 48px; }
+  .q-pay__sticky { position: static; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .q-hero__dot { animation: none; }
+  .q-opt:hover { transform: none; }
+}
+</style>
 
 <script>
 // @ts-nocheck
@@ -261,7 +498,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const token = container.dataset.token;
   const apiUrl = container.dataset.api;
 
-  // ── Płatności ─────────────────────────────────────────────────
+  // ── Płatności ──
   container.querySelectorAll('.payment-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
       const btnText = btn.querySelector('.btn-text');
@@ -283,7 +520,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // ── Utrzymanie ─────────────────────────────────────────────────
+  // ── Utrzymanie ──
   document.getElementById('maintenance-checkbox')?.addEventListener('change', async (e) => {
     try {
       await fetch(`${apiUrl}/api/quotes/client/${token}/maintenance`, {
@@ -294,24 +531,22 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch {}
   });
 
-  // ── Modal ──────────────────────────────────────────────────────
+  // ── Modal ──
   const modal = document.getElementById('change-modal');
-  const mc = document.getElementById('change-modal-content');
-  const show = (v) => {
-    modal.style.opacity = v ? '1' : '0';
-    modal.style.pointerEvents = v ? 'auto' : 'none';
-    mc.style.transform = v ? 'scale(1)' : 'scale(0.96)';
-  };
+  const show = (v) => modal.classList.toggle('is-open', v);
   document.getElementById('open-change-modal')?.addEventListener('click', () => show(true));
   document.getElementById('close-change-modal')?.addEventListener('click', () => show(false));
   document.getElementById('close-success-modal')?.addEventListener('click', () => show(false));
+  modal?.addEventListener('click', (e) => { if (e.target === modal) show(false); });
 
   document.getElementById('submit-change')?.addEventListener('click', async () => {
-    const msg = document.getElementById('change-message').value.trim();
+    const field = document.getElementById('change-message');
+    const msg = field.value.trim();
     if (!msg) { alert('Wpisz treść uwag.'); return; }
     const btn = document.getElementById('submit-change');
-    const orig = btn.innerHTML;
-    btn.innerHTML = 'Wysyłanie&hellip;';
+    const label = btn.querySelector('.nb-btn__label');
+    const orig = label.innerHTML;
+    label.innerHTML = 'Wysyłanie&hellip;';
     btn.disabled = true;
     try {
       const res = await fetch(`${apiUrl}/api/quotes/request-change/${token}`, {
@@ -320,14 +555,14 @@ document.addEventListener('DOMContentLoaded', () => {
         body: JSON.stringify({ message: msg })
       });
       if (res.ok) {
-        document.getElementById('change-form-state').classList.add('hidden');
-        document.getElementById('change-success-state').classList.remove('hidden');
+        document.getElementById('change-form-state').style.display = 'none';
+        document.getElementById('change-success-state').style.display = 'block';
         return;
       }
       const d = await res.json();
       alert('Błąd: ' + (d.error || 'Spróbuj ponownie.'));
     } catch { alert('Błąd połączenia.'); }
-    btn.innerHTML = orig;
+    label.innerHTML = orig;
     btn.disabled = false;
   });
 });
