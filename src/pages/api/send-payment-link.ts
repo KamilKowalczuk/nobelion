@@ -2,6 +2,7 @@ import type { APIRoute } from 'astro';
 import Stripe from 'stripe';
 import { sendPaymentLinkEmail } from '../../lib/email';
 import { backendEnv } from '../../lib/backend-env';
+import { requireAdmin } from '../../lib/adminAuth';
 
 type SendPaymentLinkBody = {
     briefId?: string;
@@ -23,14 +24,12 @@ function isEmail(value: string): boolean {
 }
 
 export const POST: APIRoute = async ({ request }) => {
+    // Fail-closed: bez skonfigurowanego sekretu admina endpoint jest zablokowany.
+    const denied = requireAdmin(request);
+    if (denied) return denied;
+
     const stripeKey = backendEnv('STRIPE_SECRET_KEY');
     if (!stripeKey) return json({ error: 'Stripe nie jest skonfigurowany' }, 503);
-
-    const adminSecret = backendEnv('ADMIN_PAYMENT_LINK_SECRET');
-    if (adminSecret) {
-        const providedSecret = request.headers.get('x-admin-secret') || '';
-        if (providedSecret !== adminSecret) return json({ error: 'Brak autoryzacji' }, 401);
-    }
 
     let body: SendPaymentLinkBody;
     try {

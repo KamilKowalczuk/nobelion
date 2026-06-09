@@ -1,9 +1,14 @@
 import type { APIRoute } from 'astro';
 import { downloadInvoicePdf } from '../../../lib/fakturaxl';
+import { requireAdmin } from '../../../lib/adminAuth';
 
 export const prerender = false;
 
 export const GET: APIRoute = async ({ request }) => {
+    // Faktury zawierają dane klienta i kwoty — endpoint tylko dla admina (fail-closed).
+    const denied = requireAdmin(request);
+    if (denied) return denied;
+
     const url = new URL(request.url);
     const idStr = url.searchParams.get('id');
     if (!idStr) return new Response('Brak parametru id', { status: 400 });

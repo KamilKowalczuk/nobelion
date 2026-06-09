@@ -2,10 +2,15 @@ import type { APIRoute } from 'astro';
 import { downloadInvoicePdf } from '../../../lib/fakturaxl';
 import { dispatchInvoiceEmailWithPdf } from '../../../lib/emailInvoices';
 import { findSingle } from '../../../lib/payload';
+import { requireAdmin } from '../../../lib/adminAuth';
 
 export const prerender = false;
 
 export const POST: APIRoute = async ({ request }) => {
+    // Ponowna wysyłka faktury — tylko admin (fail-closed).
+    const denied = requireAdmin(request);
+    if (denied) return denied;
+
     let body: { fakturaXlInvoiceId?: string };
     try {
         body = await request.json();

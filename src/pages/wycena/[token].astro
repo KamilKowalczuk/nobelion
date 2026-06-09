@@ -26,6 +26,16 @@ const briefCompany: string = quoteData?.brief?.company || 'Klienta';
 const briefProblem: string = quoteData?.brief?.problemDescription || '';
 
 // ─── Lexical JSON → HTML ────────────────────────────────────────────────
+// Dopuszczamy tylko bezpieczne schematy URL (blokada javascript:/data: itp.).
+function safeUrl(url: unknown): string {
+  if (typeof url !== 'string') return '#';
+  const trimmed = url.trim();
+  if (/^(https?:|mailto:|tel:|\/|#)/i.test(trimmed)) {
+    return trimmed.replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  return '#';
+}
+
 function lexicalToHtml(state: unknown): string {
   if (!state || typeof state !== 'object') return '';
   const s = state as { root?: { children?: unknown[] } };
@@ -50,7 +60,7 @@ function lexicalToHtml(state: unknown): string {
       case 'heading': return `<h3>${ch}</h3>`;
       case 'list': return n.listType === 'number' ? `<ol>${ch}</ol>` : `<ul>${ch}</ul>`;
       case 'listitem': return `<li>${ch}</li>`;
-      case 'link': return `<a href="${n.url || '#'}" target="_blank" rel="noopener noreferrer">${ch}</a>`;
+      case 'link': return `<a href="${safeUrl(n.url)}" target="_blank" rel="noopener noreferrer">${ch}</a>`;
       case 'quote': return `<blockquote>${ch}</blockquote>`;
       default: return ch;
     }
