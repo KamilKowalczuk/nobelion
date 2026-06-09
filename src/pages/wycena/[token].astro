@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import { renderMarkdown } from '../../lib/markdown';
 
 export const prerender = false;
 
@@ -25,53 +26,10 @@ const discountedPrice = Math.round(fullPrice * 0.9);
 const briefCompany: string = quoteData?.brief?.company || 'Klienta';
 const briefProblem: string = quoteData?.brief?.problemDescription || '';
 
-// ─── Lexical JSON → HTML ────────────────────────────────────────────────
-// Dopuszczamy tylko bezpieczne schematy URL (blokada javascript:/data: itp.).
-function safeUrl(url: unknown): string {
-  if (typeof url !== 'string') return '#';
-  const trimmed = url.trim();
-  if (/^(https?:|mailto:|tel:|\/|#)/i.test(trimmed)) {
-    return trimmed.replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  }
-  return '#';
-}
-
-function lexicalToHtml(state: unknown): string {
-  if (!state || typeof state !== 'object') return '';
-  const s = state as { root?: { children?: unknown[] } };
-  if (!s.root?.children) return '';
-
-  const BOLD = 1, ITALIC = 2, UNDERLINE = 8;
-
-  function node(n: any): string {
-    if (n.type === 'text') {
-      let t = (n.text || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-      if (n.format & BOLD) t = `<strong>${t}</strong>`;
-      if (n.format & ITALIC) t = `<em>${t}</em>`;
-      if (n.format & UNDERLINE) t = `<u>${t}</u>`;
-      return t;
-    }
-    if (n.type === 'linebreak') return '<br>';
-
-    const ch = (n.children || []).map(node).join('');
-
-    switch (n.type) {
-      case 'paragraph': return ch ? `<p>${ch}</p>` : '';
-      case 'heading': return `<h3>${ch}</h3>`;
-      case 'list': return n.listType === 'number' ? `<ol>${ch}</ol>` : `<ul>${ch}</ul>`;
-      case 'listitem': return `<li>${ch}</li>`;
-      case 'link': return `<a href="${safeUrl(n.url)}" target="_blank" rel="noopener noreferrer">${ch}</a>`;
-      case 'quote': return `<blockquote>${ch}</blockquote>`;
-      default: return ch;
-    }
-  }
-
-  return (s.root.children as any[]).map(node).join('');
-}
-
-const introHtml = lexicalToHtml(quoteData?.intro);
-const timelineHtml = lexicalToHtml(quoteData?.timelinePlan);
-const scopeHtml = lexicalToHtml(quoteData?.scopePlan);
+// Treść wyceny jest pisana w Markdown (pola textarea w panelu) → render + sanityzacja.
+const introHtml = renderMarkdown(quoteData?.intro);
+const timelineHtml = renderMarkdown(quoteData?.timelinePlan);
+const scopeHtml = renderMarkdown(quoteData?.scopePlan);
 
 const fmt = (n: number) => new Intl.NumberFormat('pl-PL').format(n);
 ---
@@ -322,10 +280,20 @@ const fmt = (n: number) => new Intl.NumberFormat('pl-PL').format(n);
 /* ── rich text (light) ── */
 .rt { color: var(--color-ink-2); }
 .rt :global(p) { color: var(--color-ink-2); line-height: 1.72; margin: 0 0 1.1rem; }
-.rt :global(h3) {
-  font-family: var(--font-heading); font-weight: 600; font-size: var(--fs-h4);
+.rt :global(h1), .rt :global(h2), .rt :global(h3), .rt :global(h4), .rt :global(h5), .rt :global(h6) {
+  font-family: var(--font-heading); font-weight: 600;
   letter-spacing: var(--tracking-cinematic); text-transform: uppercase;
-  color: var(--color-ink); margin: 2rem 0 0.85rem;
+  color: var(--color-ink); margin: 2rem 0 0.85rem; line-height: 1.25;
+}
+.rt :global(h1) { font-size: var(--fs-h3); }
+.rt :global(h2) { font-size: var(--fs-h4); }
+.rt :global(h3), .rt :global(h4), .rt :global(h5), .rt :global(h6) { font-size: 1rem; }
+.rt :global(h1):first-child, .rt :global(h2):first-child, .rt :global(h3):first-child { margin-top: 0; }
+.rt :global(hr) { border: none; border-top: 1px solid var(--color-hair-ink); margin: 1.8rem 0; }
+.rt :global(code) {
+  font-family: var(--font-mono); font-size: 0.875em;
+  background: var(--color-paper-3); padding: 0.1em 0.4em; border-radius: var(--r-inset);
+  color: var(--color-ink);
 }
 .rt :global(ul), .rt :global(ol) { margin: 0 0 1.1rem; padding: 0; list-style: none; }
 .rt :global(li) {
