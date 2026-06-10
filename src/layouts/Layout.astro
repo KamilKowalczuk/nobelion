@@ -13,6 +13,13 @@ import '@fontsource/manrope/400.css';
 import '@fontsource/manrope/600.css';
 
 import '@fontsource/jetbrains-mono/400.css';
+
+// Na stronie głównej linki menu to kotwice (#sekcja) — smooth-scroll.
+// Na podstronach (np. /wycena/...) tych sekcji nie ma, więc kierujemy na
+// stronę główną z kotwicą (/#sekcja), żeby przejść tam i przewinąć.
+const isHome = Astro.url.pathname === '/';
+const sec = (id: string) => (isHome ? `#${id}` : `/#${id}`);
+const homeHref = isHome ? '#hero' : '/';
 ---
 <!doctype html>
 <html lang="pl">
@@ -158,7 +165,7 @@ import '@fontsource/jetbrains-mono/400.css';
 
                 <a
                     id="header-logo"
-                    href="#hero"
+                    href={homeHref}
                     class="nb-brand"
                     aria-label="Nobelion — wróć na górę strony"
                 >
@@ -167,15 +174,15 @@ import '@fontsource/jetbrains-mono/400.css';
                 </a>
 
                 <nav class="nb-nav" aria-label="Główna nawigacja">
-                    <a href="#oferta" class="nb-nav__link" data-section="oferta">OFERTA</a>
-                    <a href="#wdrozenia"    class="nb-nav__link" data-section="wdrozenia">WDROŻENIA</a>
-                    <a href="#proces"  class="nb-nav__link" data-section="proces">PROCES</a>
-                    <a href="#bezpieczenstwo" class="nb-nav__link" data-section="bezpieczenstwo">BEZPIECZEŃSTWO</a>
-                    <a href="#faq"      class="nb-nav__link" data-section="faq">FAQ</a>
+                    <a href={sec('oferta')} class="nb-nav__link" data-section="oferta">OFERTA</a>
+                    <a href={sec('wdrozenia')}    class="nb-nav__link" data-section="wdrozenia">WDROŻENIA</a>
+                    <a href={sec('proces')}  class="nb-nav__link" data-section="proces">PROCES</a>
+                    <a href={sec('bezpieczenstwo')} class="nb-nav__link" data-section="bezpieczenstwo">BEZPIECZEŃSTWO</a>
+                    <a href={sec('faq')}      class="nb-nav__link" data-section="faq">FAQ</a>
                 </nav>
 
                 <div class="nb-header__actions">
-                    <a href="#brief" class="nb-header__cta">
+                    <a href={sec('brief')} class="nb-header__cta">
                         <span>WYPEŁNIJ BRIEF</span>
                         <svg class="nb-header__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="square" stroke-linejoin="miter">
                             <path d="M5 12 H19 M13 6 L19 12 L13 18" />
@@ -197,12 +204,12 @@ import '@fontsource/jetbrains-mono/400.css';
             </div>
 
             <div id="mobile-menu" class="nb-mobile">
-                <a href="#oferta" class="mobile-nav-link" data-section="oferta">OFERTA</a>
-                <a href="#wdrozenia"    class="mobile-nav-link" data-section="wdrozenia">WDROŻENIA</a>
-                <a href="#proces"  class="mobile-nav-link" data-section="proces">PROCES</a>
-                <a href="#bezpieczenstwo" class="mobile-nav-link" data-section="bezpieczenstwo">BEZPIECZEŃSTWO</a>
-                <a href="#faq"      class="mobile-nav-link" data-section="faq">FAQ</a>
-                <a href="#brief" class="nb-mobile__cta">WYPEŁNIJ BRIEF</a>
+                <a href={sec('oferta')} class="mobile-nav-link" data-section="oferta">OFERTA</a>
+                <a href={sec('wdrozenia')}    class="mobile-nav-link" data-section="wdrozenia">WDROŻENIA</a>
+                <a href={sec('proces')}  class="mobile-nav-link" data-section="proces">PROCES</a>
+                <a href={sec('bezpieczenstwo')} class="mobile-nav-link" data-section="bezpieczenstwo">BEZPIECZEŃSTWO</a>
+                <a href={sec('faq')}      class="mobile-nav-link" data-section="faq">FAQ</a>
+                <a href={sec('brief')} class="nb-mobile__cta">WYPEŁNIJ BRIEF</a>
             </div>
         </header>
 
@@ -214,7 +221,7 @@ import '@fontsource/jetbrains-mono/400.css';
         <!-- Floating CTA: pojawia się po opuszczeniu hero -->
         <a
             id="floating-cta"
-            href="#brief"
+            href={sec('brief')}
             class="floating-cta fixed bottom-6 right-6 md:bottom-10 md:right-10 z-50 inline-flex items-center gap-3 pl-6 pr-7 py-4 bg-brass text-void font-heading font-bold text-xs md:text-sm tracking-[0.2em] uppercase opacity-0 pointer-events-none transition-all duration-300 ease-out"
             style="border-radius: var(--r-control);"
             aria-label="Rozpocznij brief"
