@@ -1,9 +1,35 @@
 import type { APIRoute } from 'astro';
 import { createDoc, uploadFile } from '../../lib/payload';
 import { sendBriefConfirmation, sendInternalNewBrief } from '../../lib/email';
+import { rateLimit } from '../../lib/rateLimit';
+import { detectMime } from '../../lib/fileSignature';
 import sanitizeHtml from 'sanitize-html';
 
 export const prerender = false;
+
+// Maksymalne długości pól (granica bezpieczeństwa — maxlength na froncie jest obejściowy).
+const LIMITS = {
+    name: 80,
+    email: 120,
+    phone: 30,
+    company: 120,
+    nip: 15,
+    problem: 5000,
+    diagnosis: 40,
+    industry: 80,
+    size: 40,
+    tools: 200,
+    triedNotes: 2000,
+    peopleInvolved: 40,
+    growsWithScale: 40,
+    budget: 60,
+    scope: 40,
+    urgency: 40,
+} as const;
+
+const MAX_BODY_BYTES = 100 * 1024;          // 100 KB na część tekstową (JSON/data)
+const MAX_TRIED_ITEMS = 10;
+const MAX_TRIED_ITEM_LEN = 60;
 
 type BriefBody = {
     name?: string;
@@ -58,17 +84,45 @@ function normalizeUrgency(value?: string): string | undefined {
     return undefined;
 }
 
+function isValidPhone(value: string): boolean {
+    if (!value) return true; // opcjonalne
+    return /^[0-9+\-()\s]{6,30}$/.test(value);
+}
+
+function isValidNip(value: string): boolean {
+    if (!value) return true; // opcjonalne
+    return /^\d{10}$/.test(value.replace(/[\s-]/g, ''));
+}
+
 function validate(body: BriefBody): string | null {
     if ((body.honeypot || '').trim() !== '') return 'Bot detected';
+
+    // Limity MAX długości — twarda granica po stronie serwera.
+    for (const [field, max] of Object.entries(LIMITS) as [keyof typeof LIMITS, number][]) {
+        const val = body[field as keyof BriefBody];
+        if (typeof val === 'string' && val.length > max) {
+            return `Pole „${field}" przekracza dozwoloną długość (${max} znaków).`;
+        }
+    }
+
     if (!body.name || body.name.length < 2) return 'Nieprawidłowe imię i nazwisko';
     if (!body.email || !isEmail(body.email)) return 'Nieprawidłowy email';
     if (!body.company || body.company.length < 2) return 'Nieprawidłowa nazwa firmy';
     if (!body.problem || body.problem.length < 30) return 'Opis problemu musi mieć min. 30 znaków';
+    if (!isValidPhone((body.phone || '').trim())) return 'Nieprawidłowy numer telefonu';
+    if (!isValidNip((body.nip || '').trim())) return 'NIP musi składać się z 10 cyfr';
+    if (Array.isArray(body.triedBefore) && body.triedBefore.length > MAX_TRIED_ITEMS) {
+        return 'Zbyt wiele zaznaczonych opcji';
+    }
     if (!body.agreedPrivacy || !body.agreedTerms) return 'Wymagane zgody nie zostały zaakceptowane';
     return null;
 }
 
 export const POST: APIRoute = async ({ request }) => {
+    // Rate limit: maks. 5 zgłoszeń / 10 min na IP (brief to akcja rzadka).
+    const limited = rateLimit(request, { key: 'brief', limit: 5, windowMs: 10 * 60 * 1000 });
+    if (limited) return limited;
+
     let body: BriefBody;
     let files: File[] = [];
 
@@ -85,6 +139,9 @@ export const POST: APIRoute = async ({ request }) => {
         if (typeof dataRaw !== 'string') {
             return new Response(JSON.stringify({ error: 'Brak danych briefu' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
         }
+        if (dataRaw.length > MAX_BODY_BYTES) {
+            return new Response(JSON.stringify({ error: 'Dane briefu są zbyt duże.' }), { status: 413, headers: { 'Content-Type': 'application/json' } });
+        }
         try {
             body = JSON.parse(dataRaw) as BriefBody;
         } catch {
@@ -92,8 +149,12 @@ export const POST: APIRoute = async ({ request }) => {
         }
         files = formData.getAll('attachments').filter((entry): entry is File => entry instanceof File && entry.size > 0);
     } else {
+        const raw = await request.text();
+        if (raw.length > MAX_BODY_BYTES) {
+            return new Response(JSON.stringify({ error: 'Dane briefu są zbyt duże.' }), { status: 413, headers: { 'Content-Type': 'application/json' } });
+        }
         try {
-            body = await request.json();
+            body = JSON.parse(raw);
         } catch {
             return new Response(JSON.stringify({ error: 'Nieprawidłowy JSON' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
         }
@@ -109,7 +170,9 @@ export const POST: APIRoute = async ({ request }) => {
         problem: sanitizeInput(body.problem),
         tools: sanitizeInput(body.tools),
         triedNotes: sanitizeInput(body.triedNotes),
-        triedBefore: Array.isArray(body.triedBefore) ? body.triedBefore.map(t => sanitizeInput(t)) : [],
+        triedBefore: Array.isArray(body.triedBefore)
+            ? body.triedBefore.slice(0, MAX_TRIED_ITEMS).map(t => sanitizeInput(t).slice(0, MAX_TRIED_ITEM_LEN))
+            : [],
     };
 
     const error = validate(sanitizedBody);
@@ -119,16 +182,18 @@ export const POST: APIRoute = async ({ request }) => {
     try {
         const uploadedAttachmentIds: Array<string | number> = [];
         const allowedMimeTypes = new Set(['application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'image/gif']);
+        if (files.length > 5) {
+            return new Response(JSON.stringify({ error: 'Maksymalnie 5 załączników.' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+        }
         for (const file of files) {
-            if (!allowedMimeTypes.has(file.type)) {
-                return new Response(JSON.stringify({ error: 'Dozwolone są tylko pliki PDF oraz obrazy.' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
-            }
             if (file.size > 10 * 1024 * 1024) {
                 return new Response(JSON.stringify({ error: 'Każdy załącznik może mieć maksymalnie 10 MB.' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
             }
-        }
-        if (files.length > 5) {
-            return new Response(JSON.stringify({ error: 'Maksymalnie 5 załączników.' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+            // Walidacja po sygnaturze bajtowej — nie ufamy deklarowanemu file.type.
+            const realMime = await detectMime(file);
+            if (!realMime || !allowedMimeTypes.has(realMime)) {
+                return new Response(JSON.stringify({ error: 'Dozwolone są tylko prawdziwe pliki PDF oraz obrazy (JPG/PNG/WEBP/GIF).' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+            }
         }
 
         for (const file of files) {

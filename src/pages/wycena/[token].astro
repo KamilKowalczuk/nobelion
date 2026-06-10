@@ -176,7 +176,7 @@ const fmt = (n: number) => new Intl.NumberFormat('pl-PL').format(n);
             <span class="eyebrow">Poprawki</span>
             <h3 class="h3 q-modal__title">Zgłoś zmiany</h3>
             <p class="q-modal__lead">Napisz co chciałbyś zmienić w zakresie lub wycenie. Przygotujemy nową ofertę.</p>
-            <textarea id="change-message" rows="5" class="q-modal__field" placeholder="Twoje uwagi..."></textarea>
+            <textarea id="change-message" rows="5" maxlength="2000" class="q-modal__field" placeholder="Twoje uwagi..."></textarea>
             <button id="submit-change" class="nb-btn nb-btn--primary nb-btn--lg q-modal__submit" type="button">
               <span class="nb-btn__label">Wyślij prośbę o zmiany</span>
             </button>

@@ -390,7 +390,7 @@
               </div>
               <div class="nb-field">
                 <span class="nb-field__label caption">Główne narzędzia (opcjonalnie)</span>
-                <input class="nb-input" type="text" bind:value={f.tools} placeholder="np. Gmail, Excel, Subiekt, Allegro, Salesforce…"/>
+                <input class="nb-input" type="text" maxlength={200} bind:value={f.tools} placeholder="np. Gmail, Excel, Subiekt, Allegro, Salesforce…"/>
               </div>
             </div>
           {:else if step === 3}
@@ -409,7 +409,7 @@
                   {#each [["frequency","Jak często pojawia się ten problem?"],["people","Ile osób się tym zajmuje?"],["time","Ile czasu zajmuje za każdym razem?"],["tools","Jakich narzędzi używacie dziś?"],["tried","Co już próbowaliście?"]] as [k,q]}
                     <label class="nb-helper__row">
                       <span>{q}</span>
-                      <input class="nb-input nb-input--sm" type="text" bind:value={f.helperAnswers[k as keyof typeof f.helperAnswers]}/>
+                      <input class="nb-input nb-input--sm" type="text" maxlength={200} bind:value={f.helperAnswers[k as keyof typeof f.helperAnswers]}/>
                     </label>
                   {/each}
                 </div>
@@ -489,7 +489,7 @@
               </div>
               <div class="nb-field">
                 <span class="nb-field__label caption">Co nie zadziałało? (opcjonalnie)</span>
-                <textarea class="nb-input nb-textarea" rows={4} bind:value={f.triedNotes} placeholder="Dlaczego dotychczasowe próby nie wyszły…"></textarea>
+                <textarea class="nb-input nb-textarea" rows={4} maxlength={2000} bind:value={f.triedNotes} placeholder="Dlaczego dotychczasowe próby nie wyszły…"></textarea>
               </div>
             </div>
           {:else if step === 6}
