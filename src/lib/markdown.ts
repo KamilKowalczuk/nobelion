@@ -15,12 +15,16 @@ const md = new MarkdownIt({
     typographer: true,  // ładne cudzysłowy i myślniki
 });
 
+// Owijamy każdą tabelę w przewijalny kontener (czytelne tabele na mobile).
+md.renderer.rules.table_open = () => '<div class="nb-table-wrap"><table>';
+md.renderer.rules.table_close = () => '</table></div>';
+
 const SANITIZE_OPTS: sanitizeHtml.IOptions = {
     allowedTags: [
         'p', 'br', 'strong', 'em', 'b', 'i', 'u', 's', 'del', 'ins', 'mark', 'small', 'sub', 'sup',
         'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
         'ul', 'ol', 'li',
-        'a', 'blockquote', 'code', 'pre', 'hr', 'img', 'span',
+        'a', 'blockquote', 'code', 'pre', 'hr', 'img', 'span', 'div',
         'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'caption',
     ],
     allowedAttributes: {
@@ -28,7 +32,10 @@ const SANITIZE_OPTS: sanitizeHtml.IOptions = {
         img: ['src', 'alt', 'title'],
         th: ['style', 'colspan', 'rowspan', 'scope'],
         td: ['style', 'colspan', 'rowspan'],
+        div: ['class'],
     },
+    // Tylko nasza klasa kontenera tabeli jest dozwolona na <div>.
+    allowedClasses: { div: ['nb-table-wrap'] },
     allowedSchemes: ['http', 'https', 'mailto', 'tel'],
     // Zachowujemy tylko wyrównanie tekstu w tabelach (markdown-it używa text-align).
     allowedStyles: {

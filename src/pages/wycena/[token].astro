@@ -329,9 +329,18 @@ const fmt = (n: number) => new Intl.NumberFormat('pl-PL').format(n);
 }
 .rt :global(pre code) { background: none; padding: 0; font-size: 0.875rem; line-height: 1.6; }
 
-/* Tabele (GFM) */
+/* Tabele (GFM) — owinięte w przewijalny kontener (.nb-table-wrap) */
+.rt :global(.nb-table-wrap) {
+  margin: 1.4rem 0; overflow-x: auto; -webkit-overflow-scrolling: touch;
+  border-bottom: 1px solid var(--color-hair-ink-2);
+}
+.rt :global(.nb-table-wrap)::-webkit-scrollbar { height: 6px; }
+.rt :global(.nb-table-wrap)::-webkit-scrollbar-track { background: transparent; }
+.rt :global(.nb-table-wrap)::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--color-brass), transparent 55%); border-radius: 3px;
+}
 .rt :global(table) {
-  width: 100%; border-collapse: collapse; margin: 1.4rem 0;
+  width: 100%; min-width: 30rem; border-collapse: collapse; margin: 0;
   font-size: 0.95rem;
 }
 .rt :global(thead) { border-bottom: 2px solid var(--color-brass); }
@@ -496,8 +505,6 @@ const fmt = (n: number) => new Intl.NumberFormat('pl-PL').format(n);
 @media (max-width: 640px) {
   .q-hero { padding-top: clamp(100px, 15vh, 140px); padding-bottom: clamp(52px, 11vw, 88px); }
   .q-h { gap: 10px; font-size: 1rem; }
-  /* tabele: poziomy scroll zamiast ściskania na wąskim ekranie */
-  .rt :global(table) { display: block; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .q-opt { padding: 22px; }
   .q-maint { padding: 22px; }
   .q-modal__box { padding: 24px; }
