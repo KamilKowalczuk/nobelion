@@ -1,4 +1,5 @@
 ---
+import { Image } from 'astro:assets';
 import { casesData } from '../../data/content';
 
 // Cases — light panel: case studies with product image placeholders + metric
@@ -34,7 +35,17 @@ import { casesData } from '../../data/content';
             <div class="nb-case__frame">
               <span class="nb-case__dots"><i></i><i></i><i></i></span>
               <div class="nb-case__img-wrap">
-                  <img src={c.image} alt={c.title} class="nb-case__img" />
+                  <Image
+                      src={c.image}
+                      alt={c.title}
+                      class="nb-case__img"
+                      widths={[440, 660, 880]}
+                      sizes="(max-width: 920px) 92vw, 440px"
+                      format="webp"
+                      quality={72}
+                      loading="lazy"
+                      decoding="async"
+                  />
               </div>
             </div>
             <div class="nb-case__metric">

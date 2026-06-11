@@ -3,6 +3,10 @@
 // editorial luxury (Monocle / Bloomberg w polskim wydaniu). Klient docelowy:
 // nietechniczny właściciel polskiej małej i średniej firmy.
 
+import showcaseSalesEngine from '../assets/showcase_sales_engine.jpg';
+import showcaseBackOffice from '../assets/showcase_back_office.jpg';
+import showcaseOutboundAgent from '../assets/showcase_outbound_agent.jpg';
+
 export const siteConfig = {
     title: "NOBELION | Automatyzacje AI i Systemy dla Firm",
     description: "Projektujemy automatyzacje AI i strony internetowe dla firm, które chcą rosnąć bez zatrudniania kolejnych ludzi. Brief w 2 minuty, plan i wycena w 24 godziny.",
@@ -97,9 +101,9 @@ export const casesData = {
     heading: "Liczby, które się obroniły",
     subheading: "Realne, wdrożone projekty. Każdy mierzony twardym wynikiem: godziny pracy, przychód, błędy.",
     items: [
-        { id: "01", image: "/showcase_sales_engine.png", kicker: "Klinika medyczna · Silnik sprzedaży", title: "+65% sprzedaży rok do roku", metric: "+230 000 zł", metricLabel: "przychodu w 9 miesięcy", desc: "Dedykowana automatyzacja generująca leady, kwalifikująca pacjentów i synchronizująca kalendarz lekarzy.", steps: ["Audyt ścieżki pacjenta", "Silnik leadów + kwalifikacja", "Synchronizacja kalendarza", "Pomiar i optymalizacja"] },
-        { id: "02", image: "/showcase_back_office.png", kicker: "Klinika medyczna · Back-office", title: "1.5 roku pracy → 1 tydzień", metric: "~98%", metricLabel: "mniej czasu operacyjnego", desc: "Proces, który zająłby etatowi 1.5 roku, skompresowany do tygodnia czasu maszyny. Pełna ścieżka audytu w bazie.", steps: ["Mapowanie procesu", "Automatyzacja przepływu", "Ścieżka audytu w bazie", "Przekazanie zespołowi"] },
-        { id: "03", image: "/showcase_outbound_agent.png", kicker: "Produkt własny · Agent outbound", title: "Outbound, który pisze sam", metric: "24/7", metricLabel: "autonomicznej pracy", desc: "System sam szuka firm, skanuje ich strony i pisze spersonalizowane maile. Strona, panel, baza i KMS pod jedną domeną.", steps: ["Wyszukiwanie firm", "Scraping i analiza", "Personalizacja maili", "Gotowe drafty w skrzynce"] }
+        { id: "01", image: showcaseSalesEngine, kicker: "Klinika medyczna · Silnik sprzedaży", title: "+65% sprzedaży rok do roku", metric: "+230 000 zł", metricLabel: "przychodu w 9 miesięcy", desc: "Dedykowana automatyzacja generująca leady, kwalifikująca pacjentów i synchronizująca kalendarz lekarzy.", steps: ["Audyt ścieżki pacjenta", "Silnik leadów + kwalifikacja", "Synchronizacja kalendarza", "Pomiar i optymalizacja"] },
+        { id: "02", image: showcaseBackOffice, kicker: "Klinika medyczna · Back-office", title: "1.5 roku pracy → 1 tydzień", metric: "~98%", metricLabel: "mniej czasu operacyjnego", desc: "Proces, który zająłby etatowi 1.5 roku, skompresowany do tygodnia czasu maszyny. Pełna ścieżka audytu w bazie.", steps: ["Mapowanie procesu", "Automatyzacja przepływu", "Ścieżka audytu w bazie", "Przekazanie zespołowi"] },
+        { id: "03", image: showcaseOutboundAgent, kicker: "Produkt własny · Agent outbound", title: "Outbound, który pisze sam", metric: "24/7", metricLabel: "autonomicznej pracy", desc: "System sam szuka firm, skanuje ich strony i pisze spersonalizowane maile. Strona, panel, baza i KMS pod jedną domeną.", steps: ["Wyszukiwanie firm", "Scraping i analiza", "Personalizacja maili", "Gotowe drafty w skrzynce"] }
     ]
 }
 
