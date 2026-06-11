@@ -291,7 +291,7 @@
     <!-- LEFT: dark progress + dossier rail -->
     <aside class="nb-brief__rail onyx">
       <div class="nb-brief__rail-top">
-        <img src="/logo-icon.png" alt="" class="nb-brief__rail-mark"/>
+        <img src="/logo-icon.svg" alt="" class="nb-brief__rail-mark"/>
           <div>
             <div class="nb-brief__rail-name">Brief Nobelion</div>
             <div class="nb-brief__rail-sub mono">Wycena w 24h roboczych</div>
