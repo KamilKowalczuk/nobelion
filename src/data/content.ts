@@ -9,25 +9,25 @@ import showcaseOutboundAgent from '../assets/showcase_outbound_agent.jpg';
 
 export const siteConfig = {
     title: "NOBELION | Automatyzacje AI i Systemy dla Firm",
-    description: "Projektujemy automatyzacje AI i strony internetowe dla firm, które chcą rosnąć bez zatrudniania kolejnych ludzi. Brief w 2 minuty, plan i wycena w 24 godziny.",
+    description: "Projektujemy automatyzacje AI i dedykowane systemy dla firm, które chcą rosnąć bez zatrudniania kolejnych osób. Brief w 2 minuty, konkretna wycena w 24 godziny.",
     email: "kontakt@nobelion.pl",
     phone: "",
     url: "https://nobelion.pl"
 }
 
 export const heroData = {
-    line1: "Oddajemy ci czas,",
+    line1: "Oddajemy Ci czas,",
     line2: "którego nie wiedziałeś,",
     line3: "że tracisz.",
-    subheading: "Projektujemy automatyzacje i aplikacje, które oszczędzają godziny i podnoszą przychód. AI lub bez. Własne serwery lub n8n. Dedykowany kod lub make.com.",
-    microTagline: "Architekci automatyzacji · 2026",
+    subheading: "Budujemy automatyzacje i dedykowane systemy, które przejmują powtarzalną pracę Twojego zespołu. Zanim cokolwiek wdrożymy, liczymy, czy inwestycja się zwróci — jeśli nie, powiemy wprost.",
+    microTagline: "Architekci automatyzacji",
     scrollText: "Przewiń",
     primaryCta: { label: "Wypełnij brief", href: "#brief" },
-    secondaryCta: { label: "Zobacz wdrożenia", href: "#cases" },
+    secondaryCta: { label: "Zobacz wdrożenia", href: "#wdrozenia" },
     stripe: [
-        { k: "+230 000 zł", v: "przychodu w 9 mies." },
-        { k: "+65%", v: "sprzedaży r/r" },
-        { k: "1.5 roku → 1 tydz.", v: "pracy etatu" }
+        { k: "+230 000 zł", v: "przychodu klienta w 9 mies." },
+        { k: "+65%", v: "sprzedaży rok do roku" },
+        { k: "1,5 roku → 1 tydz.", v: "ręcznej pracy etatu" }
     ]
 }
 
@@ -56,27 +56,27 @@ export const problemData = {
 export const servicesData = {
     sectionLabel: "OFERTA",
     heading: "CO DLA CIEBIE BUDUJEMY",
-    subheading: "Trzy drogi do tego samego celu — mniej zmarnowanego czasu, więcej przychodu. Dobieramy narzędzie do problemu, nie odwrotnie.",
+    subheading: "Trzy drogi do tego samego celu: mniej ręcznej pracy, więcej przychodu. Najpierw słuchamy, na czym tracisz czas — potem dobieramy narzędzie. Nigdy odwrotnie.",
     pillars: [
-        { id: "01", name: "Dedykowane aplikacje i systemy", lead: "Aplikacje webowe z bazą, panelem administracyjnym i logowaniem.", body: "Pełna własność kodu i danych po odbiorze.", deliverables: ["Web app", "Panel admina", "API"], outcome: "Praca dwóch ludzi, którą wykonuje system." },
-        { id: "02", name: "Automatyzacje n8n / make.com", lead: "Tam, gdzie kod to overkill — stawiamy orkiestrowane przepływy low-code.", body: "Szybko, mierzalnie, bez wendor-locku.", deliverables: ["n8n", "make.com", "Integracje"], outcome: "Cyfrowa twarz firmy, która przynosi konkretne leady." },
-        { id: "03", name: "Wdrożenia AI w procesie", lead: "AI dokładamy tam, gdzie wnosi mierzalną wartość — klasyfikacja, generowanie treści, agenci.", body: "Nigdy dla samego AI.", deliverables: ["Agenci", "LLM", "Klasyfikacja"], outcome: "Narzędzie, którego nikt poza Tobą nie ma." }
+        { id: "01", name: "Dedykowane aplikacje i systemy", lead: "Aplikacja z bazą danych i panelem, zbudowana dokładnie pod Twój proces — nie szablon, który „prawie pasuje”.", body: "Po odbiorze kod i dane należą w całości do Ciebie.", deliverables: ["Aplikacja webowa", "Panel administracyjny", "Integracje"], outcome: "Praca dwóch osób, którą wykonuje system." },
+        { id: "02", name: "Szybkie automatyzacje procesów", lead: "Łączymy programy, których już używasz — pocztę, arkusze, sklep, fakturowanie — żeby dane przepisywały się same.", body: "Gotowe w tygodnie, nie miesiące. Rosną razem z firmą.", deliverables: ["n8n", "make.com", "Integracje"], outcome: "Zamówienie obsłużone w minutę zamiast w kwadrans." },
+        { id: "03", name: "Wdrożenia AI w procesie", lead: "Sztuczną inteligencję wdrażamy tam, gdzie realnie zarabia: pisanie ofert, analiza zgłoszeń, odpowiedzi na zapytania.", body: "Nigdy po to, żeby tylko „mieć AI”.", deliverables: ["Agenci AI", "Analiza treści", "Generowanie ofert"], outcome: "Narzędzie, którego nie ma Twoja konkurencja." }
     ]
 }
 
 export const capabilitiesData = [
-    { icon: "lightning", title: "Automatyzacja procesów", desc: "Powtarzalna praca biurowa skompresowana do minut maszyny. Deterministyczna, audytowalna." },
-    { icon: "workflow",  title: "Agent outbound", desc: "Skanuje firmy, pisze spersonalizowane maile, dostarcza gotowe do wysyłki — z panelem sterowania." },
-    { icon: "diamond",   title: "Walidacja ROI", desc: "Liczymy zwrot zanim napiszemy linijkę kodu. Jeśli matematyka się nie spina — nie wdrażamy." },
-    { icon: "shield",    title: "Bezpieczeństwo", desc: "Szyfrowanie Google KMS, logowanie bezhasłowe, zgodność z RODO i normami sektora medycznego." },
-    { icon: "server",    title: "Serwery dedykowane", desc: "Hostujemy na własnej infrastrukturze. Bez subskrypcji od pierwszego dnia, bez uzależnienia." },
-    { icon: "user",      title: "Jeden zespół", desc: "Programiści, automatyzatorzy i eksperci AI pod jednym dachem. Rozmawiasz z tymi, którzy budują." }
+    { icon: "lightning", title: "Automatyzacja procesów", desc: "Powtarzalna praca biurowa wykonana w minuty — zawsze tak samo, z zapisem każdej operacji." },
+    { icon: "workflow",  title: "Agent sprzedażowy", desc: "Sam znajduje firmy, czyta ich strony i przygotowuje spersonalizowane maile. Ty tylko zatwierdzasz." },
+    { icon: "diamond",   title: "Najpierw rachunek", desc: "Zanim napiszemy linijkę kodu, liczymy zwrot z inwestycji. Jeśli się nie opłaca — odradzimy." },
+    { icon: "shield",    title: "Bezpieczeństwo", desc: "Szyfrowanie klasy bankowej, zgodność z RODO i wymogami sektora medycznego." },
+    { icon: "server",    title: "Serwer pod Twój system", desc: "Dobieramy i konfigurujemy serwer lub hosting dopasowany do aplikacji, którą budujemy. Płacisz za to, czego używasz." },
+    { icon: "user",      title: "Jeden zespół", desc: "Rozmawiasz bezpośrednio z ludźmi, którzy budują Twój system. Bez pośredników." }
 ]
 
 export const statsData = [
-    { pre: "+", value: "230", suffix: "k zł", label: "przychodu wygenerowanego\nw 9 miesiącach" },
-    { pre: "+", value: "65", suffix: "%", label: "wzrost sprzedaży r/r\nklinika medyczna" },
-    { pre: "", value: "1", suffix: "tydz.", label: "zamiast 1.5 roku\npracy etatu" }
+    { pre: "+", value: "230", suffix: "k zł", label: "przychodu klienta\nw 9 miesięcy" },
+    { pre: "+", value: "65", suffix: "%", label: "wzrostu sprzedaży\nrok do roku" },
+    { pre: "", value: "1", suffix: "tydz.", label: "zamiast 1,5 roku\nręcznej pracy" }
 ]
 
 export const examplesData = {
@@ -94,28 +94,28 @@ export const examplesData = {
     closing: "I dziesiątki innych. Twój pomysł też się tu zmieści."
 }
 
-export const marqueeWords = ["Automatyzacja", "AI", "n8n", "make.com", "Dedykowany kod", "Serwery", "Google KMS", "ROI", "Outbound", "Integracje"]
+export const marqueeWords = ["Automatyzacje", "Sztuczna inteligencja", "Dedykowane systemy", "Integracje", "Sprzedaż B2B", "Oferty w sekundy", "Raporty bez klikania", "Bezpieczeństwo danych", "Zwrot z inwestycji", "Mniej ręcznej pracy"]
 
 export const casesData = {
     sectionLabel: "Wdrożenia",
     heading: "Liczby, które się obroniły",
-    subheading: "Realne, wdrożone projekty. Każdy mierzony twardym wynikiem: godziny pracy, przychód, błędy.",
+    subheading: "Trzy wdrożenia, trzy twarde wyniki. Bez retuszu — tak to wygląda u klientów.",
     items: [
-        { id: "01", image: showcaseSalesEngine, kicker: "Klinika medyczna · Silnik sprzedaży", title: "+65% sprzedaży rok do roku", metric: "+230 000 zł", metricLabel: "przychodu w 9 miesięcy", desc: "Dedykowana automatyzacja generująca leady, kwalifikująca pacjentów i synchronizująca kalendarz lekarzy.", steps: ["Audyt ścieżki pacjenta", "Silnik leadów + kwalifikacja", "Synchronizacja kalendarza", "Pomiar i optymalizacja"] },
-        { id: "02", image: showcaseBackOffice, kicker: "Klinika medyczna · Back-office", title: "1.5 roku pracy → 1 tydzień", metric: "~98%", metricLabel: "mniej czasu operacyjnego", desc: "Proces, który zająłby etatowi 1.5 roku, skompresowany do tygodnia czasu maszyny. Pełna ścieżka audytu w bazie.", steps: ["Mapowanie procesu", "Automatyzacja przepływu", "Ścieżka audytu w bazie", "Przekazanie zespołowi"] },
-        { id: "03", image: showcaseOutboundAgent, kicker: "Produkt własny · Agent outbound", title: "Outbound, który pisze sam", metric: "24/7", metricLabel: "autonomicznej pracy", desc: "System sam szuka firm, skanuje ich strony i pisze spersonalizowane maile. Strona, panel, baza i KMS pod jedną domeną.", steps: ["Wyszukiwanie firm", "Scraping i analiza", "Personalizacja maili", "Gotowe drafty w skrzynce"] }
+        { id: "01", image: showcaseSalesEngine, kicker: "Klinika medyczna · Powroty pacjentek", title: "+65% sprzedaży rok do roku", metric: "+230 000 zł", metricLabel: "przychodu w 9 miesięcy", desc: "Baza 100 000 pacjentek pilnuje się sama. System pamięta, kiedy każda z nich może wrócić na badanie, i na dwa miesiące przed terminem podaje rejestracji gotową listę do obdzwonienia. Wcześniej ten proces nie istniał — był niemożliwy do ogarnięcia w Excelu.", steps: ["Audyt ścieżki pacjentki", "System przypomnień w bazie", "Gotowe listy dla rejestracji", "Pomiar wyników co miesiąc"] },
+        { id: "02", image: showcaseBackOffice, kicker: "Klinika medyczna · Weryfikacja NFZ", title: "1,5 roku pracy → 1 tydzień", metric: "2000/h", metricLabel: "rekordów sprawdza system — pracownik 120 dziennie", desc: "Pracownik sprawdzał ręcznie 120 uprawnień dziennie w rządowym portalu NFZ. System sprawdza 2000 na godzinę i sam nanosi wyniki do bazy. Zespół dzwoni tylko do osób, którym badanie faktycznie przysługuje — zamiast tracić czas na odmowy.", steps: ["Mapowanie procesu", "Automat w portalu NFZ", "Wyniki prosto do bazy", "Przekazanie zespołowi"] },
+        { id: "03", image: showcaseOutboundAgent, kicker: "Produkt własny · Agent sprzedaży", title: "Sprzedaż, która pisze się sama", metric: "24/7", metricLabel: "pracy bez udziału człowieka", desc: "System sam znajduje firmy, czyta ich strony i przygotowuje spersonalizowane maile — kilkanaście dziennie, każdego dnia, także w weekendy. Handlowiec zaczyna pracę od gotowych wiadomości w skrzynce, zamiast od godzin szukania kontaktów.", steps: ["Wyszukiwanie firm", "Analiza ich stron", "Personalizowane maile", "Gotowe wiadomości w skrzynce"] }
     ]
 }
 
 export const processData = {
     sectionLabel: "PROCES",
     heading: "JAK WYGLĄDA WSPÓŁPRACA",
-    subheading: "Każdy etap ma checkpoint, na którym możesz wcisnąć stop. Bez niespodzianek, bez ukrytych kosztów.",
+    subheading: "Cztery etapy, zero niespodzianek. Po każdym możesz powiedzieć stop — bez kar i bez tłumaczenia się.",
     steps: [
-        { n: "01", title: "Brief i audyt", time: "3–5 dni", desc: "Wypełniasz brief, my audytujemy proces i liczymy ROI. Dostajesz wycenę zakresu i rekomendację narzędzia." },
-        { n: "02", title: "Projekt rozwiązania", time: "Tydzień", desc: "Projektujemy architekturę, ustalamy kamienie milowe i mierniki sukcesu. Decyzję podejmujesz na konkretach." },
-        { n: "03", title: "Wdrożenie", time: "1–10 tyg.", desc: "Budujemy etapami. Prosty proces n8n — 1–2 tygodnie. Dedykowany serwis z bazą i panelem — 4–10 tygodni." },
-        { n: "04", title: "Przekazanie", time: "Odbiór", desc: "Kod, dane i konta migrujemy do twojej organizacji. Bez vendor-locku. Utrzymujemy klientów, bo wracają." }
+        { n: "01", title: "Brief i audyt", time: "3–5 dni", desc: "Wypełniasz brief w kilka minut, własnymi słowami. My przyglądamy się procesowi, liczymy, ile firma na nim traci, i odsyłamy wycenę z konkretnym planem." },
+        { n: "02", title: "Projekt rozwiązania", time: "Tydzień", desc: "Pokazujemy, co dokładnie powstanie, w jakich etapach i po czym poznasz, że działa. Decyzję podejmujesz na konkretach, nie na obietnicach." },
+        { n: "03", title: "Wdrożenie", time: "1–10 tyg.", desc: "Budujemy etapami i na bieżąco pokazujemy postępy. Prosta automatyzacja: 1–2 tygodnie. System z bazą i panelem: 4–10 tygodni." },
+        { n: "04", title: "Przekazanie", time: "Odbiór", desc: "Kod, dane i dostępy przechodzą na Twoją firmę. Nic Cię z nami nie wiąże — klienci zostają, bo system zarabia, nie dlatego, że muszą." }
     ]
 }
 
@@ -135,29 +135,29 @@ export const audienceData = {
 }
 
 export const faqData = [
-    { question: "Czy potrzebuję AI, żeby zautomatyzować firmę?", answer: "Nie. AI to jedno z pięciu narzędzi w naszym arsenale. Najlepsze automatyzacje są deterministyczne — uruchamiają się o tej samej godzinie, robią to samo, kosztują grosze. AI dokładamy tam, gdzie wnosi mierzalną wartość." },
-    { question: "Jak rozliczacie wdrożenie?", answer: "Stawka za projekt po wycenie zakresu. W złożonych implementacjach — kontrakt z kamieniami milowymi i procentem od zaoszczędzonych godzin lub wygenerowanego przychodu. Decyzję podejmujesz po audycie." },
-    { question: "Czy kod należy do mnie po wdrożeniu?", answer: "Tak. Kod, dane i konta migrujemy do twojej organizacji w momencie odbioru. Nie utrzymujemy klientów na smyczy — utrzymujemy ich, bo wracają." },
-    { question: "Jak długo trwa typowe wdrożenie?", answer: "Audyt 3–5 dni. Prosty proces n8n: 1–2 tygodnie. Dedykowany serwis z bazą i panelem: 4–10 tygodni. Każdy etap ma checkpoint, na którym możesz wcisnąć stop." },
-    { question: "Dla jakich firm pracujecie?", answer: "MŚP usługowe, e-commerce, kliniki i sektor medyczny oraz szeroko rozumiane B2B. Jeśli masz powtarzalny proces, który zjada czas — prawdopodobnie umiemy go zautomatyzować." }
+    { question: "Czy potrzebuję AI, żeby zautomatyzować firmę?", answer: "Nie. Najlepsze automatyzacje to często zwykłe, przewidywalne systemy: uruchamiają się o czasie, robią dokładnie to samo i kosztują grosze. Sztuczną inteligencję dokładamy tylko tam, gdzie przynosi policzalny zysk — nie dlatego, że jest modna." },
+    { question: "Jak rozliczacie wdrożenie?", answer: "Stała kwota za ustalony zakres — znasz ją przed startem, po audycie. Większe projekty dzielimy na etapy i płacisz po odbiorze każdego z nich. Możliwe też rozliczenie częściowo od efektu, np. od zaoszczędzonych godzin. Bez ukrytych kosztów." },
+    { question: "Czy kod należy do mnie po wdrożeniu?", answer: "Tak. Przy odbiorze przekazujemy kod, dane i wszystkie dostępy na Twoją firmę. Nie trzymamy klientów na smyczy — wracają, bo widzą wyniki." },
+    { question: "Jak długo trwa typowe wdrożenie?", answer: "Audyt: 3–5 dni. Prosta automatyzacja: 1–2 tygodnie. Dedykowany system z bazą i panelem: 4–10 tygodni. Po każdym etapie możesz powiedzieć stop." },
+    { question: "Nie znam się na technologii. Czy to problem?", answer: "Żaden. Brief jest po polsku, plan jest po polsku, a naszą rolą jest tłumaczenie trudnych rzeczy na język firmy. Wystarczy, że wiesz, co Cię uwiera w codziennej pracy — resztę sprawdzimy za Ciebie." }
 ]
 
 export const securityData = {
     sectionLabel: "Bezpieczeństwo",
     heading: "Zbudowane na zaufaniu",
-    subheading: "Pracujemy z danymi medycznymi i finansowymi. Standard bezpieczeństwa nie jest opcją — jest fundamentem.",
+    subheading: "Pracujemy z danymi medycznymi i finansowymi. Standard bezpieczeństwa nie jest u nas opcją — jest punktem wyjścia.",
     items: [
-        { icon: "lock",   title: "Szyfrowanie Google KMS", desc: "Klucze zarządzane przez Google Cloud KMS. Dane wrażliwe szyfrowane w spoczynku i w tranzycie." },
-        { icon: "shield", title: "Logowanie bezhasłowe", desc: "Magic-link i klucze sprzętowe zamiast haseł. Mniejsza powierzchnia ataku, mniej phishingu." },
-        { icon: "diamond",title: "Zgodność z RODO", desc: "Minimalizacja danych, prawo do usunięcia, rejestr czynności. Zgodność z normami sektora medycznego." },
-        { icon: "server", title: "Pełna ścieżka audytu", desc: "Każda operacja zapisana w bazie. Wiesz kto, co i kiedy — dla compliance i Twojego spokoju." }
+        { icon: "lock",   title: "Szyfrowanie klasy bankowej", desc: "Dane wrażliwe są zaszyfrowane podczas przechowywania i przesyłania. Kluczami zarządza Google Cloud." },
+        { icon: "shield", title: "Logowanie bez haseł", desc: "Jednorazowe linki i klucze sprzętowe zamiast haseł, które można wykraść albo zgubić." },
+        { icon: "diamond",title: "Zgodność z RODO", desc: "Zbieramy tylko niezbędne dane i zawsze wiemy, gdzie się znajdują. Spełniamy wymogi sektora medycznego." },
+        { icon: "server", title: "Pełna historia operacji", desc: "Każde działanie systemu zostaje zapisane. Zawsze wiesz, kto zrobił co i kiedy." }
     ]
 }
 
 export const contactData = {
     eyebrow: "ZACZYNAMY",
     heading: "OPISZ PROBLEM. RESZTĘ POLICZYMY MY.",
-    body: "Wypełnienie briefu zajmuje kilka minut. Po wysłaniu odzywamy się w ciągu 24 godzin roboczych. Nie sprzedajemy — rozmawiamy o tym, czy ma to sens.",
+    body: "Brief to kilka prostych pytań — wypełnisz go w parę minut, bez technicznego słownika. W ciągu 24 godzin roboczych dostaniesz konkrety: co da się zautomatyzować, ile to kosztuje i kiedy się zwróci. A jeśli uznamy, że to się nie opłaca — też powiemy wprost.",
     company: "NOBELION SP. Z O.O.",
     rows: [
       { k: "Adres", v: "ul. Pamiątkowa 2, 61-512 Poznań" },
