@@ -46,7 +46,6 @@ export async function findSingle(collection: string, where: Record<string, strin
 
 export async function createDoc(collection: string, data: Record<string, unknown>): Promise<any | null> {
     const url = `${getBaseUrl()}/api/${collection}`;
-    console.log(`[payload] createDoc → POST ${url}`, JSON.stringify(data));
     try {
         const res = await fetch(url, {
             method: 'POST',

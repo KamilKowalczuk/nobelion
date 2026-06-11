@@ -233,9 +233,7 @@ export const POST: APIRoute = async ({ request }) => {
         });
 
         if (!payloadDoc || payloadDoc.error) {
-            console.error('[brief API] Payload FULL response:', JSON.stringify(payloadDoc, null, 2));
-            console.error('[brief API] Payload status:', payloadDoc?.status);
-            console.error('[brief API] Payload body:', payloadDoc?.body);
+            console.error(`[brief API] Zapis briefu odrzucony przez Payload (status ${payloadDoc?.status}):`, payloadDoc?.body);
             return new Response(JSON.stringify({ 
                 error: 'Nie udało się zapisać briefu - odrzucenie po stronie serwera.'
             }), { 

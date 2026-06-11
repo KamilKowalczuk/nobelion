@@ -229,7 +229,6 @@
       if (!res.ok) throw new Error(data?.error || "Nie udało się wysłać briefu.");
       submitState = "success";
     } catch (e) {
-      console.error(e);
       submitError = e instanceof Error ? e.message : "Nie udało się wysłać briefu.";
       submitState = "error";
     } finally { isSubmitting = false; }

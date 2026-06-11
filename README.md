@@ -1,43 +1,48 @@
-# Astro Starter Kit: Minimal
+# Nobelion — Frontend (Onyx)
+
+Strona główna i obsługa klienta agencji [nobelion.pl](https://nobelion.pl):
+landing, formularz briefu, strona wyceny dla klienta, płatności Stripe.
+
+## Stack
+
+- **Astro 5** (hybrid SSR, adapter Netlify) + **Svelte 5** (wyspy interaktywne) + **Tailwind CSS 4**
+- Backend: Payload CMS 3 (osobne repozytorium `nobelion-cms`, produkcja: `admin.nobelion.pl`)
+- Integracje: Stripe (Checkout), Resend (e-maile transakcyjne), FakturaXL (faktury)
+
+## Struktura
+
+```
+src/
+  pages/              strona główna, /wycena/[token], /dziekujemy, /blad-platnosci
+  pages/api/          brief, send-payment-link, invoices/*, stripe/verify-session
+  components/         sections (Astro, statyczne) + core/ui (Svelte, wyspy)
+  lib/                klient Payload, e-maile, FakturaXL, walidacja, rate limit
+  middleware.ts       baseline nagłówków bezpieczeństwa dla odpowiedzi SSR
+netlify/edge-functions/security-headers.ts   kanoniczne CSP + nagłówki dla stron
+```
+
+## Uruchomienie
 
 ```sh
-npm create astro@latest -- --template minimal
+npm install
+cp .env.example .env   # uzupełnij klucze (Payload, Stripe, Resend, FakturaXL)
+npm run dev            # http://localhost:4321
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+Pełny flow wymaga działającego CMS (`nobelion-cms`, port 3001).
 
-## 🚀 Project Structure
+## Komendy
 
-Inside of your Astro project, you'll see the following folders and files:
+| Komenda           | Działanie                          |
+| :---------------- | :--------------------------------- |
+| `npm run dev`     | Serwer deweloperski                |
+| `npm run build`   | Build produkcyjny do `./dist/`     |
+| `npm run preview` | Podgląd builda                     |
+| `npx astro check` | Typecheck                          |
 
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
-```
+## Deploy
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
-
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
-
-Any static assets, like images, can be placed in the `public/` directory.
-
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+Netlify — build `npm run build`, publish `dist/`. Zmienne środowiskowe z `.env.example`
+ustawiane w panelu Netlify. Webhook Stripe wskazuje **wyłącznie** na CMS
+(`https://admin.nobelion.pl/api/stripe/webhook`); endpoint `/api/stripe-webhook`
+w tym repo to świadomy no-op (do czasu usunięcia starego URL-a z panelu Stripe).

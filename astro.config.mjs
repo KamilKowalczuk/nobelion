@@ -14,7 +14,7 @@ export default defineConfig({
   integrations: [svelte(), sitemap()],
 
   vite: {
-    plugins: [tailwindcss()], // [cite: 15016]
+    plugins: [tailwindcss()],
   },
   adapter: netlify(),
 });

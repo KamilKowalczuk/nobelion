@@ -14,7 +14,7 @@ import { securityData, contactData, navigation } from '../../data/content';
         <p class="lead nb-security__body">{securityData.subheading}</p>
       </div>
       <div class="nb-security__grid">
-        {securityData.items.map((s, i) => (
+        {securityData.items.map((s) => (
           <div class="nb-sec-card">
             <span class="nb-sec-card__icon">
                {s.icon === 'lock' && <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.15" stroke-linecap="square" stroke-linejoin="miter"><rect x="4" y="10" width="16" height="11"/><path d="M8 10 V7 a4 4 0 0 1 8 0 V10"/></svg>}

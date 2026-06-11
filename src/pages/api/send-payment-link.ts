@@ -49,7 +49,7 @@ export const POST: APIRoute = async ({ request }) => {
 
     const session = await stripe.checkout.sessions.create({
         mode: 'payment',
-        payment_method_types: ['card'],
+        payment_method_types: ['card', 'blik', 'p24'],
         line_items: [{
             quantity: 1,
             price_data: {
@@ -59,6 +59,19 @@ export const POST: APIRoute = async ({ request }) => {
                     name: `Nobelion wdrożenie #${body.briefId}`
                 }
             }
+        }],
+        customer_email: body.email,
+        // Dane do faktury — te same pola co checkout z wyceny (CMS /checkout/:token):
+        // adres rozliczeniowy + telefon przez wbudowane mechanizmy Stripe,
+        // NIP jako własne custom_field (NIE Stripe tax_id — wymaga prefiksu kraju).
+        billing_address_collection: 'required',
+        phone_number_collection: { enabled: true },
+        custom_fields: [{
+            key: 'nip',
+            label: { type: 'custom', custom: 'NIP do faktury (firma)' },
+            type: 'text',
+            text: { minimum_length: 10, maximum_length: 15 },
+            optional: true,
         }],
         metadata: {
             briefId: body.briefId,

@@ -1,39 +1,14 @@
-/*
-  # 1. ZABEZPIECZENIA (Security Headers)
-  # Blokuje osadzanie strony w ramkach (obrona przed Clickjackingiem)
-  X-Frame-Options: DENY
-  
-  # Blokuje ładowanie skryptów, jeśli typ MIME jest nieprawidłowy (obrona przed Sniffingiem)
-  X-Content-Type-Options: nosniff
-  
-  # Włącza filtr XSS w starszych przeglądarkach
-  X-XSS-Protection: 1; mode=block
-  
-  # Kontrola tego, ile informacji o źródle przekazujemy innym stronom
-  Referrer-Policy: strict-origin-when-cross-origin
-  
-  # Blokada dostępu do API przeglądarki (kamera, mikrofon, geolokalizacja)
-  # To buduje zaufanie - strona nie szpieguje.
-  Permissions-Policy: geolocation=(), camera=(), microphone=(), payment=(), usb=()
+# Nagłówki dla zasobów statycznych serwowanych bezpośrednio z CDN.
+# Strony HTML i trasy SSR dostają pełny zestaw nagłówków (w tym CSP)
+# z netlify/edge-functions/security-headers.ts — to jest źródło kanoniczne.
 
-  # 2. CACHING (Wydajność)
-  # Statyczne zasoby (fonty, obrazki) trzymamy długo w pamięci
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), camera=(), microphone=(), payment=(self), usb=()
   Cache-Control: public, max-age=0, must-revalidate
 
-/assets/*
-  # Pliki w folderze assets (CSS, JS, Obrazy) cache'ujemy agresywnie (rok)
-  Cache-Control: public, max-age=31536000, immutable
-
-/fonts/*
-  Cache-Control: public, max-age=31536000, immutable
-
-  /*
-  # ... Twoje dotychczasowe nagłówki bezpieczeństwa ...
-
-# CACHING FONTÓW (Wydajność)
-# Astro podczas buildu często zmienia nazwy plików (hash), więc możemy je cache'ować "forever".
-/*.woff2
-  Cache-Control: public, max-age=31536000, immutable
-
-/*.css
+# Zasoby Astro mają hash w nazwie pliku — można cache'ować bezterminowo.
+/_astro/*
   Cache-Control: public, max-age=31536000, immutable

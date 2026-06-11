@@ -1,6 +1,6 @@
 export const legalContent = {
-    // 1. POLITYKA PRYWATNOŚCI (Czekamy na Twój tekst, na razie placeholder)
-privacy: {
+    // 1. POLITYKA PRYWATNOŚCI
+    privacy: {
         title: "POLITYKA PRYWATNOŚCI",
         date: "OSTATNIA AKTUALIZACJA: 28.11.2025",
         sections: [
@@ -119,7 +119,7 @@ privacy: {
         ]
     },
 
-    // 2. REGULAMIN SERWISU (Wypełniony Twoim tekstem z HTML)
+    // 2. REGULAMIN SERWISU
     terms: {
         title: "REGULAMIN SKLEPU",
         date: "OBOWIĄZUJE OD: 28.01.2024",
@@ -250,8 +250,8 @@ privacy: {
         ]
     },
 
-    // 3. RODO (Czekamy na Twój tekst, na razie placeholder)
-   rodo: {
+    // 3. KLAUZULA INFORMACYJNA RODO
+    rodo: {
         title: "KLAUZULA INFORMACYJNA RODO",
         date: "ZGODNOŚĆ Z UE 2016/679",
         sections: [
