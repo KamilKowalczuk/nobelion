@@ -46,10 +46,11 @@ import { navigation, contactData } from '../../data/content';
 
         <!-- Legal Bar -->
         <div class="nb-footer__legal">
-            <span class="caption">© 2025 Nobelion Sp. z o.o.</span>
+            <span class="caption">© {new Date().getFullYear()} Nobelion Sp. z o.o.</span>
             <div class="nb-footer__legal-links">
                 <button type="button" id="footer-privacy-btn">Polityka prywatności</button>
                 <button type="button" id="footer-terms-btn">Regulamin</button>
+                <button type="button" id="footer-cookies-btn">Ustawienia cookies</button>
             </div>
         </div>
     </div>
@@ -61,6 +62,9 @@ import { navigation, contactData } from '../../data/content';
     });
     document.getElementById('footer-terms-btn')?.addEventListener('click', () => {
         window.dispatchEvent(new CustomEvent('legal:open', { detail: 'terms' }));
+    });
+    document.getElementById('footer-cookies-btn')?.addEventListener('click', () => {
+        (window as any).openCookiePreferences?.();
     });
 </script>
 

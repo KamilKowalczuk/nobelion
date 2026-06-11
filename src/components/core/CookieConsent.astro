@@ -1,0 +1,379 @@
+---
+// CookieConsent — baner zgody w stylu Onyx + Google Consent Mode v2.
+// Mechanika (cookie z rewizją, consent update, dataLayer, openCookiePreferences)
+// współpracuje z GTM ładowanym w Layout.astro z domyślnym consentem "denied".
+---
+
+<div id="nb-ck" class="nb-ck" role="region" aria-label="Ustawienia plików cookie" hidden>
+  <div class="nb-ck__card" id="nb-ck-card">
+
+    <div class="nb-ck__eyebrow">
+      <span class="nb-ck__dot" aria-hidden="true"></span>
+      <span class="nb-ck__cap">Prywatność</span>
+    </div>
+
+    <h3 class="nb-ck__title">Twoje dane, Twoja decyzja</h3>
+    <p class="nb-ck__body">
+      Używamy plików cookie, żeby rozumieć ruch na stronie i ulepszać nasze usługi.
+      Niezbędne pliki dbają o stabilność briefu i płatności — działają zawsze.
+      Resztę włączysz tylko wtedy, gdy się zgodzisz.
+    </p>
+
+    <!-- Panel ustawień (domyślnie ukryty) -->
+    <div id="nb-ck-settings" class="nb-ck__settings" hidden>
+      <div class="nb-ck__row">
+        <div class="nb-ck__row-text">
+          <span class="nb-ck__row-name">Niezbędne</span>
+          <span class="nb-ck__row-desc">Zawsze aktywne</span>
+        </div>
+        <span class="nb-ck__toggle is-on is-locked" aria-hidden="true"><i class="nb-ck__knob"></i></span>
+      </div>
+
+      <div class="nb-ck__row">
+        <div class="nb-ck__row-text">
+          <span class="nb-ck__row-name">Analityczne</span>
+          <span class="nb-ck__row-desc">Statystyki ruchu na stronie</span>
+        </div>
+        <button type="button" id="nb-ck-toggle-analytics" class="nb-ck__toggle" role="switch" aria-checked="false" aria-label="Przełącz pliki analityczne">
+          <i class="nb-ck__knob"></i>
+        </button>
+      </div>
+
+      <div class="nb-ck__row">
+        <div class="nb-ck__row-text">
+          <span class="nb-ck__row-name">Marketingowe</span>
+          <span class="nb-ck__row-desc">Reklamy i remarketing</span>
+        </div>
+        <button type="button" id="nb-ck-toggle-marketing" class="nb-ck__toggle" role="switch" aria-checked="false" aria-label="Przełącz pliki marketingowe">
+          <i class="nb-ck__knob"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Akcje: widok główny -->
+    <div id="nb-ck-actions-main" class="nb-ck__actions">
+      <button type="button" id="nb-ck-accept" class="nb-ck__btn nb-ck__btn--primary">Akceptuję wszystkie</button>
+      <div class="nb-ck__actions-row">
+        <button type="button" id="nb-ck-necessary" class="nb-ck__btn nb-ck__btn--ghost">Tylko niezbędne</button>
+        <button type="button" id="nb-ck-customize" class="nb-ck__btn nb-ck__btn--ghost">Dostosuj</button>
+      </div>
+    </div>
+
+    <!-- Akcje: widok ustawień -->
+    <div id="nb-ck-actions-settings" class="nb-ck__actions" hidden>
+      <button type="button" id="nb-ck-save" class="nb-ck__btn nb-ck__btn--primary">Zapisz wybór</button>
+      <button type="button" id="nb-ck-back" class="nb-ck__btn nb-ck__btn--ghost">Wróć</button>
+    </div>
+
+    <div class="nb-ck__footer">
+      <button type="button" id="nb-ck-privacy" class="nb-ck__link">Polityka prywatności</button>
+    </div>
+  </div>
+</div>
+
+<script is:inline>
+  (function () {
+    var COOKIE_NAME = 'nb_consent';
+    var REVISION = 1;
+
+    var prefs = { necessary: true, analytics: false, marketing: false, functional: false };
+
+    var banner = document.getElementById('nb-ck');
+    var card = document.getElementById('nb-ck-card');
+    var settingsPanel = document.getElementById('nb-ck-settings');
+    var actionsMain = document.getElementById('nb-ck-actions-main');
+    var actionsSettings = document.getElementById('nb-ck-actions-settings');
+    var btnAnalytics = document.getElementById('nb-ck-toggle-analytics');
+    var btnMarketing = document.getElementById('nb-ck-toggle-marketing');
+
+    function readCookie(name) {
+      var all = document.cookie ? document.cookie.split('; ') : [];
+      for (var i = 0; i < all.length; i++) {
+        var idx = all[i].indexOf('=');
+        var key = idx > -1 ? all[i].slice(0, idx) : all[i];
+        if (key === name) return decodeURIComponent(idx > -1 ? all[i].slice(idx + 1) : '');
+      }
+      return null;
+    }
+
+    function writeCookie(name, value, days) {
+      days = days || 180;
+      var expires = new Date(Date.now() + days * 864e5).toUTCString();
+      var cookie = name + '=' + encodeURIComponent(JSON.stringify(value)) +
+        '; Expires=' + expires + '; Path=/; SameSite=Lax';
+      if (location.protocol === 'https:') cookie += '; Secure';
+      document.cookie = cookie;
+    }
+
+    function parseExisting() {
+      try {
+        var raw = readCookie(COOKIE_NAME);
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) { return null; }
+    }
+
+    function gtagSafe() {
+      if (typeof window.gtag === 'function') {
+        window.gtag.apply(null, arguments);
+      } else {
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push(arguments);
+      }
+    }
+
+    function pushDL(obj) {
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push(obj);
+    }
+
+    function pushConsentUpdate(analytics, marketing, functional) {
+      gtagSafe('consent', 'update', {
+        analytics_storage: analytics ? 'granted' : 'denied',
+        ad_storage: marketing ? 'granted' : 'denied',
+        ad_user_data: marketing ? 'granted' : 'denied',
+        ad_personalization: marketing ? 'granted' : 'denied',
+        functionality_storage: functional ? 'granted' : 'denied',
+        personalization_storage: functional ? 'granted' : 'denied',
+        security_storage: 'granted'
+      });
+      pushDL({
+        event: 'consent_update',
+        analytics_storage: analytics ? 'granted' : 'denied',
+        ad_storage: marketing ? 'granted' : 'denied',
+        ad_user_data: marketing ? 'granted' : 'denied',
+        ad_personalization: marketing ? 'granted' : 'denied'
+      });
+    }
+
+    function storeCookie() {
+      var cats = [];
+      if (prefs.analytics) cats.push('analytics');
+      if (prefs.marketing) cats.push('marketing');
+      if (prefs.functional) cats.push('functional');
+      writeCookie(COOKIE_NAME, { stamp: 'nobelion-onyx', necessary: true, categories: cats, rev: REVISION });
+    }
+
+    function showBanner() {
+      banner.hidden = false;
+      banner.getBoundingClientRect();
+      banner.classList.add('is-visible');
+    }
+
+    function hideBanner() {
+      banner.classList.remove('is-visible');
+      setTimeout(function () { banner.hidden = true; }, 400);
+    }
+
+    function setToggle(btn, on) {
+      btn.classList.toggle('is-on', on);
+      btn.setAttribute('aria-checked', on ? 'true' : 'false');
+    }
+
+    function updateToggles() {
+      setToggle(btnAnalytics, prefs.analytics);
+      setToggle(btnMarketing, prefs.marketing);
+    }
+
+    function finalize(analytics, marketing, functional) {
+      prefs = { necessary: true, analytics: analytics, marketing: marketing, functional: functional };
+      storeCookie();
+      pushConsentUpdate(analytics, marketing, functional);
+      pushDL({ event: 'consent_initial_selection' });
+      hideBanner();
+    }
+
+    document.getElementById('nb-ck-accept').addEventListener('click', function () {
+      finalize(true, true, true);
+    });
+
+    document.getElementById('nb-ck-necessary').addEventListener('click', function () {
+      finalize(false, false, false);
+    });
+
+    document.getElementById('nb-ck-customize').addEventListener('click', function () {
+      settingsPanel.hidden = false;
+      actionsMain.hidden = true;
+      actionsSettings.hidden = false;
+      updateToggles();
+    });
+
+    document.getElementById('nb-ck-back').addEventListener('click', function () {
+      settingsPanel.hidden = true;
+      actionsMain.hidden = false;
+      actionsSettings.hidden = true;
+    });
+
+    document.getElementById('nb-ck-save').addEventListener('click', function () {
+      finalize(prefs.analytics, prefs.marketing, prefs.functional);
+    });
+
+    btnAnalytics.addEventListener('click', function () {
+      prefs.analytics = !prefs.analytics;
+      updateToggles();
+    });
+
+    btnMarketing.addEventListener('click', function () {
+      prefs.marketing = !prefs.marketing;
+      updateToggles();
+    });
+
+    document.getElementById('nb-ck-privacy').addEventListener('click', function () {
+      window.dispatchEvent(new CustomEvent('legal:open', { detail: 'privacy' }));
+    });
+
+    function init() {
+      var existing = parseExisting();
+      if (!existing || existing.rev !== REVISION) {
+        setTimeout(showBanner, 1200);
+      } else {
+        var cats = existing.categories || [];
+        prefs = {
+          necessary: true,
+          analytics: cats.indexOf('analytics') !== -1,
+          marketing: cats.indexOf('marketing') !== -1,
+          functional: cats.indexOf('functional') !== -1
+        };
+        pushConsentUpdate(prefs.analytics, prefs.marketing, prefs.functional);
+      }
+    }
+
+    init();
+
+    // Globalny hook — link "Ustawienia cookies" w stopce.
+    window.openCookiePreferences = function () {
+      showBanner();
+      document.getElementById('nb-ck-customize').click();
+    };
+  })();
+</script>
+
+<style>
+  .nb-ck {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: 1100;
+    padding: clamp(16px, 3vw, 28px);
+    width: 100%;
+    max-width: 480px;
+    opacity: 0;
+    transition: opacity 400ms var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+    pointer-events: none;
+  }
+  .nb-ck.is-visible { opacity: 1; pointer-events: auto; }
+  .nb-ck.is-visible .nb-ck__card { transform: translateY(0); }
+
+  .nb-ck__card {
+    background: linear-gradient(160deg, #0E121C 0%, #0B0E16 100%);
+    border: 1px solid rgba(197, 160, 89, 0.28);
+    border-radius: 16px;
+    padding: clamp(22px, 3vw, 30px);
+    box-shadow: 0 24px 70px -18px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(0, 0, 0, 0.3);
+    transform: translateY(14px);
+    transition: transform 400ms var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+  }
+
+  .nb-ck__eyebrow { display: flex; align-items: center; gap: 9px; margin-bottom: 12px; }
+  .nb-ck__dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--color-brass-bright);
+    box-shadow: 0 0 10px var(--color-brass-glow);
+  }
+  .nb-ck__cap {
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.26em; text-transform: uppercase;
+    color: var(--color-brass-bright);
+  }
+
+  .nb-ck__title {
+    margin: 0 0 10px;
+    font-family: var(--font-heading); font-weight: 700;
+    font-size: 19px; letter-spacing: 0.04em; text-transform: uppercase;
+    color: var(--color-silver);
+  }
+  .nb-ck__body {
+    margin: 0 0 20px;
+    font-size: 13px; line-height: 1.65;
+    color: var(--color-silver-soft);
+  }
+
+  .nb-ck__settings {
+    display: flex; flex-direction: column; gap: 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    padding: 16px 0; margin-bottom: 20px;
+  }
+  .nb-ck__row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .nb-ck__row-text { display: flex; flex-direction: column; gap: 2px; }
+  .nb-ck__row-name {
+    font-family: var(--font-heading); font-weight: 700; font-size: 12px;
+    letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-silver);
+  }
+  .nb-ck__row-desc {
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-steel);
+  }
+
+  .nb-ck__toggle {
+    flex: none; width: 44px; height: 24px; border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 2px; cursor: pointer; display: inline-flex; align-items: center;
+    transition: background 250ms, border-color 250ms;
+  }
+  .nb-ck__knob {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--color-steel);
+    transform: translateX(0);
+    transition: transform 250ms var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1)), background 250ms;
+  }
+  .nb-ck__toggle.is-on { border-color: rgba(197, 160, 89, 0.5); background: rgba(197, 160, 89, 0.14); }
+  .nb-ck__toggle.is-on .nb-ck__knob {
+    transform: translateX(20px);
+    background: var(--color-brass-bright);
+    box-shadow: 0 0 8px var(--color-brass-glow);
+  }
+  .nb-ck__toggle.is-locked { opacity: 0.55; cursor: not-allowed; }
+  .nb-ck__toggle:focus-visible { outline: 2px solid var(--color-brass-bright); outline-offset: 2px; }
+
+  .nb-ck__actions { display: flex; flex-direction: column; gap: 10px; }
+  .nb-ck__actions-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .nb-ck__btn {
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    padding: 13px 18px; border-radius: var(--r-control, 999px);
+    cursor: pointer; transition: background 200ms, color 200ms, border-color 200ms, box-shadow 300ms;
+  }
+  .nb-ck__btn--primary {
+    background: var(--color-brass-bright); color: var(--color-void);
+    border: 1px solid var(--color-brass-bright); font-weight: 600;
+  }
+  .nb-ck__btn--primary:hover {
+    background: var(--color-brass-light, #d9b878);
+    box-shadow: 0 12px 32px -10px var(--color-brass-glow);
+  }
+  .nb-ck__btn--ghost {
+    background: transparent; color: var(--color-silver-soft);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+  }
+  .nb-ck__btn--ghost:hover { color: #fff; border-color: rgba(197, 160, 89, 0.45); }
+  .nb-ck__btn:focus-visible { outline: 2px solid var(--color-brass-bright); outline-offset: 2px; }
+
+  .nb-ck__footer { margin-top: 16px; text-align: center; }
+  .nb-ck__link {
+    background: none; border: none; cursor: pointer; padding: 0;
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--color-steel); transition: color 180ms;
+  }
+  .nb-ck__link:hover { color: var(--color-brass-bright); }
+
+  @media (max-width: 540px) {
+    .nb-ck { max-width: 100%; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nb-ck, .nb-ck__card, .nb-ck__knob, .nb-ck__toggle { transition: none !important; }
+  }
+</style>

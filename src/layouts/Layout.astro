@@ -3,6 +3,7 @@ import '../styles/global.css';
 import { siteConfig } from '../data/content';
 import SmoothScroll from '../components/core/SmoothScroll.svelte';
 import LegalSystem from '../components/core/LegalSystem.svelte';
+import CookieConsent from '../components/core/CookieConsent.astro';
 
 // === FONTY (self-hosted, tylko niezbędne wagi) ===
 import '@fontsource/cinzel/400.css';
@@ -13,6 +14,11 @@ import '@fontsource/manrope/400.css';
 import '@fontsource/manrope/600.css';
 
 import '@fontsource/jetbrains-mono/400.css';
+
+// GTM i baner cookie aktywują się tylko, gdy PUBLIC_GTM_ID jest ustawione.
+// UWAGA: ta deklaracja musi stać PO wszystkich importach — const wpleciony
+// między importy wywala kompilator Astro ("Syntax error" przy buildzie).
+const gtmId = import.meta.env.PUBLIC_GTM_ID || '';
 
 // Na stronie głównej linki menu to kotwice (#sekcja) — smooth-scroll.
 // Na podstronach (np. /wycena/...) tych sekcji nie ma, więc kierujemy na
@@ -54,6 +60,36 @@ const homeHref = isHome ? '#hero' : '/';
         <meta name="twitter:title" content="NOBELION | Automatyzacje AI i Systemy dla Firm">
         <meta name="twitter:description" content="Projektujemy automatyzacje AI dla polskich firm. Brief w 2 minuty, plan i wycena w 24 godziny.">
         <meta name="twitter:image" content="https://nobelion.pl/og-image-onyx.jpg">
+
+        <script is:inline define:vars={{ gtmId }}>
+            /* Google Consent Mode v2 — domyślnie wszystko "denied" PRZED
+               załadowaniem GTM. Zgody aktualizuje baner cookie (CookieConsent).
+               Bez PUBLIC_GTM_ID skrypt nie robi nic. */
+            if (gtmId) {
+                window.dataLayer = window.dataLayer || [];
+                window.gtag = function gtag() { window.dataLayer.push(arguments); };
+                window.gtag('consent', 'default', {
+                    ad_storage: 'denied',
+                    ad_user_data: 'denied',
+                    ad_personalization: 'denied',
+                    analytics_storage: 'denied',
+                    functionality_storage: 'denied',
+                    personalization_storage: 'denied',
+                    security_storage: 'granted',
+                    wait_for_update: 500
+                });
+                window.gtag('set', 'ads_data_redaction', true);
+
+                /* Google Tag Manager */
+                (function (w, d, s, l, i) {
+                    w[l] = w[l] || []; w[l].push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
+                    var f = d.getElementsByTagName(s)[0], j = d.createElement(s),
+                        dl = l !== 'dataLayer' ? '&l=' + l : '';
+                    j.async = true; j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
+                    f.parentNode.insertBefore(j, f);
+                })(window, document, 'script', 'dataLayer', gtmId);
+            }
+        </script>
 
         <meta name="theme-color" content="#050505">
         <meta name="msapplication-TileColor" content="#0B101C">
@@ -142,8 +178,21 @@ const homeHref = isHome ? '#hero' : '/';
         })} />
     </head>
     <body class="bg-paper text-ink-2 selection:bg-brass/30 selection:text-white relative">
+        {gtmId && (
+            <noscript>
+                <iframe
+                    src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
+                    height="0"
+                    width="0"
+                    style="display:none;visibility:hidden"
+                    title="Google Tag Manager"
+                ></iframe>
+            </noscript>
+        )}
+
         <SmoothScroll client:only />
         <LegalSystem client:idle />
+        {gtmId && <CookieConsent />}
 
         <div class="noise-overlay"></div>
 
