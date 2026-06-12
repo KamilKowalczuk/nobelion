@@ -11,7 +11,10 @@ import sitemap from '@astrojs/sitemap';
 export default defineConfig({
 
   site: 'https://nobelion.pl',
-  integrations: [svelte(), sitemap()],
+  integrations: [svelte(), sitemap({
+    // Strony techniczne flow płatności — bez sensu w wynikach wyszukiwania.
+    filter: (page) => !page.includes('/blad-platnosci') && !page.includes('/dziekujemy'),
+  })],
 
   build: {
     // CSS w <head> blokował renderowanie (~1,1 s na 4G) — inline eliminuje

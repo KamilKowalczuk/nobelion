@@ -1,5 +1,8 @@
 ---
 import Stripe from 'stripe';
+import Layout from '../layouts/Layout.astro';
+import ClosingPage from '../components/core/ClosingPage.astro';
+import Footer from '../components/sections/Footer.astro';
 import { backendEnv } from '../lib/backend-env';
 
 // SSR — session_id przychodzi w query, więc strona NIE może być prerenderowana
@@ -8,43 +11,57 @@ export const prerender = false;
 
 const sessionId = Astro.url.searchParams.get('session_id') || '';
 let verified = false;
-let error = '';
 
-if (!sessionId) {
-    error = 'Brak identyfikatora sesji płatności.';
-} else {
+if (sessionId) {
     const stripeKey = backendEnv('STRIPE_SECRET_KEY');
     if (!stripeKey) {
-        error = 'Weryfikacja płatności jest chwilowo niedostępna.';
         console.error('[dziekujemy] Brak STRIPE_SECRET_KEY — nie można zweryfikować sesji.');
     } else {
         try {
             const stripe = new Stripe(stripeKey, { apiVersion: '2026-04-22.dahlia' });
             const session = await stripe.checkout.sessions.retrieve(sessionId);
             verified = session.payment_status === 'paid';
-            if (!verified) error = 'Płatność nie została jeszcze zaksięgowana. Jeśli środki zeszły z konta, potwierdzenie dotrze mailem.';
         } catch (err: any) {
             console.error('[dziekujemy] Błąd weryfikacji sesji Stripe:', err?.message || err);
-            error = 'Nie udało się potwierdzić płatności. Jeśli środki zeszły z konta, potwierdzenie dotrze mailem.';
         }
     }
 }
+
+const successSteps = [
+    { n: '01', t: 'Potwierdzenie i faktura', d: 'Na Twój e-mail leci potwierdzenie płatności. Faktura dotrze osobną wiadomością.' },
+    { n: '02', t: 'Kontakt w 24 godziny', d: 'Odzywa się osoba prowadząca Twój projekt — z konkretami, nie formułkami.' },
+    { n: '03', t: 'Start prac', d: 'Ruszamy zgodnie z planem i etapami z Twojej wyceny.' },
+];
 ---
 
-<section class="min-h-[70vh] flex items-center justify-center px-6 py-24 bg-void text-silver">
-    <div class="w-full max-w-2xl border border-white/10 bg-surface/30 p-10 text-center">
-        {verified ? (
-            <>
-                <p class="font-mono text-brass text-xs tracking-[0.3em] uppercase mb-4">Płatność potwierdzona</p>
-                <h1 class="font-heading text-3xl md:text-5xl tracking-[0.06em] uppercase mb-6">Dziękujemy</h1>
-                <p class="text-steel text-base md:text-lg">Otrzymaliśmy Twoją płatność, zaczynamy pracę.</p>
-            </>
-        ) : (
-            <>
-                <p class="font-mono text-brass text-xs tracking-[0.3em] uppercase mb-4">Weryfikacja płatności</p>
-                <h1 class="font-heading text-3xl md:text-5xl tracking-[0.06em] uppercase mb-6">Brak potwierdzenia</h1>
-                <p class="text-steel text-base md:text-lg">{error}</p>
-            </>
-        )}
-    </div>
-</section>
+<Layout>
+    {verified ? (
+        <ClosingPage
+            icon="check"
+            eyebrow="Płatność potwierdzona"
+            title="Dziękujemy. Zaczynamy."
+            body="Twoja płatność dotarła, a projekt właśnie zmienił status na „w realizacji”. Od tej chwili wszystkim zajmujemy się my — Ty za moment dostaniesz komplet informacji na e-mail."
+            steps={successSteps}
+        >
+            <Fragment slot="actions">
+                <a href="/" class="nb-btn nb-btn--primary nb-btn--lg"><span class="nb-btn__label">Wróć na stronę główną</span></a>
+                <a href="mailto:kontakt@nobelion.pl" class="nb-btn nb-btn--ghost-light nb-btn--lg"><span class="nb-btn__label">Napisz do nas</span></a>
+            </Fragment>
+        </ClosingPage>
+    ) : (
+        <ClosingPage
+            icon="clock"
+            eyebrow="Weryfikacja płatności"
+            title="Jeszcze chwila."
+            body="Nie widzimy jeszcze potwierdzenia tej płatności. Jeśli środki zeszły z Twojego konta — nic nie przepadło: zaksięgowanie potrafi potrwać kilka minut, a potwierdzenie i tak dotrze na Twój e-mail."
+            note="Wątpliwości? Napisz na kontakt@nobelion.pl — odpowiadamy w 24 godziny robocze."
+        >
+            <Fragment slot="actions">
+                <a href="mailto:kontakt@nobelion.pl" class="nb-btn nb-btn--primary nb-btn--lg"><span class="nb-btn__label">Napisz do nas</span></a>
+                <a href="/" class="nb-btn nb-btn--ghost-light nb-btn--lg"><span class="nb-btn__label">Strona główna</span></a>
+            </Fragment>
+        </ClosingPage>
+    )}
+
+    <Footer />
+</Layout>
