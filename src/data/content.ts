@@ -17,7 +17,7 @@ export const siteConfig = {
 
 export const heroData = {
     line1: "Oddajemy Ci czas,",
-    line2: "którego nie wiedziałeś,",
+    line2: "który nie wiedziałeś,",
     line3: "że tracisz.",
     subheading: "Budujemy automatyzacje i dedykowane systemy, które przejmują powtarzalną pracę Twojego zespołu. Zanim cokolwiek wdrożymy, liczymy, czy inwestycja się zwróci — jeśli nie, powiemy wprost.",
     microTagline: "Architekci automatyzacji",
