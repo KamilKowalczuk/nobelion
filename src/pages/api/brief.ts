@@ -96,14 +96,23 @@ function isValidPhone(value: string): boolean {
     return digits.length >= 9 && digits.length <= 15;
 }
 
-function isValidNip(value: string): boolean {
-    if (!value) return true; // opcjonalne
-    const digits = value.replace(/[\s-]/g, '');
-    if (!/^\d{10}$/.test(digits)) return false;
+function plNipChecksum(digits: string): boolean {
     // Suma kontrolna NIP — odsiewa losowe ciągi 10 cyfr.
     const weights = [6, 5, 7, 2, 3, 4, 5, 6, 7];
     const sum = weights.reduce((acc, w, i) => acc + w * Number(digits[i]), 0);
     return sum % 11 === Number(digits[9]);
+}
+
+// Prefiksy VAT UE (+ XI: Irlandia Płn., GB: legacy).
+const EU_VAT_PREFIXES = new Set(['AT','BE','BG','CY','CZ','DE','DK','EE','EL','ES','FI','FR','HR','HU','IE','IT','LT','LU','LV','MT','NL','PL','PT','RO','SE','SI','SK','XI','GB']);
+
+function isValidNip(value: string): boolean {
+    if (!value) return true; // opcjonalne
+    const v = value.replace(/[\s-]/g, '').toUpperCase();
+    if (/^\d{10}$/.test(v)) return plNipChecksum(v);
+    if (/^PL\d{10}$/.test(v)) return plNipChecksum(v.slice(2));
+    // Numery VAT UE: realny prefiks kraju + 2–12 znaków, w tym co najmniej jedna cyfra.
+    return /^[A-Z]{2}(?=[0-9A-Z]*\d)[0-9A-Z]{2,12}$/.test(v) && EU_VAT_PREFIXES.has(v.slice(0, 2));
 }
 
 function validate(body: BriefBody): string | null {

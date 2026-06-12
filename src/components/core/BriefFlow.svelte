@@ -68,16 +68,45 @@
   const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   // Filtry znaków — niedozwolone znaki nie wchodzą do pola w ogóle.
+  const NAME_CHARS = /^[\p{L}\s'.\-]+$/u;
+  const PHONE_CHARS = /^[\d+()\s-]+$/;
+  const NIP_CHARS = /^[0-9A-Za-z\s-]+$/; // litery dozwolone (prefiks kraju UE, np. PL/DE)
+
   const sanitizeName = (v: string) => v.replace(/[^\p{L}\s'.\-]/gu, "");
   const sanitizePhone = (v: string) => v.replace(/[^\d+()\s-]/g, "");
-  const sanitizeNip = (v: string) => v.replace(/[^\d\s-]/g, "");
+  const sanitizeNip = (v: string) => v.replace(/[^0-9A-Za-z\s-]/g, "").toUpperCase();
+
+  // Warstwa 1: beforeinput odrzuca niedozwolony znak ZANIM trafi do pola.
+  const blockChars = (allowed: RegExp) => (e: InputEvent) => {
+    if (e.data && !allowed.test(e.data)) e.preventDefault();
+  };
+
+  // Warstwa 2 (wklejanie, autouzupełnianie): czyścimy DOM imperatywnie,
+  // bo gdy stan po sanitizacji się nie zmienia, Svelte nie odświeży inputa.
+  function applySanitized(el: HTMLInputElement, clean: string) {
+    if (el.value === clean) return;
+    const diff = el.value.length - clean.length;
+    const pos = (el.selectionStart ?? clean.length) - diff;
+    el.value = clean;
+    const p = Math.max(0, Math.min(clean.length, pos));
+    el.setSelectionRange(p, p);
+  }
+
+  function plNipChecksum(digits: string): boolean {
+    const weights = [6, 5, 7, 2, 3, 4, 5, 6, 7];
+    const sum = weights.reduce((acc, w, i) => acc + w * Number(digits[i]), 0);
+    return sum % 11 === Number(digits[9]);
+  }
+
+  // Prefiksy VAT UE (+ XI: Irlandia Płn., GB: legacy).
+  const EU_VAT_PREFIXES = new Set(["AT","BE","BG","CY","CZ","DE","DK","EE","EL","ES","FI","FR","HR","HU","IE","IT","LT","LU","LV","MT","NL","PL","PT","RO","SE","SI","SK","XI","GB"]);
 
   function isNipValid(raw: string): boolean {
-    const d = raw.replace(/[\s-]/g, "");
-    if (!/^\d{10}$/.test(d)) return false;
-    const weights = [6, 5, 7, 2, 3, 4, 5, 6, 7];
-    const sum = weights.reduce((acc, w, i) => acc + w * Number(d[i]), 0);
-    return sum % 11 === Number(d[9]);
+    const v = raw.replace(/[\s-]/g, "").toUpperCase();
+    if (/^\d{10}$/.test(v)) return plNipChecksum(v);            // polski NIP — suma kontrolna
+    if (/^PL\d{10}$/.test(v)) return plNipChecksum(v.slice(2)); // PL + 10 cyfr — też liczymy
+    // Inne kraje UE: realny prefiks + 2–12 znaków, w tym co najmniej jedna cyfra.
+    return /^[A-Z]{2}(?=[0-9A-Z]*\d)[0-9A-Z]{2,12}$/.test(v) && EU_VAT_PREFIXES.has(v.slice(0, 2));
   }
 
   const errors = $derived.by(() => {
@@ -89,7 +118,7 @@
       e.phone = "Numer telefonu powinien mieć 9–15 cyfr.";
     }
     if (f.company.trim().length < 2) e.company = "Podaj nazwę firmy (min. 2 znaki).";
-    if (f.nip.trim() !== "" && !isNipValid(f.nip)) e.nip = "Ten NIP jest niepoprawny — sprawdź cyfry.";
+    if (f.nip.trim() !== "" && !isNipValid(f.nip)) e.nip = "Niepoprawny NIP — 10 cyfr lub prefiks kraju (np. PL7831898094).";
     return e;
   });
 
@@ -596,7 +625,8 @@
                 <div class="nb-field">
                   <span class="nb-field__label caption">Imię i nazwisko *</span>
                   <input class="nb-input" class:is-invalid={touched.name && !!errors.name} type="text" value={f.name} maxlength={80} autocomplete="name"
-                    oninput={(e) => f.name = sanitizeName((e.currentTarget as HTMLInputElement).value)}
+                    onbeforeinput={blockChars(NAME_CHARS)}
+                    oninput={(e) => { const el = e.currentTarget as HTMLInputElement; const clean = sanitizeName(el.value); applySanitized(el, clean); f.name = clean; }}
                     onblur={() => touched.name = true}/>
                   {#if touched.name && errors.name}<span class="nb-field__error">{errors.name}</span>{/if}
                 </div>
@@ -611,7 +641,8 @@
                 <div class="nb-field">
                   <span class="nb-field__label caption">Telefon (opcjonalnie)</span>
                   <input class="nb-input" class:is-invalid={touched.phone && !!errors.phone} type="tel" inputmode="tel" value={f.phone} maxlength={20} autocomplete="tel"
-                    oninput={(e) => f.phone = sanitizePhone((e.currentTarget as HTMLInputElement).value)}
+                    onbeforeinput={blockChars(PHONE_CHARS)}
+                    oninput={(e) => { const el = e.currentTarget as HTMLInputElement; const clean = sanitizePhone(el.value); applySanitized(el, clean); f.phone = clean; }}
                     onblur={() => touched.phone = true}/>
                   {#if touched.phone && errors.phone}<span class="nb-field__error">{errors.phone}</span>{/if}
                 </div>
@@ -624,8 +655,9 @@
               </div>
               <div class="nb-field">
                 <span class="nb-field__label caption">NIP (opcjonalnie, do faktury)</span>
-                <input class="nb-input nb-input--narrow" class:is-invalid={touched.nip && !!errors.nip} type="text" inputmode="numeric" value={f.nip} maxlength={15}
-                  oninput={(e) => f.nip = sanitizeNip((e.currentTarget as HTMLInputElement).value)}
+                <input class="nb-input nb-input--narrow" class:is-invalid={touched.nip && !!errors.nip} type="text" value={f.nip} maxlength={15} placeholder="7831898094 lub PL7831898094"
+                  onbeforeinput={blockChars(NIP_CHARS)}
+                  oninput={(e) => { const el = e.currentTarget as HTMLInputElement; const clean = sanitizeNip(el.value); applySanitized(el, clean); f.nip = clean; }}
                   onblur={() => touched.nip = true}/>
                 {#if touched.nip && errors.nip}<span class="nb-field__error">{errors.nip}</span>{/if}
               </div>
