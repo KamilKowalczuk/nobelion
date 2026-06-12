@@ -5,7 +5,15 @@ const env = {
 } as Record<string, string | undefined>;
 
 function getBaseUrl(): string {
-    const url = (env.PAYLOAD_API_URL || env.PAYLOAD_URL || 'http://localhost:3001').replace(/\/$/, '');
+    let url = (env.PAYLOAD_API_URL || env.PAYLOAD_URL || 'http://localhost:3001').replace(/\/$/, '');
+    // Redirect http→https zmienia origin, a Node (undici) wycina wtedy nagłówek
+    // Authorization — CMS widzi żądanie anonimowe i zwraca 403. Wymuszamy https
+    // dla adresów innych niż localhost, zanim żądanie wyjdzie w świat.
+    if (url.startsWith('http://') && !/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(url)) {
+        const fixed = url.replace(/^http:\/\//, 'https://');
+        console.error(`[payload] PAYLOAD_API_URL używa http:// (${url}) — redirect 301 zgubiłby klucz API. Używam ${fixed}; popraw env na https.`);
+        url = fixed;
+    }
     return url;
 }
 

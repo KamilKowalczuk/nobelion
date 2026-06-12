@@ -84,14 +84,26 @@ function normalizeUrgency(value?: string): string | undefined {
     return undefined;
 }
 
+function isValidName(value: string): boolean {
+    // Litery (w tym polskie), spacje, apostrofy, kropki, myślniki — bez cyfr.
+    return /^[\p{L}\s'.\-]+$/u.test(value);
+}
+
 function isValidPhone(value: string): boolean {
     if (!value) return true; // opcjonalne
-    return /^[0-9+\-()\s]{6,30}$/.test(value);
+    if (!/^[0-9+\-()\s]{6,30}$/.test(value)) return false;
+    const digits = value.replace(/\D/g, '');
+    return digits.length >= 9 && digits.length <= 15;
 }
 
 function isValidNip(value: string): boolean {
     if (!value) return true; // opcjonalne
-    return /^\d{10}$/.test(value.replace(/[\s-]/g, ''));
+    const digits = value.replace(/[\s-]/g, '');
+    if (!/^\d{10}$/.test(digits)) return false;
+    // Suma kontrolna NIP — odsiewa losowe ciągi 10 cyfr.
+    const weights = [6, 5, 7, 2, 3, 4, 5, 6, 7];
+    const sum = weights.reduce((acc, w, i) => acc + w * Number(digits[i]), 0);
+    return sum % 11 === Number(digits[9]);
 }
 
 function validate(body: BriefBody): string | null {
@@ -106,11 +118,12 @@ function validate(body: BriefBody): string | null {
     }
 
     if (!body.name || body.name.length < 2) return 'Nieprawidłowe imię i nazwisko';
+    if (!isValidName(body.name)) return 'Imię i nazwisko nie może zawierać cyfr ani znaków specjalnych';
     if (!body.email || !isEmail(body.email)) return 'Nieprawidłowy email';
     if (!body.company || body.company.length < 2) return 'Nieprawidłowa nazwa firmy';
     if (!body.problem || body.problem.length < 30) return 'Opis problemu musi mieć min. 30 znaków';
-    if (!isValidPhone((body.phone || '').trim())) return 'Nieprawidłowy numer telefonu';
-    if (!isValidNip((body.nip || '').trim())) return 'NIP musi składać się z 10 cyfr';
+    if (!isValidPhone((body.phone || '').trim())) return 'Nieprawidłowy numer telefonu (9–15 cyfr)';
+    if (!isValidNip((body.nip || '').trim())) return 'Nieprawidłowy NIP — sprawdź cyfry';
     if (Array.isArray(body.triedBefore) && body.triedBefore.length > MAX_TRIED_ITEMS) {
         return 'Zbyt wiele zaznaczonych opcji';
     }

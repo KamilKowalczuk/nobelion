@@ -62,6 +62,41 @@
   let attachments = $state<BriefAttachment[]>([]);
   let attachmentError = $state("");
 
+  // ── Walidacja na żywo (krok 7) ──
+  let touched = $state({ name: false, email: false, phone: false, company: false, nip: false });
+
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  // Filtry znaków — niedozwolone znaki nie wchodzą do pola w ogóle.
+  const sanitizeName = (v: string) => v.replace(/[^\p{L}\s'.\-]/gu, "");
+  const sanitizePhone = (v: string) => v.replace(/[^\d+()\s-]/g, "");
+  const sanitizeNip = (v: string) => v.replace(/[^\d\s-]/g, "");
+
+  function isNipValid(raw: string): boolean {
+    const d = raw.replace(/[\s-]/g, "");
+    if (!/^\d{10}$/.test(d)) return false;
+    const weights = [6, 5, 7, 2, 3, 4, 5, 6, 7];
+    const sum = weights.reduce((acc, w, i) => acc + w * Number(d[i]), 0);
+    return sum % 11 === Number(d[9]);
+  }
+
+  const errors = $derived.by(() => {
+    const e = { name: "", email: "", phone: "", company: "", nip: "" };
+    if (f.name.trim().length < 2) e.name = "Podaj imię i nazwisko (min. 2 znaki).";
+    if (!EMAIL_RE.test(f.email.trim())) e.email = "Podaj poprawny adres e-mail, np. jan@firma.pl.";
+    const phoneDigits = f.phone.replace(/\D/g, "");
+    if (f.phone.trim() !== "" && (phoneDigits.length < 9 || phoneDigits.length > 15)) {
+      e.phone = "Numer telefonu powinien mieć 9–15 cyfr.";
+    }
+    if (f.company.trim().length < 2) e.company = "Podaj nazwę firmy (min. 2 znaki).";
+    if (f.nip.trim() !== "" && !isNipValid(f.nip)) e.nip = "Ten NIP jest niepoprawny — sprawdź cyfry.";
+    return e;
+  });
+
+  const contactValid = $derived(
+    !errors.name && !errors.email && !errors.phone && !errors.company && !errors.nip
+  );
+
   const placeholders = [
     "Mój zespół codziennie kopiuje dane z maila do Excela, zajmuje to 2 godziny dziennie...",
     "Klienci pytają o cennik mailowo, odpisuję ręcznie, czasem 30 maili dziennie...",
@@ -110,10 +145,48 @@
       case 4: return f.peopleInvolved !== "" && f.growsWithScale !== "";
       case 5: return true;
       case 6: return f.urgency !== "" && f.scope !== "";
-      case 7: return f.name.trim().length >= 2 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email) && f.company.trim().length >= 2 && f.agreedPrivacy && f.agreedTerms && f.honeypot === "";
+      case 7: return contactValid && f.agreedPrivacy && f.agreedTerms && f.honeypot === "";
       default: return false;
     }
   }
+
+  // Krótka podpowiedź przy nieaktywnym przycisku — co jeszcze trzeba uzupełnić.
+  const stepHint = $derived.by(() => {
+    if (canProceed(step)) return "";
+    switch (step) {
+      case 1: return "Wybierz jedną z opcji";
+      case 2: {
+        const m = [];
+        if (!f.industry) m.push("branżę");
+        if (!f.size) m.push("wielkość zespołu");
+        return "Wybierz " + m.join(" i ");
+      }
+      case 3: return `Opis problemu: min. 30 znaków (masz ${f.problem.trim().length})`;
+      case 4: {
+        const m = [];
+        if (!f.peopleInvolved) m.push("liczbę osób");
+        if (!f.growsWithScale) m.push("czy problem rośnie");
+        return "Zaznacz " + m.join(" i ");
+      }
+      case 6: {
+        const m = [];
+        if (!f.urgency) m.push("pilność");
+        if (!f.scope) m.push("zakres");
+        return "Wybierz " + m.join(" i ");
+      }
+      case 7: {
+        const m = [];
+        if (errors.name) m.push("imię i nazwisko");
+        if (errors.email) m.push("e-mail");
+        if (errors.phone) m.push("telefon");
+        if (errors.company) m.push("nazwę firmy");
+        if (errors.nip) m.push("NIP");
+        if (!f.agreedPrivacy || !f.agreedTerms) m.push("zgody");
+        return m.length ? "Uzupełnij: " + m.join(", ") : "";
+      }
+      default: return "";
+    }
+  });
 
   function doShake() { shake = true; setTimeout(() => shake = false, 420); }
 
@@ -520,14 +593,42 @@
           {:else if step === 7}
             <div class="nb-stack">
               <div class="nb-grid2">
-                <div class="nb-field"><span class="nb-field__label caption">Imię i nazwisko *</span><input class="nb-input" type="text" bind:value={f.name} maxlength={80} autocomplete="name"/></div>
-                <div class="nb-field"><span class="nb-field__label caption">Email firmowy *</span><input class="nb-input" type="email" bind:value={f.email} maxlength={120} autocomplete="email"/></div>
+                <div class="nb-field">
+                  <span class="nb-field__label caption">Imię i nazwisko *</span>
+                  <input class="nb-input" class:is-invalid={touched.name && !!errors.name} type="text" value={f.name} maxlength={80} autocomplete="name"
+                    oninput={(e) => f.name = sanitizeName((e.currentTarget as HTMLInputElement).value)}
+                    onblur={() => touched.name = true}/>
+                  {#if touched.name && errors.name}<span class="nb-field__error">{errors.name}</span>{/if}
+                </div>
+                <div class="nb-field">
+                  <span class="nb-field__label caption">Email firmowy *</span>
+                  <input class="nb-input" class:is-invalid={touched.email && !!errors.email} type="email" bind:value={f.email} maxlength={120} autocomplete="email"
+                    onblur={() => touched.email = true}/>
+                  {#if touched.email && errors.email}<span class="nb-field__error">{errors.email}</span>{/if}
+                </div>
               </div>
               <div class="nb-grid2">
-                <div class="nb-field"><span class="nb-field__label caption">Telefon (opcjonalnie)</span><input class="nb-input" type="tel" bind:value={f.phone} maxlength={20} autocomplete="tel"/></div>
-                <div class="nb-field"><span class="nb-field__label caption">Nazwa firmy *</span><input class="nb-input" type="text" bind:value={f.company} maxlength={120} autocomplete="organization"/></div>
+                <div class="nb-field">
+                  <span class="nb-field__label caption">Telefon (opcjonalnie)</span>
+                  <input class="nb-input" class:is-invalid={touched.phone && !!errors.phone} type="tel" inputmode="tel" value={f.phone} maxlength={20} autocomplete="tel"
+                    oninput={(e) => f.phone = sanitizePhone((e.currentTarget as HTMLInputElement).value)}
+                    onblur={() => touched.phone = true}/>
+                  {#if touched.phone && errors.phone}<span class="nb-field__error">{errors.phone}</span>{/if}
+                </div>
+                <div class="nb-field">
+                  <span class="nb-field__label caption">Nazwa firmy *</span>
+                  <input class="nb-input" class:is-invalid={touched.company && !!errors.company} type="text" bind:value={f.company} maxlength={120} autocomplete="organization"
+                    onblur={() => touched.company = true}/>
+                  {#if touched.company && errors.company}<span class="nb-field__error">{errors.company}</span>{/if}
+                </div>
               </div>
-              <div class="nb-field"><span class="nb-field__label caption">NIP (opcjonalnie, do faktury)</span><input class="nb-input nb-input--narrow" type="text" bind:value={f.nip} maxlength={15}/></div>
+              <div class="nb-field">
+                <span class="nb-field__label caption">NIP (opcjonalnie, do faktury)</span>
+                <input class="nb-input nb-input--narrow" class:is-invalid={touched.nip && !!errors.nip} type="text" inputmode="numeric" value={f.nip} maxlength={15}
+                  oninput={(e) => f.nip = sanitizeNip((e.currentTarget as HTMLInputElement).value)}
+                  onblur={() => touched.nip = true}/>
+                {#if touched.nip && errors.nip}<span class="nb-field__error">{errors.nip}</span>{/if}
+              </div>
               <div class="nb-consents">
                 <label class="nb-check"><input type="checkbox" bind:checked={f.agreedPrivacy}/><span class="nb-check__box"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><path d="M5 12.5 L10 17.5 L19 6.5" /></svg></span><span>Wyrażam zgodę na przetwarzanie danych zgodnie z <a class="nb-link" href="/polityka-prywatnosci">Polityką Prywatności</a>.</span></label>
                 <label class="nb-check"><input type="checkbox" bind:checked={f.agreedTerms}/><span class="nb-check__box"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><path d="M5 12.5 L10 17.5 L19 6.5" /></svg></span><span>Akceptuję <a class="nb-link" href="/regulamin">Regulamin</a>.</span></label>
@@ -544,6 +645,9 @@
 
       <div class="nb-brief__nav">
         <button type="button" class="nb-brief__back" onclick={()=>goto(step-1)} disabled={step===1}>← Wstecz</button>
+        {#if stepHint}
+          <span class="nb-brief__nav-hint mono" aria-live="polite">{stepHint}</span>
+        {/if}
         {#if step < TOTAL}
           <button class="nb-btn nb-btn--primary nb-btn--md" disabled={!canProceed(step)} onclick={()=>goto(step+1)}>
             <span class="nb-btn__label">Dalej</span>
@@ -641,6 +745,9 @@
 .nb-input{width:100%;background:var(--paper);border:1px solid var(--paper-edge);padding:14px 16px;font-family:var(--font-sans);font-size:16px;color:var(--ink);transition:border-color var(--dur-fast),box-shadow var(--dur-fast);}
 .nb-input::placeholder{color:var(--ink-4);}
 .nb-input:focus{outline:none;border-color:var(--brass);box-shadow:0 0 0 3px rgba(184,137,62,0.12);}
+.nb-input.is-invalid{border-color:var(--danger);}
+.nb-input.is-invalid:focus{border-color:var(--danger);box-shadow:0 0 0 3px rgba(180,40,40,0.10);}
+.nb-field__error{margin-top:7px;font-size:12.5px;line-height:1.4;color:var(--danger);}
 .nb-input--sm{padding:9px 12px;font-size:14px;}
 .nb-input--narrow{max-width:280px;}
 .nb-textarea{resize:vertical;line-height:1.6;min-height:120px;}
@@ -739,6 +846,14 @@
 
 /* nav */
 .nb-brief__nav{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:32px;padding-top:24px;border-top:1px solid var(--hair-ink);}
+.nb-brief__nav-hint{margin-left:auto;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-3);text-align:right;max-width:340px;line-height:1.5;}
+/* Nieaktywny przycisk: jednoznacznie "jeszcze nie" — wyblakły, przerywana ramka */
+.nb-brief__nav .nb-btn:disabled{opacity:1;background:var(--paper);color:var(--ink-4);border:1px dashed var(--ink-4);cursor:not-allowed;box-shadow:none;transform:none;}
+.nb-brief__nav .nb-btn:disabled:hover{background:var(--paper);color:var(--ink-4);box-shadow:none;}
+@media(max-width:560px){
+  .nb-brief__nav{flex-wrap:wrap;}
+  .nb-brief__nav-hint{order:3;flex-basis:100%;text-align:left;margin-left:0;}
+}
 .nb-brief__back{font-family:var(--font-mono);font-size:12px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-3);background:none;border:none;cursor:pointer;transition:color var(--dur-fast);}
 .nb-brief__back:hover:not(:disabled){color:var(--brass);}
 .nb-brief__back:disabled{opacity:0.4;cursor:not-allowed;}
