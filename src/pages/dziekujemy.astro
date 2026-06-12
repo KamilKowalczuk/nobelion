@@ -1,22 +1,33 @@
 ---
+import Stripe from 'stripe';
+import { backendEnv } from '../lib/backend-env';
+
+// SSR — session_id przychodzi w query, więc strona NIE może być prerenderowana
+// (statyczny build widzi puste parametry i na zawsze pokazuje błąd).
+export const prerender = false;
+
 const sessionId = Astro.url.searchParams.get('session_id') || '';
-const apiUrl = sessionId ? `/api/stripe/verify-session?session_id=${encodeURIComponent(sessionId)}` : '';
 let verified = false;
 let error = '';
-if (apiUrl) {
-    try {
-        const res = await fetch(new URL(apiUrl, Astro.site || 'http://localhost:4321'));
-        if (res.ok) {
-            const data = await res.json();
-            verified = !!data.valid;
-        } else {
-            error = 'Nie udało się potwierdzić płatności.';
-        }
-    } catch {
-        error = 'Nie udało się połączyć z serwerem płatności.';
-    }
-} else {
+
+if (!sessionId) {
     error = 'Brak identyfikatora sesji płatności.';
+} else {
+    const stripeKey = backendEnv('STRIPE_SECRET_KEY');
+    if (!stripeKey) {
+        error = 'Weryfikacja płatności jest chwilowo niedostępna.';
+        console.error('[dziekujemy] Brak STRIPE_SECRET_KEY — nie można zweryfikować sesji.');
+    } else {
+        try {
+            const stripe = new Stripe(stripeKey, { apiVersion: '2026-04-22.dahlia' });
+            const session = await stripe.checkout.sessions.retrieve(sessionId);
+            verified = session.payment_status === 'paid';
+            if (!verified) error = 'Płatność nie została jeszcze zaksięgowana. Jeśli środki zeszły z konta, potwierdzenie dotrze mailem.';
+        } catch (err: any) {
+            console.error('[dziekujemy] Błąd weryfikacji sesji Stripe:', err?.message || err);
+            error = 'Nie udało się potwierdzić płatności. Jeśli środki zeszły z konta, potwierdzenie dotrze mailem.';
+        }
+    }
 }
 ---
 
