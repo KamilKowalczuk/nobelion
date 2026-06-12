@@ -17,8 +17,20 @@ function getHeaders(json = true): Record<string, string> {
     const apiKey = env.PAYLOAD_API_KEY;
     if (apiKey && !apiKey.includes('PASTE_') && apiKey.length > 10) {
         headers.Authorization = `users API-Key ${apiKey}`;
+    } else {
+        // Bez klucza CMS odrzuci zapis/upload (403) — kolekcje wymagają auth.
+        console.error('[payload] PAYLOAD_API_KEY brakuje lub jest placeholderem — żądanie pójdzie BEZ autoryzacji i CMS zwróci 403.');
     }
     return headers;
+}
+
+// 403 z CMS przy ustawionym kluczu = klucz nieważny. Najczęstszy powód:
+// zmiana PAYLOAD_SECRET unieważnia klucze API (Payload szyfruje je sekretem)
+// — wtedy trzeba wygenerować nowy klucz w panelu i podmienić env.
+function hint403(status: number): string {
+    return status === 403
+        ? ' [403 = CMS nie uznał autoryzacji — zweryfikuj PAYLOAD_API_KEY; po zmianie PAYLOAD_SECRET klucz trzeba wygenerować od nowa]'
+        : '';
 }
 
 export async function findSingle(collection: string, where: Record<string, string>): Promise<any | null> {
@@ -54,7 +66,7 @@ export async function createDoc(collection: string, data: Record<string, unknown
         });
         if (!res.ok) {
             const body = await res.text().catch(() => '');
-            console.error(`[payload] createDoc ${collection} failed: ${res.status}`, body);
+            console.error(`[payload] createDoc ${collection} failed: ${res.status}${hint403(res.status)}`, body);
             // Zwracamy obiekt z błędem, żeby API mogło go przekazać dalej
             return { error: true, status: res.status, body };
         }
@@ -77,7 +89,7 @@ export async function uploadFile(collection: string, file: File): Promise<any | 
         });
         const responseText = await res.text().catch(() => '');
         if (!res.ok) {
-            console.error(`[payload] uploadFile ${collection} failed: ${res.status}`, responseText);
+            console.error(`[payload] uploadFile ${collection} failed: ${res.status}${hint403(res.status)}`, responseText);
             return null;
         }
         if (!responseText) return null;
