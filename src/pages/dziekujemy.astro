@@ -11,6 +11,9 @@ export const prerender = false;
 
 const sessionId = Astro.url.searchParams.get('session_id') || '';
 let verified = false;
+// Rodzaj płatności z metadanych sesji: '50' | 'final50' | '100' | 'subscription'.
+let paymentModel = '';
+let isSubscription = false;
 
 if (sessionId) {
     const stripeKey = backendEnv('STRIPE_SECRET_KEY');
@@ -20,28 +23,84 @@ if (sessionId) {
         try {
             const stripe = new Stripe(stripeKey, { apiVersion: '2026-04-22.dahlia' });
             const session = await stripe.checkout.sessions.retrieve(sessionId);
-            verified = session.payment_status === 'paid';
+            isSubscription = session.mode === 'subscription';
+            paymentModel = session.metadata?.paymentModel || '';
+            // Subskrypcja po pierwszym pobraniu bywa 'paid' lub 'no_payment_required'.
+            verified = session.payment_status === 'paid'
+                || session.payment_status === 'no_payment_required'
+                || session.status === 'complete';
         } catch (err: any) {
             console.error('[dziekujemy] Błąd weryfikacji sesji Stripe:', err?.message || err);
         }
     }
 }
 
-const successSteps = [
-    { n: '01', t: 'Potwierdzenie i faktura', d: 'Na Twój e-mail leci potwierdzenie płatności. Faktura dotrze osobną wiadomością.' },
-    { n: '02', t: 'Kontakt w 24 godziny', d: 'Odzywa się osoba prowadząca Twój projekt — z konkretami, nie formułkami.' },
-    { n: '03', t: 'Start prac', d: 'Ruszamy zgodnie z planem i etapami z Twojej wyceny.' },
-];
+type Closing = {
+    eyebrow: string;
+    title: string;
+    body: string;
+    steps: { n: string; t: string; d: string }[];
+};
+
+// ── Warianty potwierdzenia zależne od rodzaju płatności ──
+let content: Closing;
+
+if (isSubscription || paymentModel === 'subscription') {
+    content = {
+        eyebrow: 'Pakiet wsparcia aktywny',
+        title: 'Wsparcie włączone.',
+        body: 'Twoja subskrypcja opieki technicznej jest aktywna — czuwamy nad działaniem systemu od teraz. Płatność odnawia się automatycznie co miesiąc, a Ty możesz ją w każdej chwili anulować linkiem z maila powitalnego.',
+        steps: [
+            { n: '01', t: 'Potwierdzenie i faktura', d: 'Na e-mail dostajesz potwierdzenie oraz fakturę za pierwszy miesiąc.' },
+            { n: '02', t: 'Stała opieka', d: 'Monitorujemy i utrzymujemy Twój system w ramach pakietu — bez doraźnych ustaleń.' },
+            { n: '03', t: 'Pełna kontrola', d: 'Subskrypcję anulujesz samodzielnie, kiedy zechcesz. Bez okresów wypowiedzenia.' },
+        ],
+    };
+} else if (paymentModel === 'final50') {
+    content = {
+        eyebrow: 'Płatność końcowa potwierdzona',
+        title: 'Projekt rozliczony.',
+        body: 'Druga, końcowa rata została zaksięgowana — zamówienie jest w pełni opłacone. Dziękujemy za zaufanie i domknięcie projektu po naszej stronie. Komplet dokumentów dostajesz na e-mail.',
+        steps: [
+            { n: '01', t: 'Potwierdzenie i faktura', d: 'Na e-mail leci potwierdzenie płatności końcowej oraz faktura.' },
+            { n: '02', t: 'Finalne przekazanie', d: 'Przekazujemy dostępy, kod i dane — projekt w całości po Twojej stronie.' },
+            { n: '03', t: 'Zostajemy w kontakcie', d: 'Potrzebujesz opieki nad systemem? Zaproponujemy pakiet wsparcia.' },
+        ],
+    };
+} else if (paymentModel === '50') {
+    content = {
+        eyebrow: 'Pierwsza rata potwierdzona',
+        title: 'Zaczynamy pracę.',
+        body: 'Pierwsza rata (50%) została zaksięgowana — to sygnał startu dla naszego zespołu. Pozostałe 50% opłacisz dopiero na zakończenie projektu, linkiem, który wyślemy Ci mailem, gdy prace będą gotowe.',
+        steps: [
+            { n: '01', t: 'Potwierdzenie i faktura', d: 'Na e-mail dostajesz potwierdzenie I raty oraz fakturę.' },
+            { n: '02', t: 'Realizacja etapami', d: 'Budujemy zgodnie z planem z wyceny i pokazujemy postępy.' },
+            { n: '03', t: 'Płatność końcowa', d: 'Po zakończeniu prac wyślemy link do drugiej, ostatniej raty.' },
+        ],
+    };
+} else {
+    // Domyślnie: płatność jednorazowa (całość) lub nieznany model.
+    content = {
+        eyebrow: 'Płatność potwierdzona',
+        title: 'Dziękujemy. Zaczynamy.',
+        body: 'Twoja płatność dotarła, a projekt właśnie zmienił status na „w realizacji”. Od tej chwili wszystkim zajmujemy się my — Ty za moment dostaniesz komplet informacji na e-mail.',
+        steps: [
+            { n: '01', t: 'Potwierdzenie i faktura', d: 'Na Twój e-mail leci potwierdzenie płatności oraz faktura.' },
+            { n: '02', t: 'Kontakt w 24 godziny', d: 'Odzywa się osoba prowadząca Twój projekt — z konkretami, nie formułkami.' },
+            { n: '03', t: 'Start prac', d: 'Ruszamy zgodnie z planem i etapami z Twojej wyceny.' },
+        ],
+    };
+}
 ---
 
 <Layout>
     {verified ? (
         <ClosingPage
             icon="check"
-            eyebrow="Płatność potwierdzona"
-            title="Dziękujemy. Zaczynamy."
-            body="Twoja płatność dotarła, a projekt właśnie zmienił status na „w realizacji”. Od tej chwili wszystkim zajmujemy się my — Ty za moment dostaniesz komplet informacji na e-mail."
-            steps={successSteps}
+            eyebrow={content.eyebrow}
+            title={content.title}
+            body={content.body}
+            steps={content.steps}
         >
             <Fragment slot="actions">
                 <a href="/" class="nb-btn nb-btn--primary nb-btn--lg"><span class="nb-btn__label">Wróć na stronę główną</span></a>
