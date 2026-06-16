@@ -52,6 +52,10 @@ const docOrder = ['umowa-wspolpracy', 'regulamin', 'polityka-prywatnosci'] as co
 const consentDocs = docOrder
   .filter((t) => legalDocs[t])
   .map((t) => ({ type: t, title: legalDocs[t].title, html: legalDocs[t].html }));
+// Pojedyncze dokumenty — dwie grupy zgód: (regulamin + polityka) oraz (umowa współpracy).
+const docRegulamin = legalDocs['regulamin'];
+const docPolityka = legalDocs['polityka-prywatnosci'];
+const docUmowa = legalDocs['umowa-wspolpracy'];
 
 const fmt = (n: number) => new Intl.NumberFormat('pl-PL').format(n);
 ---
@@ -184,28 +188,46 @@ const fmt = (n: number) => new Intl.NumberFormat('pl-PL').format(n);
                     {/* Dokumenty i zgody (clickwrap) — bramka na płatność */}
                     <div class="q-consent" id="q-consent">
                       <span class="caption q-consent__h">Dokumenty i zgody</span>
-                      {consentDocs.length > 0 ? (
-                        <div class="q-consent__docs">
-                          {consentDocs.map((d) => (
-                            <button type="button" class="q-consent__doc" data-doc={d.type}>
+
+                      <div class="q-consent__group">
+                        {(docRegulamin || docPolityka) && (
+                          <div class="q-consent__docs">
+                            {docRegulamin && (
+                              <button type="button" class="q-consent__doc" data-doc="regulamin">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M7 3h7l5 5v13H7zM14 3v5h5"/></svg>
+                                <span>{docRegulamin.title}</span>
+                              </button>
+                            )}
+                            {docPolityka && (
+                              <button type="button" class="q-consent__doc" data-doc="polityka-prywatnosci">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M7 3h7l5 5v13H7zM14 3v5h5"/></svg>
+                                <span>{docPolityka.title}</span>
+                              </button>
+                            )}
+                          </div>
+                        )}
+                        <label class="q-consent__check">
+                          <input type="checkbox" id="consent-terms" />
+                          <span class="q-consent__cbox" aria-hidden="true"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="square"><path d="M5 12.5 L10 17.5 L19 6.5"/></svg></span>
+                          <span>Akceptuję regulamin i politykę prywatności.</span>
+                        </label>
+                      </div>
+
+                      <div class="q-consent__group">
+                        {docUmowa && (
+                          <div class="q-consent__docs">
+                            <button type="button" class="q-consent__doc" data-doc="umowa-wspolpracy">
                               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M7 3h7l5 5v13H7zM14 3v5h5"/></svg>
-                              <span>{d.title}</span>
+                              <span>{docUmowa.title}</span>
                             </button>
-                          ))}
-                        </div>
-                      ) : (
-                        <p class="q-consent__empty">Dokumenty pojawią się tutaj po dodaniu w panelu.</p>
-                      )}
-                      <label class="q-consent__check">
-                        <input type="checkbox" id="consent-docs" />
-                        <span class="q-consent__cbox" aria-hidden="true"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="square"><path d="M5 12.5 L10 17.5 L19 6.5"/></svg></span>
-                        <span>Zapoznałem się i akceptuję umowę współpracy, regulamin oraz politykę prywatności.</span>
-                      </label>
-                      <label class="q-consent__check">
-                        <input type="checkbox" id="consent-withdrawal" />
-                        <span class="q-consent__cbox" aria-hidden="true"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="square"><path d="M5 12.5 L10 17.5 L19 6.5"/></svg></span>
-                        <span>Zamawiam wykonanie spersonalizowanego rozwiązania według mojej specyfikacji i żądam rozpoczęcia prac. Przyjmuję do wiadomości, że po rozpoczęciu świadczenia nie przysługuje mi prawo odstąpienia w terminie 14 dni.</span>
-                      </label>
+                          </div>
+                        )}
+                        <label class="q-consent__check">
+                          <input type="checkbox" id="consent-agreement" />
+                          <span class="q-consent__cbox" aria-hidden="true"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="square"><path d="M5 12.5 L10 17.5 L19 6.5"/></svg></span>
+                          <span>Akceptuję umowę współpracy.</span>
+                        </label>
+                      </div>
                     </div>
 
                     {/* Jednorazowa — rabat 10% */}
@@ -226,7 +248,7 @@ const fmt = (n: number) => new Intl.NumberFormat('pl-PL').format(n);
                       <span class="btn-text q-opt__cta q-opt__cta--ghost">Opłać I ratę (50%)</span>
                     </button>
 
-                    <p class="q-consent__hint" id="consent-hint">Zaznacz obie zgody powyżej, aby odblokować płatność.</p>
+                    <p class="q-consent__hint" id="consent-hint">Zaznacz obie zgody, aby odblokować płatność.</p>
                   </>
                 )}
               </div>
@@ -469,6 +491,7 @@ const fmt = (n: number) => new Intl.NumberFormat('pl-PL').format(n);
   background: var(--color-paper-2);
 }
 .q-consent__h { display: block; color: var(--color-ink-3); }
+.q-consent__group { display: flex; flex-direction: column; gap: 8px; }
 .q-consent__docs { display: flex; flex-direction: column; gap: 6px; }
 .q-consent__doc {
   display: inline-flex; align-items: center; gap: 9px; text-align: left;
@@ -665,17 +688,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ── Bramka zgód (clickwrap) ──
   const payBtns = container.querySelectorAll('.payment-btn');
-  const cDocs = document.getElementById('consent-docs');
-  const cWith = document.getElementById('consent-withdrawal');
+  const cTerms = document.getElementById('consent-terms');
+  const cAgree = document.getElementById('consent-agreement');
   const hint = document.getElementById('consent-hint');
-  const gateOk = () => !!(cDocs && cDocs.checked && cWith && cWith.checked);
+  const gateOk = () => !!(cTerms && cTerms.checked && cAgree && cAgree.checked);
   function applyGate() {
     const ok = gateOk();
     payBtns.forEach(b => { b.disabled = !ok; });
     if (hint) hint.style.display = ok ? 'none' : '';
   }
-  cDocs?.addEventListener('change', applyGate);
-  cWith?.addEventListener('change', applyGate);
+  cTerms?.addEventListener('change', applyGate);
+  cAgree?.addEventListener('change', applyGate);
   applyGate();
 
   // ── Modale dokumentów ──
@@ -699,7 +722,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const res = await fetch(`${apiUrl}/api/quotes/checkout/${token}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ paymentModel: btn.dataset.model, acceptDocuments: true, acceptWithdrawal: true })
+          body: JSON.stringify({ paymentModel: btn.dataset.model, acceptTerms: true, acceptAgreement: true })
         });
         const data = await res.json();
         if (data.url) { window.location.href = data.url; return; }
