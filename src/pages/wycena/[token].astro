@@ -169,7 +169,29 @@ const fmt = (n: number) => new Intl.NumberFormat('pl-PL').format(n);
                   </div>
                 ) : (
                   <>
-                    {/* Opcjonalny add-on: opieka po wdrożeniu — przy decyzji o płatności */}
+                    {/* Najpierw oferta — najważniejsza jest płatność jednorazowa z rabatem */}
+                    <span class="caption q-pay__choose">Wybierz formę płatności</span>
+
+                    {/* Jednorazowa — rabat 10% (opcja główna) */}
+                    <button type="button" data-model="100" class="payment-btn q-opt q-opt--primary">
+                      <span class="q-opt__ribbon">Rabat 10%</span>
+                      <h3 class="h4 q-opt__title">Płatność jednorazowa</h3>
+                      <p class="q-opt__desc">Domykasz sprawę od ręki i schodzisz z ceny o 10%. Jedna płatność, pełny rabat — ruszamy z projektem bez zwłoki.</p>
+                      <div class="q-opt__price q-opt__price--accent">{fmt(discountedPrice)} PLN</div>
+                      {savings > 0 && <span class="q-opt__save">Oszczędzasz {fmt(savings)} PLN</span>}
+                      <span class="btn-text q-opt__cta q-opt__cta--solid">Opłać całość z rabatem</span>
+                    </button>
+
+                    {/* Etapowa — 50% (opcja drugorzędna) */}
+                    <button type="button" data-model="50" class="payment-btn q-opt q-opt--secondary">
+                      <h3 class="h4 q-opt__title">Płatność w dwóch ratach</h3>
+                      <p class="q-opt__desc">Wolisz rozłożyć inwestycję? Płacisz połowę na start, a drugą część dopiero po odbiorze gotowego projektu.</p>
+                      <div class="q-opt__price">{fmt(Math.round(fullPrice / 2))} PLN</div>
+                      <span class="caption q-opt__sub">I rata — start prac</span>
+                      <span class="btn-text q-opt__cta q-opt__cta--ghost">Opłać I ratę (50%)</span>
+                    </button>
+
+                    {/* Opcjonalny add-on: opieka po wdrożeniu (upsell — start po oddaniu projektu) */}
                     {quoteData.maintenancePrice ? (
                       <label class="q-addon">
                         <input type="checkbox" id="maintenance-checkbox" checked={quoteData.clientSelectedMaintenance} />
@@ -201,7 +223,7 @@ const fmt = (n: number) => new Intl.NumberFormat('pl-PL').format(n);
                       </label>
                     ) : null}
 
-                    {/* Dokumenty i zgody (clickwrap) — bramka na płatność */}
+                    {/* Dokumenty i zgody (clickwrap) — finalna bramka na płatność */}
                     <div class="q-consent" id="q-consent">
                       <span class="caption q-consent__h">Dokumenty i zgody</span>
 
@@ -247,28 +269,9 @@ const fmt = (n: number) => new Intl.NumberFormat('pl-PL').format(n);
                           <span>Akceptuję umowę współpracy.</span>
                         </label>
                       </div>
+
+                      <p class="q-consent__hint" id="consent-hint">Zaznacz obie zgody, aby przejść do płatności.</p>
                     </div>
-
-                    {/* Jednorazowa — rabat 10% (opcja główna) */}
-                    <button type="button" data-model="100" class="payment-btn q-opt q-opt--primary" disabled>
-                      <span class="q-opt__ribbon">Rabat 10%</span>
-                      <h3 class="h4 q-opt__title">Płatność jednorazowa</h3>
-                      <p class="q-opt__desc">Domykasz sprawę od ręki i schodzisz z ceny o 10%. Jedna płatność, pełny rabat — ruszamy z projektem bez zwłoki.</p>
-                      <div class="q-opt__price q-opt__price--accent">{fmt(discountedPrice)} PLN</div>
-                      {savings > 0 && <span class="q-opt__save">Oszczędzasz {fmt(savings)} PLN</span>}
-                      <span class="btn-text q-opt__cta q-opt__cta--solid">Opłać całość z rabatem</span>
-                    </button>
-
-                    {/* Etapowa — 50% (opcja drugorzędna) */}
-                    <button type="button" data-model="50" class="payment-btn q-opt q-opt--secondary" disabled>
-                      <h3 class="h4 q-opt__title">Płatność w dwóch ratach</h3>
-                      <p class="q-opt__desc">Wolisz rozłożyć inwestycję? Płacisz połowę na start, a drugą część dopiero po odbiorze gotowego projektu.</p>
-                      <div class="q-opt__price">{fmt(Math.round(fullPrice / 2))} PLN</div>
-                      <span class="caption q-opt__sub">I rata — start prac</span>
-                      <span class="btn-text q-opt__cta q-opt__cta--ghost">Opłać I ratę (50%)</span>
-                    </button>
-
-                    <p class="q-consent__hint" id="consent-hint">Zaznacz obie zgody, aby odblokować płatność.</p>
                   </>
                 )}
               </div>
@@ -562,6 +565,15 @@ const fmt = (n: number) => new Intl.NumberFormat('pl-PL').format(n);
 .q-consent__check span:last-child { font-size: 12.5px; line-height: 1.55; color: var(--color-ink-2); }
 .q-consent__hint { margin: 0; text-align: center; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.04em; color: var(--color-ink-4); }
 
+/* Puls naprowadzający — gdy klient klika opcję płatności przed akceptacją zgód
+   (przewijamy do zgód i podświetlamy), a po akceptacji wracamy pulsem do opcji. */
+@keyframes q-flash {
+  0%, 100% { box-shadow: 0 0 0 0 transparent; }
+  25% { box-shadow: 0 0 0 3px var(--color-brass-glow); border-color: var(--color-brass); }
+}
+.q-consent.is-flash { animation: q-flash 1.1s var(--ease-out); }
+.q-opt.is-flash { animation: q-flash 1.1s var(--ease-out); }
+
 /* ── modal dokumentu prawnego ── */
 .q-docmodal {
   position: fixed; inset: 0; z-index: 1200; display: none;
@@ -615,7 +627,11 @@ const fmt = (n: number) => new Intl.NumberFormat('pl-PL').format(n);
   transition: border-color var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out);
 }
 .q-opt:hover { border-color: var(--color-ink-4); box-shadow: var(--shadow-lift); transform: translateY(-2px); }
-.q-opt:disabled { opacity: 0.6; cursor: wait; transform: none; }
+/* Stan „zablokowane zgodami" — oferta zostaje w pełni czytelna (rabat widoczny),
+   wyciszamy tylko CTA; klik prowadzi do sekcji zgód. */
+.q-opt.is-locked .q-opt__cta { opacity: 0.5; }
+.q-opt.is-busy { opacity: 0.6; cursor: wait; transform: none; pointer-events: none; }
+.q-pay__choose { display: block; color: var(--color-ink-3); margin-bottom: -4px; }
 
 .q-opt--primary {
   border-color: var(--color-brass);
@@ -734,6 +750,7 @@ const fmt = (n: number) => new Intl.NumberFormat('pl-PL').format(n);
 @media (prefers-reduced-motion: reduce) {
   .q-hero__dot { animation: none; }
   .q-opt:hover { transform: none; }
+  .q-consent.is-flash, .q-opt.is-flash { animation: none; }
 }
 </style>
 
@@ -746,15 +763,33 @@ document.addEventListener('DOMContentLoaded', () => {
   const apiUrl = container.dataset.api;
 
   // ── Bramka zgód (clickwrap) ──
+  // Oferta (z rabatem) jest na górze i zawsze w pełni czytelna. Przyciski nie są
+  // wyszarzone — gdy zgody nie są zaznaczone, klik naprowadza do sekcji zgód
+  // (przewinięcie + puls), a po ich zaznaczeniu wracamy pulsem do wybranej opcji.
   const payBtns = container.querySelectorAll('.payment-btn');
   const cTerms = document.getElementById('consent-terms');
   const cAgree = document.getElementById('consent-agreement');
   const hint = document.getElementById('consent-hint');
+  const consentBlock = document.getElementById('q-consent');
+  let pendingBtn = null;
   const gateOk = () => !!(cTerms && cTerms.checked && cAgree && cAgree.checked);
+
+  function pulse(el) {
+    if (!el) return;
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el.classList.remove('is-flash');
+    void el.offsetWidth; // restart animacji
+    el.classList.add('is-flash');
+  }
+
   function applyGate() {
     const ok = gateOk();
-    payBtns.forEach(b => { b.disabled = !ok; });
+    // Przycisk pozostaje operowalny (klik prowadzi do zgód) — bez aria-disabled,
+    // które kłóciłoby się z tym dla czytników ekranu. Stan komunikuje hint + is-locked.
+    payBtns.forEach(b => { b.classList.toggle('is-locked', !ok); });
     if (hint) hint.style.display = ok ? 'none' : '';
+    // Klient kliknął opcję przed akceptacją — po zaznaczeniu zgód wróć do niej.
+    if (ok && pendingBtn) { const b = pendingBtn; pendingBtn = null; pulse(b); }
   }
   cTerms?.addEventListener('change', applyGate);
   cAgree?.addEventListener('change', applyGate);
@@ -772,22 +807,28 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── Płatności ──
   payBtns.forEach(btn => {
     btn.addEventListener('click', async () => {
-      if (!gateOk()) { applyGate(); return; }
+      // Zablokowane zgodami — naprowadź do sekcji zgód i zapamiętaj wybór.
+      if (!gateOk()) { pendingBtn = btn; pulse(consentBlock); return; }
       const btnText = btn.querySelector('.btn-text');
       const orig = btnText.innerHTML;
       btnText.innerHTML = 'Przetwarzanie&hellip;';
-      payBtns.forEach(b => { b.disabled = true; });
+      payBtns.forEach(b => { b.classList.add('is-busy'); });
       try {
         const res = await fetch(`${apiUrl}/api/quotes/checkout/${token}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ paymentModel: btn.dataset.model, acceptTerms: true, acceptAgreement: true })
+          body: JSON.stringify({
+            paymentModel: btn.dataset.model,
+            acceptTerms: !!(cTerms && cTerms.checked),
+            acceptAgreement: !!(cAgree && cAgree.checked)
+          })
         });
         const data = await res.json();
         if (data.url) { window.location.href = data.url; return; }
         alert('Błąd: ' + (data.error || 'Spróbuj ponownie.'));
       } catch { alert('Błąd połączenia z serwerem.'); }
       btnText.innerHTML = orig;
+      payBtns.forEach(b => { b.classList.remove('is-busy'); });
       applyGate();
     });
   });
