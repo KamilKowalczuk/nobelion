@@ -798,7 +798,7 @@
 /* diagnosis */
 .nb-diag{display:flex;align-items:flex-start;gap:18px;width:100%;text-align:left;background:var(--paper);border:1px solid var(--paper-edge);padding:18px 20px;cursor:pointer;transition:border-color var(--dur-base),background var(--dur-base),box-shadow var(--dur-base);}
 .nb-diag:hover{border-color:rgba(184,137,62,0.5);}
-.nb-diag.sel{border-color:var(--brass);background:rgba(184,137,62,0.05);box-shadow:0 8px 24px -14px rgba(184,137,62,0.5);}
+.nb-diag.sel{border-color:var(--brass);background:color-mix(in srgb, var(--brass), transparent 87%);box-shadow:inset 0 0 0 1px var(--brass), 0 8px 24px -14px rgba(184,137,62,0.5);}
 
 .nb-diag__n{font-family:var(--font-mono);font-size:15px;color:var(--brass);flex-shrink:0;padding-top:2px;}
 .nb-diag__txt{flex:1;display:flex;flex-direction:column;gap:4px;}
@@ -816,7 +816,7 @@
 .nb-pill{background:var(--paper);border:1px solid var(--paper-edge);padding:13px 14px;font-family:var(--font-mono);font-size:13px;letter-spacing:0.08em;color:var(--ink-2);cursor:pointer;text-align:center;transition:all var(--dur-fast);}
 .nb-pill--wide{text-align:left;letter-spacing:0.04em;font-size:12.5px;}
 .nb-pill:hover{border-color:rgba(184,137,62,0.5);color:var(--brass);}
-.nb-pill.sel{border-color:var(--brass);background:rgba(184,137,62,0.08);color:var(--brass-dark);font-weight:600;}
+.nb-pill.sel{border-color:var(--brass);background:color-mix(in srgb, var(--brass), transparent 84%);color:var(--brass-dark);font-weight:600;box-shadow:inset 0 0 0 1px var(--brass);}
 
 @media(max-width:520px){.nb-pills--4{grid-template-columns:1fr 1fr;}.nb-pills--2{grid-template-columns:1fr;}}
 
@@ -866,7 +866,8 @@
 /* scope */
 .nb-scope{display:flex;flex-direction:column;gap:4px;width:100%;text-align:left;background:var(--paper);border:1px solid var(--paper-edge);padding:16px 18px;cursor:pointer;transition:all var(--dur-fast);}
 .nb-scope:hover{border-color:rgba(184,137,62,0.5);}
-.nb-scope.sel{border-color:var(--brass);background:rgba(184,137,62,0.06);}
+.nb-scope.sel{border-color:var(--brass);background:color-mix(in srgb, var(--brass), transparent 87%);box-shadow:inset 0 0 0 1px var(--brass);}
+.nb-scope.sel .nb-scope__l{color:var(--brass-dark);}
 
 .nb-scope__l{font-family:var(--font-heading);font-weight:600;font-size:15px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink);}
 .nb-scope__d{font-size:13px;color:var(--ink-3);}
