@@ -849,17 +849,18 @@
 
 /* checkboxes */
 .nb-checks{display:flex;flex-direction:column;gap:8px;}
-/* Styl spójny z add-onem „Opieka po wdrożeniu" na stronie wyceny —
-   mosiężna ramka boxa widoczna już przed zaznaczeniem (lepsza widoczność wyboru). */
-.nb-check{display:flex;align-items:flex-start;gap:13px;padding:14px 16px;border:1px solid color-mix(in srgb, var(--brass), transparent 55%);background:color-mix(in srgb, var(--brass), transparent 95%);cursor:pointer;font-size:14px;color:var(--ink-2);line-height:1.5;transition:border-color var(--dur-base) var(--ease-out),background var(--dur-base) var(--ease-out),box-shadow var(--dur-base) var(--ease-out);}
-.nb-check:hover{border-color:var(--brass);box-shadow:0 8px 22px -14px var(--brass-glow);}
-.nb-check.sel{border-color:var(--brass);background:color-mix(in srgb, var(--brass), transparent 88%);}
+/* Delikatnie wyraźniejszy wybór — inspirowany add-onem wyceny, ale subtelny:
+   brief ma wiele checkboxów, więc bez mocnych mosiężnych kart. Box ma miękką
+   mosiężną ramkę (czytelny jako „do zaznaczenia"), a stan zaznaczony wyróżnia się jasno. */
+.nb-check{display:flex;align-items:flex-start;gap:13px;padding:13px 15px;border:1px solid color-mix(in srgb, var(--brass), transparent 72%);background:var(--paper);cursor:pointer;font-size:14px;color:var(--ink-2);line-height:1.5;transition:border-color var(--dur-fast),background var(--dur-fast);}
+.nb-check:hover{border-color:color-mix(in srgb, var(--brass), transparent 35%);}
+.nb-check.sel{border-color:var(--brass);background:color-mix(in srgb, var(--brass), transparent 92%);}
 
 .nb-check input{position:absolute;opacity:0;width:0;height:0;}
-.nb-check__box{flex-shrink:0;width:24px;height:24px;border:1.5px solid var(--brass);background:var(--paper);display:flex;align-items:center;justify-content:center;color:transparent;margin-top:1px;box-shadow:inset 0 0 0 2px color-mix(in srgb, var(--brass), transparent 86%);transition:all var(--dur-fast);}
-.nb-check:hover .nb-check__box{border-color:var(--brass-dark);}
+.nb-check__box{flex-shrink:0;width:20px;height:20px;border:1px solid color-mix(in srgb, var(--brass), transparent 40%);background:var(--paper);display:flex;align-items:center;justify-content:center;color:transparent;margin-top:1px;transition:all var(--dur-fast);}
+.nb-check:hover .nb-check__box{border-color:var(--brass);}
 .nb-check input:focus-visible + .nb-check__box{outline:2px solid var(--brass);outline-offset:2px;}
-.nb-check input:checked + .nb-check__box{background:var(--brass);border-color:var(--brass);color:var(--void);box-shadow:none;}
+.nb-check input:checked + .nb-check__box{background:var(--brass);border-color:var(--brass);color:var(--void);}
 
 
 /* scope */
@@ -873,7 +874,7 @@
 /* consents */
 .nb-consents{display:flex;flex-direction:column;gap:14px;padding-top:22px;border-top:1px solid var(--hair-ink);}
 .nb-consents .nb-check{border:none;background:none;padding:0;}
-.nb-consents .nb-check:hover{border:none;box-shadow:none;}
+.nb-consents .nb-check:hover{border:none;}
 .nb-consents .nb-check a{color:var(--brass);text-decoration:underline;}
 
 .nb-grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;}

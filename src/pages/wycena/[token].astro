@@ -169,7 +169,57 @@ const fmt = (n: number) => new Intl.NumberFormat('pl-PL').format(n);
                   </div>
                 ) : (
                   <>
-                    {/* Najpierw oferta — najważniejsza jest płatność jednorazowa z rabatem */}
+                    {/* Dokumenty i zgody (clickwrap) — pod ceną, PRZED wyborem płatności */}
+                    <div class="q-consent" id="q-consent">
+                      <span class="caption q-consent__h">Dokumenty i zgody</span>
+
+                      <div class="q-consent__group">
+                        {(docRegulamin || docPolityka) && (
+                          <div class="q-consent__docs">
+                            {docRegulamin && (
+                              <button type="button" class="q-consent__doc" data-doc="regulamin">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M7 3h7l5 5v13H7zM14 3v5h5"/></svg>
+                                <span>{docRegulamin.title}</span>
+                                {docRegulamin.version && <span class="q-consent__ver">wersja {docRegulamin.version}</span>}
+                              </button>
+                            )}
+                            {docPolityka && (
+                              <button type="button" class="q-consent__doc" data-doc="polityka-prywatnosci">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M7 3h7l5 5v13H7zM14 3v5h5"/></svg>
+                                <span>{docPolityka.title}</span>
+                                {docPolityka.version && <span class="q-consent__ver">wersja {docPolityka.version}</span>}
+                              </button>
+                            )}
+                          </div>
+                        )}
+                        <label class="q-consent__check">
+                          <input type="checkbox" id="consent-terms" />
+                          <span class="q-consent__cbox" aria-hidden="true"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="square"><path d="M5 12.5 L10 17.5 L19 6.5"/></svg></span>
+                          <span>Akceptuję regulamin i politykę prywatności.</span>
+                        </label>
+                      </div>
+
+                      <div class="q-consent__group">
+                        {docUmowa && (
+                          <div class="q-consent__docs">
+                            <button type="button" class="q-consent__doc" data-doc="umowa-wspolpracy">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M7 3h7l5 5v13H7zM14 3v5h5"/></svg>
+                              <span>{docUmowa.title}</span>
+                              {docUmowa.version && <span class="q-consent__ver">wersja {docUmowa.version}</span>}
+                            </button>
+                          </div>
+                        )}
+                        <label class="q-consent__check">
+                          <input type="checkbox" id="consent-agreement" />
+                          <span class="q-consent__cbox" aria-hidden="true"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="square"><path d="M5 12.5 L10 17.5 L19 6.5"/></svg></span>
+                          <span>Akceptuję umowę współpracy.</span>
+                        </label>
+                      </div>
+
+                      <p class="q-consent__hint" id="consent-hint">Zaznacz obie zgody, aby odblokować płatność.</p>
+                    </div>
+
+                    {/* Wybór płatności — najważniejsza jest jednorazowa z rabatem */}
                     <span class="caption q-pay__choose">Wybierz formę płatności</span>
 
                     {/* Jednorazowa — rabat 10% (opcja główna) */}
@@ -222,56 +272,6 @@ const fmt = (n: number) => new Intl.NumberFormat('pl-PL').format(n);
                         </span>
                       </label>
                     ) : null}
-
-                    {/* Dokumenty i zgody (clickwrap) — finalna bramka na płatność */}
-                    <div class="q-consent" id="q-consent">
-                      <span class="caption q-consent__h">Dokumenty i zgody</span>
-
-                      <div class="q-consent__group">
-                        {(docRegulamin || docPolityka) && (
-                          <div class="q-consent__docs">
-                            {docRegulamin && (
-                              <button type="button" class="q-consent__doc" data-doc="regulamin">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M7 3h7l5 5v13H7zM14 3v5h5"/></svg>
-                                <span>{docRegulamin.title}</span>
-                                {docRegulamin.version && <span class="q-consent__ver">wersja {docRegulamin.version}</span>}
-                              </button>
-                            )}
-                            {docPolityka && (
-                              <button type="button" class="q-consent__doc" data-doc="polityka-prywatnosci">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M7 3h7l5 5v13H7zM14 3v5h5"/></svg>
-                                <span>{docPolityka.title}</span>
-                                {docPolityka.version && <span class="q-consent__ver">wersja {docPolityka.version}</span>}
-                              </button>
-                            )}
-                          </div>
-                        )}
-                        <label class="q-consent__check">
-                          <input type="checkbox" id="consent-terms" />
-                          <span class="q-consent__cbox" aria-hidden="true"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="square"><path d="M5 12.5 L10 17.5 L19 6.5"/></svg></span>
-                          <span>Akceptuję regulamin i politykę prywatności.</span>
-                        </label>
-                      </div>
-
-                      <div class="q-consent__group">
-                        {docUmowa && (
-                          <div class="q-consent__docs">
-                            <button type="button" class="q-consent__doc" data-doc="umowa-wspolpracy">
-                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M7 3h7l5 5v13H7zM14 3v5h5"/></svg>
-                              <span>{docUmowa.title}</span>
-                              {docUmowa.version && <span class="q-consent__ver">wersja {docUmowa.version}</span>}
-                            </button>
-                          </div>
-                        )}
-                        <label class="q-consent__check">
-                          <input type="checkbox" id="consent-agreement" />
-                          <span class="q-consent__cbox" aria-hidden="true"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="square"><path d="M5 12.5 L10 17.5 L19 6.5"/></svg></span>
-                          <span>Akceptuję umowę współpracy.</span>
-                        </label>
-                      </div>
-
-                      <p class="q-consent__hint" id="consent-hint">Zaznacz obie zgody, aby przejść do płatności.</p>
-                    </div>
                   </>
                 )}
               </div>
@@ -614,8 +614,8 @@ const fmt = (n: number) => new Intl.NumberFormat('pl-PL').format(n);
 .q-pay__head { margin-bottom: 6px; }
 .q-pay__full {
   font-family: var(--font-heading); font-weight: 700;
-  font-size: clamp(32px, 3.4vw, 42px); color: var(--color-ink-4);
-  text-decoration: line-through; line-height: 1; margin: 12px 0 8px;
+  font-size: clamp(32px, 3.4vw, 42px); color: var(--color-ink);
+  line-height: 1; margin: 12px 0 8px;
 }
 
 .q-opt {
