@@ -23,6 +23,7 @@ try {
 
 const fullPrice: number = quoteData?.totalPrice || 0;
 const discountedPrice = Math.round(fullPrice * 0.9);
+const savings = fullPrice - discountedPrice;
 const briefCompany: string = quoteData?.brief?.company || 'Klienta';
 const briefProblem: string = quoteData?.brief?.problemDescription || '';
 // Po opłaceniu panel płatności zamienia się w potwierdzenie (endpoint i tak blokuje).
@@ -35,15 +36,15 @@ const timelineHtml = renderMarkdown(quoteData?.timelinePlan);
 const scopeHtml = renderMarkdown(quoteData?.scopePlan);
 
 // Dokumenty prawne do akceptacji (clickwrap). Publiczny endpoint, bez auth.
-type LegalDoc = { docType: string; title: string; content: string };
-let legalDocs: Record<string, { title: string; html: string }> = {};
+type LegalDoc = { docType: string; title: string; content: string; version?: string };
+let legalDocs: Record<string, { title: string; html: string; version?: string }> = {};
 if (quoteData && paymentStatus === 'unpaid') {
   try {
     const dres = await fetch(`${apiUrl}/api/documents/public`);
     if (dres.ok) {
       const dj = await dres.json();
       for (const d of (dj.documents || []) as LegalDoc[]) {
-        legalDocs[d.docType] = { title: d.title, html: renderMarkdown(d.content) };
+        legalDocs[d.docType] = { title: d.title, html: renderMarkdown(d.content), version: d.version };
       }
     }
   } catch { /* dokumenty opcjonalne — brak nie blokuje renderu strony */ }
@@ -180,15 +181,20 @@ const fmt = (n: number) => new Intl.NumberFormat('pl-PL').format(n);
                             <span class="q-addon__name">Opieka po wdrożeniu</span>
                             <span class="q-addon__price">+{fmt(quoteData.maintenancePrice)} zł/mies.</span>
                           </span>
-                          <span class="q-addon__desc">{quoteData.maintenanceDescription || 'Monitoring, utrzymanie i drobne poprawki po starcie.'} Abonament startuje dopiero po zakończeniu i oddaniu projektu — teraz nic za niego nie płacisz.</span>
+                          <span class="q-addon__lead">Twój system zostaje pod naszą ręką — działa bez przerw, jest aktualny i bezpieczny. Ty prowadzisz firmę, technologią zajmujemy się my.</span>
+                          <span class="q-addon__scope">{quoteData.maintenanceDescription || 'Monitoring, aktualizacje, kopie zapasowe i drobne poprawki po starcie.'}</span>
+                          <span class="q-addon__note">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.5"/></svg>
+                            <span>Pierwsza opłata rusza dopiero po oddaniu gotowego projektu — dziś nie płacisz za nią nic.</span>
+                          </span>
                           <span class="q-addon__cue">
                             <span class="q-addon__cue--off">
                               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="M12 5v14M5 12h14"/></svg>
-                              Zaznacz, aby dodać
+                              Dodaj do oferty
                             </span>
                             <span class="q-addon__cue--on">
                               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="square"><path d="M5 12.5 L10 17.5 L19 6.5"/></svg>
-                              Wybrane — start po wdrożeniu
+                              W ofercie — start po wdrożeniu
                             </span>
                           </span>
                         </span>
@@ -206,12 +212,14 @@ const fmt = (n: number) => new Intl.NumberFormat('pl-PL').format(n);
                               <button type="button" class="q-consent__doc" data-doc="regulamin">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M7 3h7l5 5v13H7zM14 3v5h5"/></svg>
                                 <span>{docRegulamin.title}</span>
+                                {docRegulamin.version && <span class="q-consent__ver">wersja {docRegulamin.version}</span>}
                               </button>
                             )}
                             {docPolityka && (
                               <button type="button" class="q-consent__doc" data-doc="polityka-prywatnosci">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M7 3h7l5 5v13H7zM14 3v5h5"/></svg>
                                 <span>{docPolityka.title}</span>
+                                {docPolityka.version && <span class="q-consent__ver">wersja {docPolityka.version}</span>}
                               </button>
                             )}
                           </div>
@@ -229,6 +237,7 @@ const fmt = (n: number) => new Intl.NumberFormat('pl-PL').format(n);
                             <button type="button" class="q-consent__doc" data-doc="umowa-wspolpracy">
                               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M7 3h7l5 5v13H7zM14 3v5h5"/></svg>
                               <span>{docUmowa.title}</span>
+                              {docUmowa.version && <span class="q-consent__ver">wersja {docUmowa.version}</span>}
                             </button>
                           </div>
                         )}
@@ -240,21 +249,22 @@ const fmt = (n: number) => new Intl.NumberFormat('pl-PL').format(n);
                       </div>
                     </div>
 
-                    {/* Jednorazowa — rabat 10% */}
+                    {/* Jednorazowa — rabat 10% (opcja główna) */}
                     <button type="button" data-model="100" class="payment-btn q-opt q-opt--primary" disabled>
                       <span class="q-opt__ribbon">Rabat 10%</span>
                       <h3 class="h4 q-opt__title">Płatność jednorazowa</h3>
-                      <p class="q-opt__desc">Opłacasz z góry całą kwotę i otrzymujesz gwarantowany rabat 10%.</p>
+                      <p class="q-opt__desc">Domykasz sprawę od ręki i schodzisz z ceny o 10%. Jedna płatność, pełny rabat — ruszamy z projektem bez zwłoki.</p>
                       <div class="q-opt__price q-opt__price--accent">{fmt(discountedPrice)} PLN</div>
+                      {savings > 0 && <span class="q-opt__save">Oszczędzasz {fmt(savings)} PLN</span>}
                       <span class="btn-text q-opt__cta q-opt__cta--solid">Opłać całość z rabatem</span>
                     </button>
 
-                    {/* Etapowa — 50% */}
-                    <button type="button" data-model="50" class="payment-btn q-opt" disabled>
-                      <h3 class="h4 q-opt__title">Płatność etapowa</h3>
-                      <p class="q-opt__desc">Płacisz 50% na start, resztę po zakończeniu projektu (bez rabatu).</p>
-                      <div class="q-opt__price">{fmt(fullPrice / 2)} PLN</div>
-                      <span class="caption q-opt__sub">Pierwsza rata</span>
+                    {/* Etapowa — 50% (opcja drugorzędna) */}
+                    <button type="button" data-model="50" class="payment-btn q-opt q-opt--secondary" disabled>
+                      <h3 class="h4 q-opt__title">Płatność w dwóch ratach</h3>
+                      <p class="q-opt__desc">Wolisz rozłożyć inwestycję? Płacisz połowę na start, a drugą część dopiero po odbiorze gotowego projektu.</p>
+                      <div class="q-opt__price">{fmt(Math.round(fullPrice / 2))} PLN</div>
+                      <span class="caption q-opt__sub">I rata — start prac</span>
                       <span class="btn-text q-opt__cta q-opt__cta--ghost">Opłać I ratę (50%)</span>
                     </button>
 
@@ -501,7 +511,14 @@ const fmt = (n: number) => new Intl.NumberFormat('pl-PL').format(n);
 .q-addon__top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
 .q-addon__name { font-family: var(--font-heading); font-weight: 600; font-size: 14px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-ink); }
 .q-addon__price { font-family: var(--font-mono); font-size: 13px; color: var(--color-brass-dark); white-space: nowrap; font-weight: 600; }
-.q-addon__desc { font-size: 12.5px; line-height: 1.55; color: var(--color-ink-3); }
+.q-addon__lead { font-size: 12.5px; line-height: 1.58; color: var(--color-ink-2); }
+.q-addon__scope { font-size: 12.5px; line-height: 1.55; color: var(--color-ink-3); white-space: pre-line; }
+.q-addon__note {
+  display: flex; align-items: flex-start; gap: 7px; margin-top: 2px;
+  padding-top: 10px; border-top: 1px solid color-mix(in srgb, var(--color-brass), transparent 78%);
+  font-size: 11.5px; line-height: 1.5; color: var(--color-brass-dark);
+}
+.q-addon__note svg { flex-shrink: 0; margin-top: 1px; }
 .q-addon__cue { margin-top: 3px; font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; }
 .q-addon__cue--off, .q-addon__cue--on { display: inline-flex; align-items: center; gap: 6px; }
 .q-addon__cue--on { display: none; color: var(--color-ink-3); }
@@ -526,6 +543,13 @@ const fmt = (n: number) => new Intl.NumberFormat('pl-PL').format(n);
 }
 .q-consent__doc:hover { color: var(--color-ink); }
 .q-consent__doc svg { flex-shrink: 0; color: var(--color-ink-4); }
+.q-consent__ver {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  color: var(--color-ink-4);
+  white-space: nowrap;
+}
 .q-consent__empty { font-size: 12px; color: var(--color-ink-4); margin: 0; }
 .q-consent__check { display: flex; gap: 11px; align-items: flex-start; cursor: pointer; }
 .q-consent__check input { position: absolute; opacity: 0; width: 0; height: 0; }
@@ -613,7 +637,17 @@ const fmt = (n: number) => new Intl.NumberFormat('pl-PL').format(n);
   font-size: clamp(24px, 2.6vw, 30px); color: var(--color-ink); line-height: 1; margin-bottom: 4px;
 }
 .q-opt__price--accent { color: var(--color-brass-dark); }
+.q-opt__save {
+  display: block; margin: 3px 0 18px;
+  font-family: var(--font-mono); font-size: 11.5px; font-weight: 600;
+  letter-spacing: 0.06em; color: var(--color-brass-dark);
+}
 .q-opt__sub { display: block; margin-bottom: 18px; }
+
+/* opcja drugorzędna — celowo wyciszona względem głównej (rabat 10%) */
+.q-opt--secondary { background: transparent; }
+.q-opt--secondary .q-opt__title { color: var(--color-ink-2); }
+.q-opt--secondary .q-opt__price { font-size: clamp(20px, 2.1vw, 25px); color: var(--color-ink-2); }
 
 /* panel po opłaceniu — zamiast przycisków płatności */
 .q-paid {
