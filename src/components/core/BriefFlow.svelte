@@ -776,9 +776,9 @@
 
 .nb-input{width:100%;background:var(--paper);border:1px solid var(--paper-edge);padding:14px 16px;font-family:var(--font-sans);font-size:16px;color:var(--ink);transition:border-color var(--dur-fast),box-shadow var(--dur-fast);}
 .nb-input::placeholder{color:var(--ink-4);}
-.nb-input:focus{outline:none;border-color:var(--brass);box-shadow:0 0 0 3px rgba(184,137,62,0.12);}
+.nb-input:focus{outline:none;border-color:var(--brass);box-shadow:inset 0 0 0 1px var(--brass);}
 .nb-input.is-invalid{border-color:var(--danger);}
-.nb-input.is-invalid:focus{border-color:var(--danger);box-shadow:0 0 0 3px rgba(180,40,40,0.10);}
+.nb-input.is-invalid:focus{border-color:var(--danger);box-shadow:inset 0 0 0 1px var(--danger);}
 .nb-field__error{margin-top:7px;font-size:12.5px;line-height:1.4;color:var(--danger);}
 .nb-input--sm{padding:9px 12px;font-size:14px;}
 .nb-input--narrow{max-width:280px;}
@@ -787,7 +787,7 @@
 .nb-select{position:relative;}
 .nb-select::after{content:"";position:absolute;right:18px;top:50%;width:8px;height:8px;border-right:1.5px solid var(--ink-3);border-bottom:1.5px solid var(--ink-3);transform:translateY(-70%) rotate(45deg);pointer-events:none;}
 .nb-select select{width:100%;appearance:none;-webkit-appearance:none;background:var(--paper);border:1px solid var(--paper-edge);padding:14px 16px;font-family:var(--font-sans);font-size:16px;color:var(--ink);cursor:pointer;transition:border-color var(--dur-fast);}
-.nb-select select:focus{outline:none;border-color:var(--brass);}
+.nb-select select:focus{outline:none;border-color:var(--brass);box-shadow:inset 0 0 0 1px var(--brass);}
 
 .nb-brief__meta{display:flex;justify-content:space-between;align-items:center;margin-top:10px;gap:12px;}
 .nb-brief__meta .mono{font-size:11px;letter-spacing:0.08em;color:var(--ink-3);}
@@ -854,7 +854,7 @@
    mosiężną ramkę (czytelny jako „do zaznaczenia"), a stan zaznaczony wyróżnia się jasno. */
 .nb-check{display:flex;align-items:flex-start;gap:13px;padding:13px 15px;border:1px solid color-mix(in srgb, var(--brass), transparent 72%);background:var(--paper);cursor:pointer;font-size:14px;color:var(--ink-2);line-height:1.5;transition:border-color var(--dur-fast),background var(--dur-fast);}
 .nb-check:hover{border-color:color-mix(in srgb, var(--brass), transparent 35%);}
-.nb-check.sel{border-color:var(--brass);background:color-mix(in srgb, var(--brass), transparent 92%);}
+.nb-check.sel{border-color:var(--brass);background:color-mix(in srgb, var(--brass), transparent 92%);box-shadow:inset 0 0 0 1px var(--brass);}
 
 .nb-check input{position:absolute;opacity:0;width:0;height:0;}
 .nb-check__box{flex-shrink:0;width:20px;height:20px;border:1px solid color-mix(in srgb, var(--brass), transparent 40%);background:var(--paper);display:flex;align-items:center;justify-content:center;color:transparent;margin-top:1px;transition:all var(--dur-fast);}
