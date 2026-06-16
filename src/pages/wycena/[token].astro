@@ -34,6 +34,25 @@ const introHtml = renderMarkdown(quoteData?.intro);
 const timelineHtml = renderMarkdown(quoteData?.timelinePlan);
 const scopeHtml = renderMarkdown(quoteData?.scopePlan);
 
+// Dokumenty prawne do akceptacji (clickwrap). Publiczny endpoint, bez auth.
+type LegalDoc = { docType: string; title: string; content: string };
+let legalDocs: Record<string, { title: string; html: string }> = {};
+if (quoteData && paymentStatus === 'unpaid') {
+  try {
+    const dres = await fetch(`${apiUrl}/api/documents/public`);
+    if (dres.ok) {
+      const dj = await dres.json();
+      for (const d of (dj.documents || []) as LegalDoc[]) {
+        legalDocs[d.docType] = { title: d.title, html: renderMarkdown(d.content) };
+      }
+    }
+  } catch { /* dokumenty opcjonalne — brak nie blokuje renderu strony */ }
+}
+const docOrder = ['umowa-wspolpracy', 'regulamin', 'polityka-prywatnosci'] as const;
+const consentDocs = docOrder
+  .filter((t) => legalDocs[t])
+  .map((t) => ({ type: t, title: legalDocs[t].title, html: legalDocs[t].html }));
+
 const fmt = (n: number) => new Intl.NumberFormat('pl-PL').format(n);
 ---
 
@@ -103,26 +122,6 @@ const fmt = (n: number) => new Intl.NumberFormat('pl-PL').format(n);
                 </section>
               )}
 
-              {quoteData.maintenancePrice ? (
-                <section class="q-maint">
-                  <span class="eyebrow">Opcjonalnie</span>
-                  <h2 class="h4 q-maint__title">Wsparcie i utrzymanie</h2>
-                  <div class="q-maint__price">
-                    {fmt(quoteData.maintenancePrice)} <span class="q-maint__cur">PLN / miesiąc</span>
-                  </div>
-                  {quoteData.maintenanceDescription && (
-                    <p class="q-maint__desc">{quoteData.maintenanceDescription}</p>
-                  )}
-                  <label class="q-maint__opt">
-                    <input type="checkbox" id="maintenance-checkbox" checked={quoteData.clientSelectedMaintenance} />
-                    <span>
-                      <strong>Tak, chcę dodać pakiet utrzymania</strong>
-                      Płatność za utrzymanie zostanie uruchomiona po wdrożeniu projektu, w oddzielnym procesie.
-                    </span>
-                  </label>
-                </section>
-              ) : null}
-
               <div class="q-change">
                 <p>Masz pytania lub chciałbyś zmodyfikować zakres tej wyceny?</p>
                 <button id="open-change-modal" class="q-change__btn" type="button">
@@ -165,8 +164,52 @@ const fmt = (n: number) => new Intl.NumberFormat('pl-PL').format(n);
                   </div>
                 ) : (
                   <>
+                    {/* Opcjonalny add-on: opieka po wdrożeniu — przy decyzji o płatności */}
+                    {quoteData.maintenancePrice ? (
+                      <label class="q-addon">
+                        <input type="checkbox" id="maintenance-checkbox" checked={quoteData.clientSelectedMaintenance} />
+                        <span class="q-addon__box" aria-hidden="true">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="square"><path d="M5 12.5 L10 17.5 L19 6.5"/></svg>
+                        </span>
+                        <span class="q-addon__body">
+                          <span class="q-addon__top">
+                            <span class="q-addon__name">Opieka po wdrożeniu</span>
+                            <span class="q-addon__price">+{fmt(quoteData.maintenancePrice)} zł/mies.</span>
+                          </span>
+                          <span class="q-addon__desc">{quoteData.maintenanceDescription || 'Monitoring, utrzymanie i drobne poprawki po starcie.'} Płatność uruchamiamy osobno po wdrożeniu.</span>
+                        </span>
+                      </label>
+                    ) : null}
+
+                    {/* Dokumenty i zgody (clickwrap) — bramka na płatność */}
+                    <div class="q-consent" id="q-consent">
+                      <span class="caption q-consent__h">Dokumenty i zgody</span>
+                      {consentDocs.length > 0 ? (
+                        <div class="q-consent__docs">
+                          {consentDocs.map((d) => (
+                            <button type="button" class="q-consent__doc" data-doc={d.type}>
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M7 3h7l5 5v13H7zM14 3v5h5"/></svg>
+                              <span>{d.title}</span>
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <p class="q-consent__empty">Dokumenty pojawią się tutaj po dodaniu w panelu.</p>
+                      )}
+                      <label class="q-consent__check">
+                        <input type="checkbox" id="consent-docs" />
+                        <span class="q-consent__cbox" aria-hidden="true"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="square"><path d="M5 12.5 L10 17.5 L19 6.5"/></svg></span>
+                        <span>Zapoznałem się i akceptuję umowę współpracy, regulamin oraz politykę prywatności.</span>
+                      </label>
+                      <label class="q-consent__check">
+                        <input type="checkbox" id="consent-withdrawal" />
+                        <span class="q-consent__cbox" aria-hidden="true"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="square"><path d="M5 12.5 L10 17.5 L19 6.5"/></svg></span>
+                        <span>Zamawiam wykonanie spersonalizowanego rozwiązania według mojej specyfikacji i żądam rozpoczęcia prac. Przyjmuję do wiadomości, że po rozpoczęciu świadczenia nie przysługuje mi prawo odstąpienia w terminie 14 dni.</span>
+                      </label>
+                    </div>
+
                     {/* Jednorazowa — rabat 10% */}
-                    <button type="button" data-model="100" class="payment-btn q-opt q-opt--primary">
+                    <button type="button" data-model="100" class="payment-btn q-opt q-opt--primary" disabled>
                       <span class="q-opt__ribbon">Rabat 10%</span>
                       <h3 class="h4 q-opt__title">Płatność jednorazowa</h3>
                       <p class="q-opt__desc">Opłacasz z góry całą kwotę i otrzymujesz gwarantowany rabat 10%.</p>
@@ -175,17 +218,32 @@ const fmt = (n: number) => new Intl.NumberFormat('pl-PL').format(n);
                     </button>
 
                     {/* Etapowa — 50% */}
-                    <button type="button" data-model="50" class="payment-btn q-opt">
+                    <button type="button" data-model="50" class="payment-btn q-opt" disabled>
                       <h3 class="h4 q-opt__title">Płatność etapowa</h3>
                       <p class="q-opt__desc">Płacisz 50% na start, resztę po zakończeniu projektu (bez rabatu).</p>
                       <div class="q-opt__price">{fmt(fullPrice / 2)} PLN</div>
                       <span class="caption q-opt__sub">Pierwsza rata</span>
                       <span class="btn-text q-opt__cta q-opt__cta--ghost">Opłać I ratę (50%)</span>
                     </button>
+
+                    <p class="q-consent__hint" id="consent-hint">Zaznacz obie zgody powyżej, aby odblokować płatność.</p>
                   </>
                 )}
               </div>
             </aside>
+
+            {/* Modale dokumentów prawnych */}
+            {consentDocs.map((d) => (
+              <div class="q-docmodal" id={`docmodal-${d.type}`} data-docmodal={d.type}>
+                <div class="q-docmodal__box">
+                  <button type="button" class="q-docmodal__close" data-close-doc aria-label="Zamknij">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M6 18L18 6M6 6l12 12"/></svg>
+                  </button>
+                  <h3 class="h3 q-docmodal__title">{d.title}</h3>
+                  <div class="q-docmodal__body rt" set:html={d.html} />
+                </div>
+              </div>
+            ))}
 
           </div>
         </div>
@@ -382,34 +440,75 @@ const fmt = (n: number) => new Intl.NumberFormat('pl-PL').format(n);
 }
 .rt :global(tbody tr):hover { background: var(--color-paper-3); }
 
-/* ── maintenance (standalone card) ── */
-.q-maint {
-  margin-bottom: clamp(36px, 4vw, 56px);
-  padding: clamp(24px, 3vw, 36px);
+/* ── add-on opieki (w kolumnie płatności) ── */
+.q-addon {
+  display: flex; gap: 12px; align-items: flex-start; cursor: pointer;
+  border: 1px solid var(--color-paper-edge); border-radius: var(--r-card);
+  padding: 16px 18px; background: var(--color-paper);
+  transition: border-color var(--dur-base) var(--ease-out), background var(--dur-base) var(--ease-out);
+}
+.q-addon:hover { border-color: var(--color-brass); }
+.q-addon input { position: absolute; opacity: 0; width: 0; height: 0; }
+.q-addon__box {
+  flex-shrink: 0; width: 22px; height: 22px; margin-top: 1px; border-radius: 6px;
+  border: 1px solid var(--color-paper-edge); display: flex; align-items: center; justify-content: center;
+  color: transparent; transition: all var(--dur-fast);
+}
+.q-addon input:checked + .q-addon__box { background: var(--color-brass); border-color: var(--color-brass); color: var(--color-void); }
+.q-addon input:checked ~ .q-addon__body { color: var(--color-ink); }
+.q-addon__body { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.q-addon__top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.q-addon__name { font-family: var(--font-heading); font-weight: 600; font-size: 14px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-ink); }
+.q-addon__price { font-family: var(--font-mono); font-size: 13px; color: var(--color-brass-dark); white-space: nowrap; }
+.q-addon__desc { font-size: 12.5px; line-height: 1.55; color: var(--color-ink-3); }
+
+/* ── dokumenty i zgody (clickwrap) ── */
+.q-consent {
+  border: 1px solid var(--color-paper-edge); border-radius: var(--r-card);
+  padding: 16px 18px; display: flex; flex-direction: column; gap: 12px;
   background: var(--color-paper-2);
-  border: 1px solid var(--color-hair-ink);
-  border-radius: var(--r-card);
-  box-shadow: var(--shadow-card);
 }
-.q-maint__title { margin: 14px 0 0; color: var(--color-ink); }
-.q-maint__price {
-  font-family: var(--font-heading); font-weight: 700;
-  font-size: clamp(26px, 3vw, 34px); color: var(--color-brass-dark);
-  margin: 16px 0 0; line-height: 1;
+.q-consent__h { display: block; color: var(--color-ink-3); }
+.q-consent__docs { display: flex; flex-direction: column; gap: 6px; }
+.q-consent__doc {
+  display: inline-flex; align-items: center; gap: 9px; text-align: left;
+  background: none; border: none; cursor: pointer; padding: 4px 0;
+  font-size: 13px; color: var(--color-brass-dark); text-decoration: underline; text-underline-offset: 3px;
+  transition: color var(--dur-fast);
 }
-.q-maint__cur { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-ink-3); margin-left: 8px; }
-.q-maint__desc { color: var(--color-ink-2); line-height: 1.65; margin: 16px 0 0; white-space: pre-wrap; }
-.q-maint__opt {
-  display: flex; gap: 14px; align-items: flex-start; cursor: pointer;
-  margin-top: 22px; padding: 16px;
-  border: 1px solid var(--color-hair-ink);
-  border-radius: var(--r-control);
-  transition: border-color var(--dur-base) var(--ease-out);
+.q-consent__doc:hover { color: var(--color-ink); }
+.q-consent__doc svg { flex-shrink: 0; color: var(--color-ink-4); }
+.q-consent__empty { font-size: 12px; color: var(--color-ink-4); margin: 0; }
+.q-consent__check { display: flex; gap: 11px; align-items: flex-start; cursor: pointer; }
+.q-consent__check input { position: absolute; opacity: 0; width: 0; height: 0; }
+.q-consent__cbox {
+  flex-shrink: 0; width: 20px; height: 20px; margin-top: 1px; border-radius: 5px;
+  border: 1px solid var(--color-paper-edge); display: flex; align-items: center; justify-content: center;
+  color: transparent; background: var(--color-paper); transition: all var(--dur-fast);
 }
-.q-maint__opt:hover { border-color: var(--color-brass); }
-.q-maint__opt input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--color-brass); flex-shrink: 0; }
-.q-maint__opt span { font-size: 14px; line-height: 1.6; color: var(--color-ink-3); }
-.q-maint__opt strong { display: block; color: var(--color-ink); font-weight: 600; margin-bottom: 4px; }
+.q-consent__check input:checked + .q-consent__cbox { background: var(--color-brass); border-color: var(--color-brass); color: var(--color-void); }
+.q-consent__check span:last-child { font-size: 12.5px; line-height: 1.55; color: var(--color-ink-2); }
+.q-consent__hint { margin: 0; text-align: center; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.04em; color: var(--color-ink-4); }
+
+/* ── modal dokumentu prawnego ── */
+.q-docmodal {
+  position: fixed; inset: 0; z-index: 1200; display: none;
+  align-items: center; justify-content: center; padding: 20px;
+  background: rgba(8, 11, 16, 0.62); backdrop-filter: blur(4px);
+}
+.q-docmodal.is-open { display: flex; }
+.q-docmodal__box {
+  position: relative; background: var(--color-paper); border-radius: var(--r-card);
+  max-width: 760px; width: 100%; max-height: 86vh; overflow-y: auto;
+  padding: clamp(28px, 4vw, 48px); box-shadow: var(--shadow-lift);
+}
+.q-docmodal__close {
+  position: absolute; top: 16px; right: 16px; background: none; border: none; cursor: pointer;
+  color: var(--color-ink-3); padding: 6px; transition: color var(--dur-fast);
+}
+.q-docmodal__close:hover { color: var(--color-ink); }
+.q-docmodal__title { margin: 0 0 20px; color: var(--color-ink); }
+.q-docmodal__body { color: var(--color-ink-2); line-height: 1.7; font-size: 15px; }
 
 /* ── change request ── */
 .q-change { padding-top: clamp(28px, 3vw, 40px); border-top: 1px solid var(--color-hair-ink); }
@@ -547,7 +646,6 @@ const fmt = (n: number) => new Intl.NumberFormat('pl-PL').format(n);
   .q-hero { padding-top: clamp(100px, 15vh, 140px); padding-bottom: clamp(52px, 11vw, 88px); }
   .q-h { gap: 10px; font-size: 1rem; }
   .q-opt { padding: 22px; }
-  .q-maint { padding: 22px; }
   .q-modal__box { padding: 24px; }
 }
 
@@ -565,25 +663,50 @@ document.addEventListener('DOMContentLoaded', () => {
   const token = container.dataset.token;
   const apiUrl = container.dataset.api;
 
+  // ── Bramka zgód (clickwrap) ──
+  const payBtns = container.querySelectorAll('.payment-btn');
+  const cDocs = document.getElementById('consent-docs');
+  const cWith = document.getElementById('consent-withdrawal');
+  const hint = document.getElementById('consent-hint');
+  const gateOk = () => !!(cDocs && cDocs.checked && cWith && cWith.checked);
+  function applyGate() {
+    const ok = gateOk();
+    payBtns.forEach(b => { b.disabled = !ok; });
+    if (hint) hint.style.display = ok ? 'none' : '';
+  }
+  cDocs?.addEventListener('change', applyGate);
+  cWith?.addEventListener('change', applyGate);
+  applyGate();
+
+  // ── Modale dokumentów ──
+  document.querySelectorAll('.q-consent__doc').forEach(b => {
+    b.addEventListener('click', () => document.getElementById('docmodal-' + b.dataset.doc)?.classList.add('is-open'));
+  });
+  document.querySelectorAll('.q-docmodal').forEach(m => {
+    m.addEventListener('click', (e) => { if (e.target === m) m.classList.remove('is-open'); });
+    m.querySelector('[data-close-doc]')?.addEventListener('click', () => m.classList.remove('is-open'));
+  });
+
   // ── Płatności ──
-  container.querySelectorAll('.payment-btn').forEach(btn => {
+  payBtns.forEach(btn => {
     btn.addEventListener('click', async () => {
+      if (!gateOk()) { applyGate(); return; }
       const btnText = btn.querySelector('.btn-text');
       const orig = btnText.innerHTML;
       btnText.innerHTML = 'Przetwarzanie&hellip;';
-      btn.disabled = true;
+      payBtns.forEach(b => { b.disabled = true; });
       try {
         const res = await fetch(`${apiUrl}/api/quotes/checkout/${token}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ paymentModel: btn.dataset.model })
+          body: JSON.stringify({ paymentModel: btn.dataset.model, acceptDocuments: true, acceptWithdrawal: true })
         });
         const data = await res.json();
         if (data.url) { window.location.href = data.url; return; }
         alert('Błąd: ' + (data.error || 'Spróbuj ponownie.'));
       } catch { alert('Błąd połączenia z serwerem.'); }
       btnText.innerHTML = orig;
-      btn.disabled = false;
+      applyGate();
     });
   });
 
