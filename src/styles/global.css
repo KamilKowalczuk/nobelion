@@ -82,6 +82,10 @@
 
   /* Radius */
   --radius-0:0px; --radius-1:2px; --radius-2:4px; --radius-pill:999px;
+  --radius-card: 14px;
+  --radius-shell: 18px;
+  --radius-control: 8px;
+  --radius-inset: 12px;
 
   /* Easing & Duration */
   --ease-out: cubic-bezier(0.16,1,0.3,1);
