@@ -4,7 +4,7 @@ import { renderMarkdown } from '../lib/markdown';
 
 export const prerender = false;
 
-const apiUrl = import.meta.env.PUBLIC_PAYLOAD_URL || 'http://localhost:3000';
+const apiUrl = (process.env.PAYLOAD_API_URL || import.meta.env.PAYLOAD_API_URL || 'http://localhost:3001').replace(/\/$/, '');
 let title = 'Polityka prywatności';
 let htmlContent = '<p>Brak dostępnego dokumentu lub błąd ładowania.</p>';
 

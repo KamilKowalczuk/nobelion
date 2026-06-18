@@ -14,15 +14,36 @@ const { title } = Astro.props;
   <ScrollChoreography client:idle />
   
   <div class="main-shell legal-shell">
-    <div class="wrap mx-auto legal-container">
-      <a href="/" class="nb-btn nb-btn--ghost-light nb-btn--md btn-back">
-        <span class="nb-btn__label">← Wróć na stronę główną</span>
-      </a>
-      <h1 class="h1 legal-title">{title}</h1>
-      <div class="rt">
-        <slot />
+    {/* ───────── ONYX HERO BAND ───────── */}
+    <section class="onyx q-hero">
+      <div class="q-hero__bg" aria-hidden="true">
+        <div class="q-hero__glow"></div>
+        <div class="q-hero__grid"></div>
       </div>
-    </div>
+      <div class="wrap q-hero__inner">
+        <div class="q-hero__eyebrow">
+          <span class="q-hero__dot"></span>
+          <span class="eyebrow">Dokument Prawny</span>
+        </div>
+        <h1 class="q-hero__title">
+          {title}
+        </h1>
+        <div class="q-hero__actions">
+          <a href="/" class="nb-btn nb-btn--ghost nb-btn--md" style="margin-top: 32px;">
+            <span class="nb-btn__label">← Wróć na stronę główną</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    {/* ───────── LIGHT BODY (overlapping panel) ───────── */}
+    <section class="section q-body nb-panel bg-paper">
+      <div class="wrap q-body__inner">
+        <div class="rt">
+          <slot />
+        </div>
+      </div>
+    </section>
   </div>
 
   <Footer />
@@ -30,25 +51,60 @@ const { title } = Astro.props;
 
 <style>
   .legal-shell {
+    position: relative;
+    z-index: 2; /* overlap the footer */
     background-color: var(--color-paper);
-    min-height: 100vh;
     border-bottom-left-radius: var(--r-shell, 24px);
     border-bottom-right-radius: var(--r-shell, 24px);
     box-shadow: 0 10px 40px -10px rgba(0,0,0,0.08);
-    position: relative;
-    z-index: 2; /* overlap the footer */
   }
-  .legal-container {
+
+  /* ── ONYX HERO (adapted from wycena) ── */
+  .q-hero {
+    position: relative; overflow: hidden;
+    padding: clamp(140px, 16vw, 200px) 0 clamp(80px, 12vw, 150px);
+  }
+  .q-hero__bg {
+    position: absolute; inset: 0; background: var(--color-onyx); z-index: 1;
+  }
+  .q-hero__glow {
+    position: absolute; width: 60%; height: 60%; top: 0; left: 20%;
+    background: radial-gradient(circle, var(--color-brass-glow) 0%, transparent 60%);
+    opacity: 0.15; pointer-events: none;
+  }
+  .q-hero__grid {
+    position: absolute; inset: 0; pointer-events: none; opacity: 0.25;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, #000 30%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, #000 30%, transparent 75%);
+  }
+  .q-hero__inner { position: relative; z-index: 2; }
+  .q-hero__eyebrow { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 26px; }
+  .q-hero__dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--color-brass-bright);
+    box-shadow: 0 0 12px 1px var(--color-brass-glow);
+    animation: q-pulse 2.6s cubic-bezier(0.65,0,0.35,1) infinite;
+  }
+  @keyframes q-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+  .q-hero__title {
+    font-family: var(--font-heading); font-weight: 700; text-transform: uppercase;
+    line-height: 1.04; letter-spacing: 0.04em; color: var(--color-silver);
+    margin: 0; font-size: clamp(28px, 5vw, 68px); max-width: 16ch;
+    overflow-wrap: break-word; word-break: break-word;
+  }
+
+  /* ── LIGHT BODY ── */
+  .q-body { 
+    background: var(--color-paper); 
+    padding-top: clamp(56px, 7vw, 96px); 
+    padding-bottom: clamp(80px, 10vw, 120px);
+  }
+  .q-body__inner {
     max-width: 800px;
-    padding: clamp(120px, 15vw, 160px) 0 clamp(80px, 10vw, 120px);
-  }
-  .btn-back {
-    margin-bottom: 40px;
-    border-color: var(--color-hair-ink);
-    color: var(--color-ink-2);
-  }
-  .legal-title {
-    margin-bottom: 48px;
-    color: var(--color-ink);
+    margin: 0 auto;
   }
 </style>
