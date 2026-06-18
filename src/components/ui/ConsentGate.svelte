@@ -8,21 +8,25 @@
     termsAccepted = $bindable(false),
     agreementAccepted = $bindable(false),
     isFlash = false,
+    showAgreement = true,
+    errorMessage = "Zaznacz obie zgody, aby odblokować płatność.",
     openDoc
   } = $props<{
     docRegulamin?: LegalDoc;
     docPolityka?: LegalDoc;
     docUmowa?: LegalDoc;
     termsAccepted: boolean;
-    agreementAccepted: boolean;
+    agreementAccepted?: boolean;
     isFlash?: boolean;
+    showAgreement?: boolean;
+    errorMessage?: string;
     openDoc: (doc: LegalDoc) => void;
   }>();
 
-  let isGateOk = $derived(termsAccepted && agreementAccepted);
+  let isGateOk = $derived(termsAccepted && (showAgreement ? agreementAccepted : true));
 </script>
 
-<div class="border border-paper-edge rounded-card p-[16px_18px] flex flex-col gap-[12px] bg-paper-2" class:animate-[q-flash_1.1s_cubic-bezier(0.16,1,0.3,1)]={isFlash}>
+<div class="border border-paper-edge rounded-[24px] p-[20px_22px] flex flex-col gap-[14px] bg-paper-2" class:animate-[q-flash_1.1s_cubic-bezier(0.16,1,0.3,1)]={isFlash}>
   <span class="block text-ink-3 caption">Dokumenty i zgody</span>
 
   <!-- Regulamin + Polityka -->
@@ -49,16 +53,17 @@
         {/if}
       </div>
     {/if}
-    <label class="flex gap-[11px] items-start cursor-pointer group/check">
+    <label class="flex gap-[12px] items-start cursor-pointer group/check">
       <input type="checkbox" class="absolute opacity-0 w-0 h-0 peer" bind:checked={termsAccepted} />
-      <span class="shrink-0 w-[20px] h-[20px] mt-[1px] rounded-[6px] border border-[color-mix(in_srgb,var(--color-brass),transparent_40%)] flex items-center justify-center text-transparent bg-paper transition-all duration-[180ms] group-hover/check:border-brass peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-brass peer-checked:bg-brass peer-checked:border-brass peer-checked:text-void" aria-hidden="true">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="square"><path d="M5 12.5 L10 17.5 L19 6.5"/></svg>
+      <span class="shrink-0 w-[22px] h-[22px] mt-[1px] rounded-full border-[1.5px] border-[color-mix(in_srgb,var(--color-brass),transparent_40%)] flex items-center justify-center text-transparent bg-paper transition-all duration-[180ms] group-hover/check:border-brass peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-brass peer-checked:bg-brass peer-checked:border-brass peer-checked:text-void" aria-hidden="true">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 L10 17.5 L19 6.5"/></svg>
       </span>
-      <span class="text-[12.5px] leading-[1.55] text-ink-2">Akceptuję regulamin i politykę prywatności.</span>
+      <span class="text-[13px] leading-[1.6] text-ink-2 mt-[1px]">Akceptuję regulamin i politykę prywatności.</span>
     </label>
   </div>
 
   <!-- Umowa -->
+  {#if showAgreement}
   <div class="flex flex-col gap-[8px]">
     {#if docUmowa}
       <div class="flex flex-col gap-[6px]">
@@ -71,17 +76,18 @@
         </button>
       </div>
     {/if}
-    <label class="flex gap-[11px] items-start cursor-pointer group/check">
+    <label class="flex gap-[12px] items-start cursor-pointer group/check">
       <input type="checkbox" class="absolute opacity-0 w-0 h-0 peer" bind:checked={agreementAccepted} />
-      <span class="shrink-0 w-[20px] h-[20px] mt-[1px] rounded-[6px] border border-[color-mix(in_srgb,var(--color-brass),transparent_40%)] flex items-center justify-center text-transparent bg-paper transition-all duration-[180ms] group-hover/check:border-brass peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-brass peer-checked:bg-brass peer-checked:border-brass peer-checked:text-void" aria-hidden="true">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="square"><path d="M5 12.5 L10 17.5 L19 6.5"/></svg>
+      <span class="shrink-0 w-[22px] h-[22px] mt-[1px] rounded-full border-[1.5px] border-[color-mix(in_srgb,var(--color-brass),transparent_40%)] flex items-center justify-center text-transparent bg-paper transition-all duration-[180ms] group-hover/check:border-brass peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-brass peer-checked:bg-brass peer-checked:border-brass peer-checked:text-void" aria-hidden="true">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 L10 17.5 L19 6.5"/></svg>
       </span>
-      <span class="text-[12.5px] leading-[1.55] text-ink-2">Akceptuję umowę współpracy.</span>
+      <span class="text-[13px] leading-[1.6] text-ink-2 mt-[1px]">Akceptuję umowę współpracy.</span>
     </label>
   </div>
+  {/if}
 
   {#if !isGateOk}
-    <p class="m-0 text-center font-mono text-[11px] tracking-[0.04em] text-ink-4">Zaznacz obie zgody, aby odblokować płatność.</p>
+    <p class="m-[4px_0_0] text-center font-mono text-[11px] tracking-[0.04em] text-ink-4">{errorMessage}</p>
   {/if}
 </div>
 

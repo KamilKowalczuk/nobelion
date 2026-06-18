@@ -1,0 +1,102 @@
+---
+const isHome = Astro.url.pathname === '/';
+const sec = (id: string) => (isHome ? `#${id}` : `/#${id}`);
+const homeHref = isHome ? '#hero' : '/';
+---
+
+<header id="site-header" class="fixed top-0 left-0 right-0 z-[1000] transition-[background,box-shadow,border-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] border-b border-transparent [&.is-solid]:bg-[#F7F4ED]/82 [&.is-solid]:backdrop-blur-[14px] [&.is-solid]:border-ink/10 [&.is-solid]:shadow-[0_1px_0_rgba(21,23,29,0.02)] group motion-reduce:transition-none">
+    <div class="flex items-center justify-between h-[72px] wrap">
+
+        <a
+            id="header-logo"
+            href={homeHref}
+            class="flex items-center gap-[12px] no-underline"
+            aria-label="Nobelion — wróć na górę strony"
+        >
+            <img src="/logo-icon.svg" alt="" aria-hidden="true" class="w-[38px] h-[38px] object-contain" width="38" height="38" />
+            <span class="font-heading font-bold text-[21px] tracking-[0.18em] uppercase text-silver transition-colors duration-300 group-[.is-solid]:text-ink">NOBELION</span>
+        </a>
+
+        <nav class="hidden max-[860px]:hidden md:flex items-center gap-[34px]" aria-label="Główna nawigacja">
+            <a href={sec('oferta')} class="relative py-[6px] font-mono text-[13px] tracking-[0.04em] text-silver-soft transition-colors duration-[180ms] no-underline hover:text-white after:content-[''] after:absolute after:left-0 after:bottom-0 after:h-[1px] after:w-0 after:bg-brass-bright after:transition-[width] after:duration-300 after:ease-[cubic-bezier(0.16,1,0.3,1)] hover:after:w-full group-[.is-solid]:text-ink-2 group-[.is-solid]:hover:text-brass group-[.is-solid]:after:bg-brass motion-reduce:after:transition-none" data-section="oferta">OFERTA</a>
+            <a href={sec('wdrozenia')} class="relative py-[6px] font-mono text-[13px] tracking-[0.04em] text-silver-soft transition-colors duration-[180ms] no-underline hover:text-white after:content-[''] after:absolute after:left-0 after:bottom-0 after:h-[1px] after:w-0 after:bg-brass-bright after:transition-[width] after:duration-300 after:ease-[cubic-bezier(0.16,1,0.3,1)] hover:after:w-full group-[.is-solid]:text-ink-2 group-[.is-solid]:hover:text-brass group-[.is-solid]:after:bg-brass motion-reduce:after:transition-none" data-section="wdrozenia">WDROŻENIA</a>
+            <a href={sec('proces')} class="relative py-[6px] font-mono text-[13px] tracking-[0.04em] text-silver-soft transition-colors duration-[180ms] no-underline hover:text-white after:content-[''] after:absolute after:left-0 after:bottom-0 after:h-[1px] after:w-0 after:bg-brass-bright after:transition-[width] after:duration-300 after:ease-[cubic-bezier(0.16,1,0.3,1)] hover:after:w-full group-[.is-solid]:text-ink-2 group-[.is-solid]:hover:text-brass group-[.is-solid]:after:bg-brass motion-reduce:after:transition-none" data-section="proces">PROCES</a>
+            <a href={sec('bezpieczenstwo')} class="relative py-[6px] font-mono text-[13px] tracking-[0.04em] text-silver-soft transition-colors duration-[180ms] no-underline hover:text-white after:content-[''] after:absolute after:left-0 after:bottom-0 after:h-[1px] after:w-0 after:bg-brass-bright after:transition-[width] after:duration-300 after:ease-[cubic-bezier(0.16,1,0.3,1)] hover:after:w-full group-[.is-solid]:text-ink-2 group-[.is-solid]:hover:text-brass group-[.is-solid]:after:bg-brass motion-reduce:after:transition-none" data-section="bezpieczenstwo">BEZPIECZEŃSTWO</a>
+            <a href={sec('faq')} class="relative py-[6px] font-mono text-[13px] tracking-[0.04em] text-silver-soft transition-colors duration-[180ms] no-underline hover:text-white after:content-[''] after:absolute after:left-0 after:bottom-0 after:h-[1px] after:w-0 after:bg-brass-bright after:transition-[width] after:duration-300 after:ease-[cubic-bezier(0.16,1,0.3,1)] hover:after:w-full group-[.is-solid]:text-ink-2 group-[.is-solid]:hover:text-brass group-[.is-solid]:after:bg-brass motion-reduce:after:transition-none" data-section="faq">FAQ</a>
+        </nav>
+
+        <div class="flex items-center gap-[14px]">
+            <a href={sec('brief')} class="hidden max-[860px]:hidden md:inline-flex items-center gap-[9px] font-mono text-[12px] tracking-[0.12em] uppercase text-void bg-brass-bright py-[11px] px-[18px] transition-[background,box-shadow] duration-[180ms] no-underline rounded-[9px] hover:bg-brass-light hover:shadow-[0_12px_32px_-10px_var(--color-brass-glow)] group-[.is-solid]:bg-ink group-[.is-solid]:text-paper group-[.is-solid]:hover:bg-brass group-[.is-solid]:hover:text-void group-hover/btn:translate-x-1 nav-cta group/btn">
+                <span>WYPEŁNIJ BRIEF</span>
+                <svg class="inline-flex transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/btn:translate-x-1" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="square" stroke-linejoin="miter">
+                    <path d="M5 12 H19 M13 6 L19 12 L13 18" />
+                </svg>
+            </a>
+            <button
+                id="mobile-menu-btn"
+                class="hidden max-[860px]:flex flex-col gap-[5px] bg-transparent border-none cursor-pointer p-[8px]"
+                aria-label="Otwórz menu nawigacyjne"
+                aria-expanded="false"
+                aria-controls="mobile-menu"
+                type="button"
+            >
+                <span class="w-[22px] h-[1.5px] bg-silver transition-colors duration-300 group-[.is-solid]:bg-ink"></span>
+                <span class="w-[22px] h-[1.5px] bg-silver transition-colors duration-300 group-[.is-solid]:bg-ink"></span>
+                <span class="w-[22px] h-[1.5px] bg-silver transition-colors duration-300 group-[.is-solid]:bg-ink"></span>
+            </button>
+        </div>
+    </div>
+
+    <div id="mobile-menu" class="hidden max-[860px]:flex flex-col bg-onyx border-t border-white/10 max-h-0 overflow-hidden transition-[max-height] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] [&.open]:max-h-[420px] motion-reduce:transition-none">
+        <a href={sec('oferta')} class="py-[16px] px-[24px] font-mono text-[14px] tracking-[0.08em] text-silver-soft border-b border-white/5 no-underline" data-section="oferta">OFERTA</a>
+        <a href={sec('wdrozenia')} class="py-[16px] px-[24px] font-mono text-[14px] tracking-[0.08em] text-silver-soft border-b border-white/5 no-underline" data-section="wdrozenia">WDROŻENIA</a>
+        <a href={sec('proces')} class="py-[16px] px-[24px] font-mono text-[14px] tracking-[0.08em] text-silver-soft border-b border-white/5 no-underline" data-section="proces">PROCES</a>
+        <a href={sec('bezpieczenstwo')} class="py-[16px] px-[24px] font-mono text-[14px] tracking-[0.08em] text-silver-soft border-b border-white/5 no-underline" data-section="bezpieczenstwo">BEZPIECZEŃSTWO</a>
+        <a href={sec('faq')} class="py-[16px] px-[24px] font-mono text-[14px] tracking-[0.08em] text-silver-soft border-b border-white/5 no-underline" data-section="faq">FAQ</a>
+        <a href={sec('brief')} class="py-[16px] px-[24px] font-mono text-[14px] tracking-[0.08em] border-b border-white/5 no-underline !text-brass-bright">WYPEŁNIJ BRIEF</a>
+    </div>
+</header>
+
+<script>
+    // === HEADER: light-glass po ~50px scrolla ===
+    const siteHeader = document.getElementById('site-header');
+
+    if (siteHeader) {
+        let rafPending = false;
+        const checkScroll = () => {
+            siteHeader.classList.toggle('is-solid', window.scrollY > 50);
+            rafPending = false;
+        };
+        window.addEventListener('scroll', () => {
+            if (!rafPending) {
+                rafPending = true;
+                requestAnimationFrame(checkScroll);
+            }
+        }, { passive: true });
+        checkScroll();
+    }
+
+    // === MOBILE MENU ===
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    let isMenuOpen = false;
+
+    function toggleMobileMenu(open: boolean) {
+        isMenuOpen = open;
+        mobileMenuBtn?.setAttribute('aria-expanded', String(open));
+        mobileMenuBtn?.classList.toggle('open', open);
+        mobileMenu?.classList.toggle('open', open);
+        document.body.style.overflow = open ? 'hidden' : '';
+        if (open) (mobileMenu as HTMLElement)?.focus();
+    }
+
+    mobileMenuBtn?.addEventListener('click', () => toggleMobileMenu(!isMenuOpen));
+
+    mobileMenu?.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => toggleMobileMenu(false));
+    });
+
+    document.addEventListener('keydown', (e: KeyboardEvent) => {
+        if (e.key === 'Escape' && isMenuOpen) toggleMobileMenu(false);
+    });
+</script>

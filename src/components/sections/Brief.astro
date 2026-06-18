@@ -1,6 +1,21 @@
 ---
 import { contactData } from '../../data/content';
 import BriefFlow from '../core/BriefFlow.svelte';
+import { getApiUrl, API_ENDPOINTS } from '../../lib/constants';
+import { renderMarkdown } from '../../lib/markdown';
+
+const apiUrl = getApiUrl();
+let legalDocs: Record<string, { title: string; html: string; version?: string }> = {};
+
+try {
+  const res = await fetch(`${apiUrl}${API_ENDPOINTS.publicDocuments()}`);
+  if (res.ok) {
+    const data = await res.json();
+    for (const d of (data.documents || [])) {
+      legalDocs[d.docType] = { title: d.title, html: renderMarkdown(d.content), version: d.version };
+    }
+  }
+} catch { /* ignored */ }
 ---
 
 <section id="brief" class="section nb-brief nb-panel bg-paper-3">
@@ -12,7 +27,7 @@ import BriefFlow from '../core/BriefFlow.svelte';
     </div>
 
     <div class="nb-brief__flow-container">
-        <BriefFlow client:visible={{ rootMargin: '600px' }} />
+        <BriefFlow client:visible={{ rootMargin: '600px' }} {legalDocs} />
     </div>
   </div>
 </section>

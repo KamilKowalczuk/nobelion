@@ -13,23 +13,23 @@ const { title } = Astro.props;
 <Layout title={`${title} | Nobelion`}>
   <ScrollChoreography client:idle />
   
-  <div class="main-shell legal-shell">
+  <div class="relative z-10 bg-paper rounded-b-shell shadow-[0_10px_40px_-10px_rgba(0,0,0,0.08)]">
     {/* ───────── ONYX HERO BAND ───────── */}
-    <section class="onyx q-hero">
-      <div class="q-hero__bg" aria-hidden="true">
-        <div class="q-hero__glow"></div>
-        <div class="q-hero__grid"></div>
+    <section class="relative overflow-hidden pt-[clamp(140px,16vw,200px)] pb-[clamp(80px,12vw,150px)]">
+      <div class="absolute inset-0 bg-onyx z-0" aria-hidden="true">
+        <div class="absolute w-[60%] h-[60%] top-0 left-[20%] bg-[radial-gradient(circle,var(--color-brass-glow)_0%,transparent_60%)] opacity-15 pointer-events-none"></div>
+        <div class="absolute inset-0 pointer-events-none opacity-25 bg-[linear-gradient(rgba(255,255,255,0.025)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.025)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_80%_70%_at_50%_40%,#000_30%,transparent_75%)] [-webkit-mask-image:radial-gradient(ellipse_80%_70%_at_50%_40%,#000_30%,transparent_75%)]"></div>
       </div>
-      <div class="wrap q-hero__inner">
-        <div class="q-hero__eyebrow">
-          <span class="q-hero__dot"></span>
+      <div class="wrap relative z-10">
+        <div class="inline-flex items-center gap-[10px] mb-[26px]">
+          <span class="w-[7px] h-[7px] rounded-full bg-brass-bright shadow-[0_0_12px_1px_var(--color-brass-glow)] animate-[q-pulse_2.6s_cubic-bezier(0.65,0,0.35,1)_infinite]"></span>
           <span class="eyebrow">Dokument Prawny</span>
         </div>
-        <h1 class="q-hero__title">
+        <h1 class="font-heading font-bold uppercase leading-[1.04] tracking-[0.04em] text-silver m-0 text-[clamp(28px,5vw,68px)] max-w-[16ch] break-words">
           {title}
         </h1>
-        <div class="q-hero__actions">
-          <a href="/" class="nb-btn nb-btn--ghost nb-btn--md" style="margin-top: 32px;">
+        <div class="mt-[32px]">
+          <a href="/" class="nb-btn nb-btn--ghost nb-btn--md">
             <span class="nb-btn__label">← Wróć na stronę główną</span>
           </a>
         </div>
@@ -37,8 +37,8 @@ const { title } = Astro.props;
     </section>
 
     {/* ───────── LIGHT BODY (overlapping panel) ───────── */}
-    <section class="section q-body nb-panel bg-paper">
-      <div class="wrap q-body__inner">
+    <section class="bg-paper pt-[clamp(56px,7vw,96px)] pb-[clamp(80px,10vw,120px)]">
+      <div class="max-w-[800px] mx-auto px-[clamp(24px,5vw,40px)]">
         <div class="rt">
           <slot />
         </div>
@@ -48,63 +48,3 @@ const { title } = Astro.props;
 
   <Footer />
 </Layout>
-
-<style>
-  .legal-shell {
-    position: relative;
-    z-index: 2; /* overlap the footer */
-    background-color: var(--color-paper);
-    border-bottom-left-radius: var(--r-shell, 24px);
-    border-bottom-right-radius: var(--r-shell, 24px);
-    box-shadow: 0 10px 40px -10px rgba(0,0,0,0.08);
-  }
-
-  /* ── ONYX HERO (adapted from wycena) ── */
-  .q-hero {
-    position: relative; overflow: hidden;
-    padding: clamp(140px, 16vw, 200px) 0 clamp(80px, 12vw, 150px);
-  }
-  .q-hero__bg {
-    position: absolute; inset: 0; background: var(--color-onyx); z-index: 1;
-  }
-  .q-hero__glow {
-    position: absolute; width: 60%; height: 60%; top: 0; left: 20%;
-    background: radial-gradient(circle, var(--color-brass-glow) 0%, transparent 60%);
-    opacity: 0.15; pointer-events: none;
-  }
-  .q-hero__grid {
-    position: absolute; inset: 0; pointer-events: none; opacity: 0.25;
-    background-image:
-      linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
-    background-size: 64px 64px;
-    mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, #000 30%, transparent 75%);
-    -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, #000 30%, transparent 75%);
-  }
-  .q-hero__inner { position: relative; z-index: 2; }
-  .q-hero__eyebrow { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 26px; }
-  .q-hero__dot {
-    width: 7px; height: 7px; border-radius: 50%;
-    background: var(--color-brass-bright);
-    box-shadow: 0 0 12px 1px var(--color-brass-glow);
-    animation: q-pulse 2.6s cubic-bezier(0.65,0,0.35,1) infinite;
-  }
-  @keyframes q-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
-  .q-hero__title {
-    font-family: var(--font-heading); font-weight: 700; text-transform: uppercase;
-    line-height: 1.04; letter-spacing: 0.04em; color: var(--color-silver);
-    margin: 0; font-size: clamp(28px, 5vw, 68px); max-width: 16ch;
-    overflow-wrap: break-word; word-break: break-word;
-  }
-
-  /* ── LIGHT BODY ── */
-  .q-body { 
-    background: var(--color-paper); 
-    padding-top: clamp(56px, 7vw, 96px); 
-    padding-bottom: clamp(80px, 10vw, 120px);
-  }
-  .q-body__inner {
-    max-width: 800px;
-    margin: 0 auto;
-  }
-</style>

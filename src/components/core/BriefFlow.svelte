@@ -1,6 +1,10 @@
 <script lang="ts">
   import { onMount, tick } from "svelte";
   import { slide } from "svelte/transition";
+  import ConsentGate from "../ui/ConsentGate.svelte";
+  import DocModal from "../ui/DocModal.svelte";
+
+  let { legalDocs = {} } = $props<{ legalDocs?: Record<string, any> }>();
 
   type Diagnosis = "biuro" | "strona" | "sprzedaz" | "wizja" | null;
 
@@ -61,6 +65,17 @@
   const MAX_ATTACHMENT_SIZE = 10 * 1024 * 1024;
   let attachments = $state<BriefAttachment[]>([]);
   let attachmentError = $state("");
+
+  $effect(() => {
+    f.agreedPrivacy = f.agreedTerms;
+  });
+
+  let activeDoc = $state<any>(null);
+  let docModalOpen = $state(false);
+  function openDoc(doc: any) {
+    activeDoc = doc;
+    docModalOpen = true;
+  }
 
   // ── Walidacja na żywo (krok 7) ──
   let touched = $state({ name: false, email: false, phone: false, company: false, nip: false });
@@ -133,6 +148,14 @@
   ];
 
   onMount(() => {
+    // Dynamicznie pobieramy politykę z API
+    if (Object.keys(legalDocs).length === 0) {
+      fetch('/api/legal')
+        .then(r => r.json())
+        .then(d => { if (!d.error) legalDocs = d; })
+        .catch(() => {});
+    }
+
     const t = setInterval(() => placeholderIndex = (placeholderIndex + 1) % placeholders.length, 4500);
     const ro = new ResizeObserver(() => {
       void updateMainMinHeight();
@@ -465,7 +488,7 @@
                   <span class="nb-diag__n">{String(i+1).padStart(2,"0")}</span>
                   <span class="nb-diag__txt"><span class="nb-diag__t">{o.t}</span><span class="nb-diag__b">{o.b}</span></span>
                   <span class="nb-diag__check">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square" stroke-linejoin="miter">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                       <path d="M5 12.5 L10 17.5 L19 6.5" />
                     </svg>
                   </span>
@@ -579,7 +602,7 @@
                     <label class="nb-check" class:sel={f.triedBefore.includes(t)}>
                       <input type="checkbox" checked={f.triedBefore.includes(t)} onchange={()=>toggleTried(t)}/>
                       <span class="nb-check__box">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                           <path d="M5 12.5 L10 17.5 L19 6.5" />
                         </svg>
                       </span>
@@ -624,7 +647,7 @@
               <div class="nb-grid2">
                 <div class="nb-field">
                   <span class="nb-field__label caption">Imię i nazwisko *</span>
-                  <input class="nb-input" class:is-invalid={touched.name && !!errors.name} type="text" value={f.name} maxlength={80} autocomplete="name"
+                  <input class="nb-input" class:is-invalid={touched.name && !!errors.name} type="text" value={f.name} maxlength={80} autocomplete="name" placeholder="np. Jan Kowalski"
                     onbeforeinput={blockChars(NAME_CHARS)}
                     oninput={(e) => { const el = e.currentTarget as HTMLInputElement; const clean = sanitizeName(el.value); applySanitized(el, clean); f.name = clean; }}
                     onblur={() => touched.name = true}/>
@@ -632,7 +655,7 @@
                 </div>
                 <div class="nb-field">
                   <span class="nb-field__label caption">Email firmowy *</span>
-                  <input class="nb-input" class:is-invalid={touched.email && !!errors.email} type="email" bind:value={f.email} maxlength={120} autocomplete="email"
+                  <input class="nb-input" class:is-invalid={touched.email && !!errors.email} type="email" bind:value={f.email} maxlength={120} autocomplete="email" placeholder="np. jan@firma.pl"
                     onblur={() => touched.email = true}/>
                   {#if touched.email && errors.email}<span class="nb-field__error">{errors.email}</span>{/if}
                 </div>
@@ -640,7 +663,7 @@
               <div class="nb-grid2">
                 <div class="nb-field">
                   <span class="nb-field__label caption">Telefon (opcjonalnie)</span>
-                  <input class="nb-input" class:is-invalid={touched.phone && !!errors.phone} type="tel" inputmode="tel" value={f.phone} maxlength={20} autocomplete="tel"
+                  <input class="nb-input" class:is-invalid={touched.phone && !!errors.phone} type="tel" inputmode="tel" value={f.phone} maxlength={20} autocomplete="tel" placeholder="+48 000 000 000"
                     onbeforeinput={blockChars(PHONE_CHARS)}
                     oninput={(e) => { const el = e.currentTarget as HTMLInputElement; const clean = sanitizePhone(el.value); applySanitized(el, clean); f.phone = clean; }}
                     onblur={() => touched.phone = true}/>
@@ -648,7 +671,7 @@
                 </div>
                 <div class="nb-field">
                   <span class="nb-field__label caption">Nazwa firmy *</span>
-                  <input class="nb-input" class:is-invalid={touched.company && !!errors.company} type="text" bind:value={f.company} maxlength={120} autocomplete="organization"
+                  <input class="nb-input" class:is-invalid={touched.company && !!errors.company} type="text" bind:value={f.company} maxlength={120} autocomplete="organization" placeholder="Twoja firma"
                     onblur={() => touched.company = true}/>
                   {#if touched.company && errors.company}<span class="nb-field__error">{errors.company}</span>{/if}
                 </div>
@@ -661,12 +684,20 @@
                   onblur={() => touched.nip = true}/>
                 {#if touched.nip && errors.nip}<span class="nb-field__error">{errors.nip}</span>{/if}
               </div>
-              <div class="nb-consents">
-                <label class="nb-check"><input type="checkbox" bind:checked={f.agreedPrivacy}/><span class="nb-check__box"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><path d="M5 12.5 L10 17.5 L19 6.5" /></svg></span><span>Wyrażam zgodę na przetwarzanie danych zgodnie z <a class="nb-link" href="/polityka-prywatnosci">Polityką Prywatności</a>.</span></label>
-                <label class="nb-check"><input type="checkbox" bind:checked={f.agreedTerms}/><span class="nb-check__box"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><path d="M5 12.5 L10 17.5 L19 6.5" /></svg></span><span>Akceptuję <a class="nb-link" href="/regulamin">Regulamin</a>.</span></label>
+              <div class="mt-[22px] pt-[22px] border-t border-hair-ink">
+                <ConsentGate 
+                  docRegulamin={legalDocs['regulamin']}
+                  docPolityka={legalDocs['polityka-prywatnosci']}
+                  bind:termsAccepted={f.agreedTerms} 
+                  showAgreement={false}
+                  errorMessage="Zaznacz zgody, aby wysłać zapytanie."
+                  {openDoc}
+                />
               </div>
             </div>
           {/if}
+
+          <DocModal bind:isOpen={docModalOpen} title={activeDoc?.title || ''} html={activeDoc?.html || ''} />
 
           <input type="text" tabindex={-1} autocomplete="off" bind:value={f.honeypot} class="nb-honeypot" aria-hidden="true"/>
           {#if submitState === "error" && submitError}
@@ -804,7 +835,7 @@
 .nb-diag__txt{flex:1;display:flex;flex-direction:column;gap:4px;}
 .nb-diag__t{font-family:var(--font-heading);font-weight:600;font-size:15px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink);}
 .nb-diag__b{font-size:14px;color:var(--ink-3);}
-.nb-diag__check{flex-shrink:0;width:24px;height:24px;border:1px solid var(--paper-edge);display:flex;align-items:center;justify-content:center;color:transparent;transition:all var(--dur-base);}
+.nb-diag__check{flex-shrink:0;width:24px;height:24px;border:1.5px solid var(--paper-edge);border-radius:50%;display:flex;align-items:center;justify-content:center;color:transparent;transition:all var(--dur-base);}
 .nb-diag.sel .nb-diag__check{background:var(--brass);border-color:var(--brass);color:var(--void);}
 
 
@@ -857,7 +888,7 @@
 .nb-check.sel{border-color:var(--brass);background:color-mix(in srgb, var(--brass), transparent 92%);box-shadow:inset 0 0 0 1px var(--brass);}
 
 .nb-check input{position:absolute;opacity:0;width:0;height:0;}
-.nb-check__box{flex-shrink:0;width:20px;height:20px;border:1px solid color-mix(in srgb, var(--brass), transparent 40%);background:var(--paper);display:flex;align-items:center;justify-content:center;color:transparent;margin-top:1px;transition:all var(--dur-fast);}
+.nb-check__box{flex-shrink:0;width:22px;height:22px;border:1.5px solid color-mix(in srgb, var(--brass), transparent 40%);background:var(--paper);display:flex;align-items:center;justify-content:center;color:transparent;margin-top:1px;transition:all var(--dur-fast);border-radius:50%;}
 .nb-check:hover .nb-check__box{border-color:var(--brass);}
 .nb-check input:focus-visible + .nb-check__box{outline:2px solid var(--brass);outline-offset:2px;}
 .nb-check input:checked + .nb-check__box{background:var(--brass);border-color:var(--brass);color:var(--void);}
@@ -933,12 +964,12 @@
 .nb-btn,
 .nb-header__cta,.nb-footer__cta,
 .nb-input,.nb-select select,.nb-textarea,.nb-input--sm,
-.nb-pill,.nb-diag,.nb-scope,.nb-check{border-radius:var(--r-control);}
+.nb-pill,.nb-diag,.nb-scope,.nb-check,.nb-drop__upload,.nb-drop__item{border-radius:var(--r-control);}
 
 /* tiny tiles */
 .nb-tag,.nb-case__step,
 .nb-offer__icon,.nb-cap__icon,.nb-sec-card__icon,
-.nb-check__box,.nb-brief__step-mark,.nb-case__metric{border-radius:var(--r-inset);}
+.nb-brief__step-mark,.nb-case__metric{border-radius:var(--r-inset);}
 
 /* standalone cards & callouts */
 .nb-offer__card,

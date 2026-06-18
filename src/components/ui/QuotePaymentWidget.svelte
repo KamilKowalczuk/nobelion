@@ -102,7 +102,7 @@
     </div>
 
     {#if paymentStatus === PAYMENT_STATUSES.PAID_FULL}
-      <div class="flex flex-col items-start gap-[10px] border border-[rgba(184,137,62,0.45)] bg-[rgba(184,137,62,0.06)] rounded-card p-[26px_24px]">
+      <div class="flex flex-col items-start gap-[10px] border border-[rgba(184,137,62,0.45)] bg-[rgba(184,137,62,0.06)] rounded-[24px] p-[26px_24px]">
         <span class="w-[44px] h-[44px] border-[1.5px] border-brass rounded-full flex items-center justify-center text-brass-dark mb-[4px]" aria-hidden="true">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" stroke-linejoin="miter">
             <path d="M5 12.5 L10 17.5 L19 6.5" />
@@ -112,7 +112,7 @@
         <p class="m-0 text-[14px] leading-[1.6] text-ink-2">Dziękujemy — realizacja jest w toku. Potwierdzenie płatności i faktura trafiły na Twój e-mail.</p>
       </div>
     {:else if paymentStatus === PAYMENT_STATUSES.PAID_HALF}
-      <div class="flex flex-col items-start gap-[10px] border border-[rgba(184,137,62,0.45)] bg-[rgba(184,137,62,0.06)] rounded-card p-[26px_24px]">
+      <div class="flex flex-col items-start gap-[10px] border border-[rgba(184,137,62,0.45)] bg-[rgba(184,137,62,0.06)] rounded-[24px] p-[26px_24px]">
         <span class="w-[44px] h-[44px] border-[1.5px] border-brass rounded-full flex items-center justify-center text-brass-dark mb-[4px]" aria-hidden="true">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" stroke-linejoin="miter">
             <path d="M5 12.5 L10 17.5 L19 6.5" />
@@ -138,21 +138,21 @@
       <!-- Primary Option: 100% -->
       <button 
         type="button" 
-        class="relative flex flex-col text-left w-full cursor-pointer p-[clamp(22px,2.4vw,30px)] max-[640px]:p-[22px] bg-paper-2 border border-brass rounded-card transition-all duration-300 hover:border-brass-dark hover:shadow-lift hover:-translate-y-[2px] motion-reduce:hover:translate-y-0"
+        class="relative flex flex-col text-left w-full cursor-pointer p-[clamp(22px,2.4vw,30px)] max-[640px]:p-[22px] bg-paper-2 border border-brass rounded-[24px] transition-all duration-300 hover:border-brass-dark hover:shadow-lift hover:-translate-y-[2px] motion-reduce:hover:translate-y-0"
         class:opacity-50={!isGateOk}
         class:opacity-60={isBusy}
         class:pointer-events-none={isBusy}
         style="background: linear-gradient(160deg, color-mix(in srgb, var(--color-brass) 7%, var(--color-paper-2)), var(--color-paper-2));"
         onclick={() => handleCheckout(PAYMENT_MODELS.FULL)}
       >
-        <span class="absolute top-0 right-0 bg-brass text-void font-mono text-[10px] font-semibold tracking-[0.14em] uppercase py-[6px] px-[12px] rounded-bl-inset">Rabat 10%</span>
+        <span class="absolute top-[-1px] right-[-1px] bg-brass text-void font-mono text-[10px] font-semibold tracking-[0.14em] uppercase py-[7px] px-[14px] rounded-bl-[18px] rounded-tr-[24px]">Rabat 10%</span>
         <h3 class="h4 m-[0_0_10px] text-ink">Płatność jednorazowa</h3>
         <p class="text-[14px] leading-[1.6] text-ink-3 m-[0_0_20px] grow">Domykasz sprawę od ręki i schodzisz z ceny o 10%. Jedna płatność, pełny rabat — ruszamy z projektem bez zwłoki.</p>
         <div class="font-heading font-bold text-[clamp(24px,2.6vw,30px)] leading-none mb-[4px] text-brass-dark">{fmt(discountedPrice)} PLN</div>
         {#if savings > 0}
           <span class="block m-[3px_0_18px] font-mono text-[11.5px] font-semibold tracking-[0.06em] text-brass-dark">Oszczędzasz {fmt(savings)} PLN</span>
         {/if}
-        <span class="inline-flex items-center justify-center w-full font-mono font-semibold text-[12.5px] tracking-[0.14em] uppercase p-[14px_20px] mt-auto rounded-control transition-colors duration-300 bg-brass-bright text-void hover:bg-brass-light">
+        <span class="inline-flex items-center justify-center w-full font-mono font-semibold text-[12.5px] tracking-[0.14em] uppercase p-[14px_20px] mt-auto rounded-full transition-colors duration-300 bg-brass-bright text-void hover:bg-brass-light">
           {processingModel === PAYMENT_MODELS.FULL ? 'Przetwarzanie...' : 'Opłać całość z rabatem'}
         </span>
       </button>
@@ -160,7 +160,7 @@
       <!-- Secondary Option: 50% -->
       <button 
         type="button" 
-        class="relative flex flex-col text-left w-full cursor-pointer p-[clamp(22px,2.4vw,30px)] max-[640px]:p-[22px] bg-transparent border border-hair-ink rounded-card transition-all duration-300 hover:border-ink-4 hover:shadow-lift hover:-translate-y-[2px] motion-reduce:hover:translate-y-0 group/sec"
+        class="relative flex flex-col text-left w-full cursor-pointer p-[clamp(22px,2.4vw,30px)] max-[640px]:p-[22px] bg-transparent border border-hair-ink rounded-[24px] transition-all duration-300 hover:border-ink-4 hover:shadow-lift hover:-translate-y-[2px] motion-reduce:hover:translate-y-0 group/sec"
         class:opacity-50={!isGateOk}
         class:opacity-60={isBusy}
         class:pointer-events-none={isBusy}
@@ -170,22 +170,22 @@
         <p class="text-[14px] leading-[1.6] text-ink-3 m-[0_0_20px] grow">Wolisz rozłożyć inwestycję? Płacisz połowę na start, a drugą część dopiero po odbiorze gotowego projektu.</p>
         <div class="font-heading font-bold text-[clamp(20px,2.1vw,25px)] leading-none mb-[4px] text-ink-2">{fmt(Math.round(fullPrice / BUSINESS_CONFIG.INSTALLMENT_DIVISOR))} PLN</div>
         <span class="block mb-[18px] caption">I rata — start prac</span>
-        <span class="inline-flex items-center justify-center w-full font-mono font-semibold text-[12.5px] tracking-[0.14em] uppercase p-[14px_20px] mt-auto rounded-control transition-colors duration-300 border border-hair-ink text-ink group-hover/sec:border-ink">
+        <span class="inline-flex items-center justify-center w-full font-mono font-semibold text-[12.5px] tracking-[0.14em] uppercase p-[14px_20px] mt-auto rounded-full transition-colors duration-300 border border-hair-ink text-ink group-hover/sec:border-ink">
           {processingModel === PAYMENT_MODELS.HALF ? 'Przetwarzanie...' : 'Opłać I ratę (50%)'}
         </span>
       </button>
 
       <!-- Optional Addon: Maintenance -->
       {#if quoteData.maintenancePrice}
-        <label class="flex gap-[13px] items-start cursor-pointer border rounded-card p-[16px_18px] transition-all duration-300 group/addon"
+        <label class="flex gap-[13px] items-start cursor-pointer border rounded-[20px] p-[16px_18px] transition-all duration-300 group/addon"
                class:border-brass={clientSelectedMaintenance}
                class:bg-[color-mix(in_srgb,var(--color-brass),transparent_88%)]={clientSelectedMaintenance}
                class:border-[color-mix(in_srgb,var(--color-brass),transparent_50%)]={!clientSelectedMaintenance}
                class:bg-[color-mix(in_srgb,var(--color-brass),transparent_95%)]={!clientSelectedMaintenance}>
           <input type="checkbox" class="absolute opacity-0 w-0 h-0 peer" checked={clientSelectedMaintenance} onchange={toggleMaintenance} />
           
-          <span class="shrink-0 w-[24px] h-[24px] mt-[1px] rounded-[6px] border-[1.5px] border-brass bg-paper flex items-center justify-center text-transparent transition-all duration-180 shadow-[inset_0_0_0_2px_color-mix(in_srgb,var(--color-brass),transparent_86%)] group-hover/addon:border-brass-dark peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-brass peer-checked:bg-brass peer-checked:border-brass peer-checked:text-void peer-checked:shadow-none" aria-hidden="true">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="square"><path d="M5 12.5 L10 17.5 L19 6.5"/></svg>
+          <span class="shrink-0 w-[24px] h-[24px] mt-[1px] rounded-full border-[1.5px] border-brass bg-paper flex items-center justify-center text-transparent transition-all duration-180 shadow-[inset_0_0_0_2px_color-mix(in_srgb,var(--color-brass),transparent_86%)] group-hover/addon:border-brass-dark peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-brass peer-checked:bg-brass peer-checked:border-brass peer-checked:text-void peer-checked:shadow-none" aria-hidden="true">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 L10 17.5 L19 6.5"/></svg>
           </span>
           
           <span class="flex flex-col gap-[5px] min-w-0">
