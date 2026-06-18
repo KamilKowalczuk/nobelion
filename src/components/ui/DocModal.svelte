@@ -1,4 +1,7 @@
 <script lang="ts">
+  import { fade, fly } from 'svelte/transition';
+  import { backOut, cubicOut } from 'svelte/easing';
+
   let { 
     isOpen = $bindable(false), 
     title, 
@@ -31,10 +34,16 @@
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div 
     use:portal
-    class="fixed inset-0 z-[2000] flex items-center justify-center p-[20px] bg-[#080b10]/70 backdrop-blur-[10px] animate-in fade-in duration-300" 
+    class="fixed inset-0 z-[2000] flex items-center justify-center p-[20px] bg-[#080b10]/70 backdrop-blur-[10px]" 
     onclick={(e) => { if (e.target === e.currentTarget) close(); }}
+    transition:fade={{ duration: 200, easing: cubicOut }}
   >
-    <div class="relative bg-paper rounded-card max-w-[760px] w-full max-h-[88vh] overflow-y-auto p-[clamp(28px,4vw,48px)] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] border border-[rgba(184,137,62,0.15)] overscroll-contain" data-lenis-prevent>
+    <div 
+      class="relative bg-paper rounded-card max-w-[760px] w-full max-h-[88vh] overflow-y-auto p-[clamp(28px,4vw,48px)] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] border border-[rgba(184,137,62,0.15)] overscroll-contain" 
+      data-lenis-prevent
+      in:fly={{ y: 30, duration: 400, easing: backOut, delay: 50 }}
+      out:fly={{ y: 15, duration: 200, easing: cubicOut }}
+    >
       <button 
         type="button" 
         class="sticky top-0 float-right bg-paper border-none cursor-pointer text-ink-3 p-[8px] transition-all duration-[180ms] z-20 rounded-full shadow-[0_4px_12px_rgba(0,0,0,0.08)] -mt-[14px] -mr-[14px] hover:text-ink hover:scale-105 hover:bg-paper-2" 

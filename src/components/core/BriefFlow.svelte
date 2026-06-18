@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, tick } from "svelte";
-  import { slide } from "svelte/transition";
+  import { slide, fly } from "svelte/transition";
+  import { cubicOut } from "svelte/easing";
   import ConsentGate from "../ui/ConsentGate.svelte";
   import DocModal from "../ui/DocModal.svelte";
 
@@ -60,6 +61,13 @@
     id: string;
     file: File;
   };
+
+  // Dropdown state
+  let industryOpen = $state(false);
+  function selectIndustry(x: string) {
+    f.industry = x;
+    industryOpen = false;
+  }
 
   const MAX_ATTACHMENTS = 5;
   const MAX_ATTACHMENT_SIZE = 10 * 1024 * 1024;
@@ -402,7 +410,13 @@
   });
 </script>
 
-<div class="nb-brief__shell" bind:this={shellEl} style={shellMinHeight > 0 ? `min-height:${shellMinHeight}px` : undefined} class:nb-brief__shell--done={submitState === "success"}>
+<svelte:window onclick={(e) => {
+  if (e.target instanceof Element && !e.target.closest('.nb-custom-select')) {
+    industryOpen = false;
+  }
+}} />
+
+<div class="nb-brief__shell bg-paper-2" bind:this={shellEl} style={shellMinHeight > 0 ? `min-height:${shellMinHeight}px` : undefined} class:nb-brief__shell--done={submitState === "success"}>
   {#if submitState === "success"}
     <div class="nb-brief__check">
       <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square" stroke-linejoin="miter">
@@ -499,11 +513,25 @@
             <div class="nb-stack">
               <div class="nb-field">
                 <span class="nb-field__label caption">Branża</span>
-                <div class="nb-select">
-                  <select bind:value={f.industry}>
-                    <option value="">Wybierz branżę…</option>
-                    {#each industries as x}<option value={x}>{x}</option>{/each}
-                  </select>
+                <div class="nb-custom-select" class:is-open={industryOpen}>
+                  <button type="button" class="nb-custom-select__trigger" onclick={() => industryOpen = !industryOpen}>
+                    <span class="nb-custom-select__val" class:is-placeholder={!f.industry}>
+                      {f.industry || "Wybierz branżę…"}
+                    </span>
+                    <span class="nb-custom-select__icon">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 9l6 6 6-6" />
+                      </svg>
+                    </span>
+                  </button>
+                  {#if industryOpen}
+                    <div class="nb-custom-select__dropdown" transition:fly={{ y: -5, duration: 180, easing: cubicOut }}>
+                      <button type="button" class="nb-custom-select__option" class:sel={!f.industry} onclick={() => selectIndustry("")}>Wybierz branżę…</button>
+                      {#each industries as x}
+                        <button type="button" class="nb-custom-select__option" class:sel={f.industry === x} onclick={() => selectIndustry(x)}>{x}</button>
+                      {/each}
+                    </div>
+                  {/if}
                 </div>
               </div>
               <div class="nb-field">
@@ -815,6 +843,22 @@
 .nb-input--narrow{max-width:280px;}
 .nb-textarea{resize:vertical;line-height:1.6;min-height:120px;}
 
+/* custom select */
+.nb-custom-select{position:relative;width:100%;}
+.nb-custom-select.is-open{z-index:100;}
+.nb-custom-select__trigger{width:100%;display:flex;align-items:center;justify-content:space-between;background:var(--paper);border:1px solid var(--paper-edge);padding:14px 16px;font-family:var(--font-sans);font-size:16px;color:var(--ink);cursor:pointer;border-radius:var(--r-control);transition:border-color var(--dur-fast),box-shadow var(--dur-fast);}
+.nb-custom-select__trigger:hover{border-color:color-mix(in srgb, var(--brass), transparent 60%);}
+.nb-custom-select.is-open .nb-custom-select__trigger{border-color:var(--brass);box-shadow:inset 0 0 0 1px var(--brass);}
+.nb-custom-select__val.is-placeholder{color:var(--ink-4);}
+.nb-custom-select__icon{color:var(--ink-3);display:flex;transition:transform var(--dur-fast);}
+.nb-custom-select.is-open .nb-custom-select__icon{transform:rotate(180deg);color:var(--brass);}
+
+.nb-custom-select__dropdown{position:absolute;top:calc(100% + 6px);left:0;width:100%;z-index:50;background:var(--paper);border:1px solid var(--paper-edge);border-radius:var(--r-control);box-shadow:0 12px 34px -10px rgba(184,137,62,0.25);display:flex;flex-direction:column;padding:6px;gap:2px;}
+.nb-custom-select__option{text-align:left;background:none;border:none;padding:9px 12px;font-family:var(--font-sans);font-size:14px;color:var(--ink-2);cursor:pointer;border-radius:calc(var(--r-control) - 3px);transition:background var(--dur-fast),color var(--dur-fast);flex-shrink:0;}
+.nb-custom-select__option:hover{background:color-mix(in srgb, var(--brass), transparent 92%);color:var(--ink);}
+.nb-custom-select__option.sel{background:color-mix(in srgb, var(--brass), transparent 85%);color:var(--brass-dark);font-weight:600;}
+
+/* old select (fallback/removed) */
 .nb-select{position:relative;}
 .nb-select::after{content:"";position:absolute;right:18px;top:50%;width:8px;height:8px;border-right:1.5px solid var(--ink-3);border-bottom:1.5px solid var(--ink-3);transform:translateY(-70%) rotate(45deg);pointer-events:none;}
 .nb-select select{width:100%;appearance:none;-webkit-appearance:none;background:var(--paper);border:1px solid var(--paper-edge);padding:14px 16px;font-family:var(--font-sans);font-size:16px;color:var(--ink);cursor:pointer;transition:border-color var(--dur-fast);}
