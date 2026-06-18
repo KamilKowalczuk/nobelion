@@ -277,18 +277,7 @@ const fmt = (n: number) => new Intl.NumberFormat('pl-PL').format(n);
               </div>
             </aside>
 
-            {/* Modale dokumentów prawnych */}
-            {consentDocs.map((d) => (
-              <div class="q-docmodal" id={`docmodal-${d.type}`} data-docmodal={d.type}>
-                <div class="q-docmodal__box">
-                  <button type="button" class="q-docmodal__close" data-close-doc aria-label="Zamknij">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M6 18L18 6M6 6l12 12"/></svg>
-                  </button>
-                  <h3 class="h3 q-docmodal__title">{d.title}</h3>
-                  <div class="q-docmodal__body rt" set:html={d.html} />
-                </div>
-              </div>
-            ))}
+
 
           </div>
         </div>
@@ -325,6 +314,19 @@ const fmt = (n: number) => new Intl.NumberFormat('pl-PL').format(n);
           </div>
         </div>
       </div>
+
+      {/* Modale dokumentów prawnych */}
+      {consentDocs.map((d) => (
+        <div class="q-docmodal" id={`docmodal-${d.type}`} data-docmodal={d.type}>
+          <div class="q-docmodal__box">
+            <button type="button" class="q-docmodal__close" data-close-doc aria-label="Zamknij">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+            <h3 class="h3 q-docmodal__title">{d.title}</h3>
+            <div class="q-docmodal__body rt" set:html={d.html} />
+          </div>
+        </div>
+      ))}
     </>
   )}
 </Layout>
@@ -588,6 +590,7 @@ const fmt = (n: number) => new Intl.NumberFormat('pl-PL').format(n);
   position: relative; background: var(--color-paper); border-radius: var(--r-card);
   max-width: 760px; width: 100%; max-height: 86vh; overflow-y: auto;
   padding: clamp(28px, 4vw, 48px); box-shadow: var(--shadow-lift);
+  overscroll-behavior: contain;
 }
 .q-docmodal__close {
   position: absolute; top: 16px; right: 16px; background: none; border: none; cursor: pointer;
@@ -712,6 +715,7 @@ const fmt = (n: number) => new Intl.NumberFormat('pl-PL').format(n);
   border-radius: var(--r-shell); padding: clamp(28px, 4vw, 40px);
   box-shadow: var(--shadow-lift); transform: scale(0.96);
   transition: transform var(--dur-base) var(--ease-out);
+  overscroll-behavior: contain;
 }
 .q-modal.is-open .q-modal__box { transform: scale(1); }
 .q-modal__close {
@@ -798,13 +802,26 @@ document.addEventListener('DOMContentLoaded', () => {
   cAgree?.addEventListener('change', applyGate);
   applyGate();
 
+  // Helper to lock body scroll
+  const lockScroll = (lock) => {
+    document.documentElement.style.overflow = lock ? 'hidden' : '';
+    document.body.style.overflow = lock ? 'hidden' : '';
+  };
+
   // ── Modale dokumentów ──
   document.querySelectorAll('.q-consent__doc').forEach(b => {
-    b.addEventListener('click', () => document.getElementById('docmodal-' + b.dataset.doc)?.classList.add('is-open'));
+    b.addEventListener('click', () => {
+      const m = document.getElementById('docmodal-' + b.dataset.doc);
+      if (m) { m.classList.add('is-open'); lockScroll(true); }
+    });
   });
   document.querySelectorAll('.q-docmodal').forEach(m => {
-    m.addEventListener('click', (e) => { if (e.target === m) m.classList.remove('is-open'); });
-    m.querySelector('[data-close-doc]')?.addEventListener('click', () => m.classList.remove('is-open'));
+    m.addEventListener('click', (e) => { 
+      if (e.target === m) { m.classList.remove('is-open'); lockScroll(false); }
+    });
+    m.querySelector('[data-close-doc]')?.addEventListener('click', () => { 
+      m.classList.remove('is-open'); lockScroll(false); 
+    });
   });
 
   // ── Płatności ──
@@ -849,7 +866,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ── Modal ──
   const modal = document.getElementById('change-modal');
-  const show = (v) => modal.classList.toggle('is-open', v);
+  const show = (v) => {
+    modal.classList.toggle('is-open', v);
+    lockScroll(v);
+  };
   document.getElementById('open-change-modal')?.addEventListener('click', () => show(true));
   document.getElementById('close-change-modal')?.addEventListener('click', () => show(false));
   document.getElementById('close-success-modal')?.addEventListener('click', () => show(false));
