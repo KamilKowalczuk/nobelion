@@ -2,35 +2,35 @@
 import { heroData } from '../../data/content';
 
 // Hero — dark onyx anchor (Split editorial variant).
-// Built to match the Nobelion Light/Onyx design prototype.
+// Refactored to Tailwind CSS
 ---
 
-<section id="hero" class="onyx hero">
-  <div class="hero-bg" aria-hidden="true">
-    <div class="hero-glow"></div>
-    <div class="hero-grid"></div>
+<section id="hero" class="relative min-h-dvh flex items-center overflow-hidden pt-[clamp(76px,10dvh,110px)] pb-[clamp(72px,11dvh,120px)] bg-onyx text-silver max-h-[860px]:pt-[clamp(52px,7dvh,84px)] max-h-[860px]:pb-[clamp(40px,6dvh,70px)] max-h-[760px]:pt-[clamp(42px,5.5dvh,66px)] max-h-[760px]:pb-[clamp(22px,3.8dvh,42px)] max-[920px]:h-auto max-[920px]:min-h-dvh max-[920px]:pt-[140px] max-[920px]:pb-[120px] max-[920px]:max-h-[760px]:pt-[76px] max-[920px]:max-h-[760px]:pb-[30px]">
+  <div class="absolute inset-0 z-0" aria-hidden="true">
+    <div class="absolute -top-[20%] left-1/2 -translate-x-1/2 w-[min(1100px,120vw)] h-[900px] blur-[8px]" style="background: radial-gradient(ellipse at center, rgba(197, 160, 89, 0.16), rgba(197, 160, 89, 0.04) 38%, transparent 64%);"></div>
+    <div class="absolute inset-0 opacity-50 bg-[size:64px_64px]" style="background-image: linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px); mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, #000 30%, transparent 75%); -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, #000 30%, transparent 75%);"></div>
   </div>
 
-  <div class="wrap hero-inner hero-split">
-    <!-- LEFT COL — copy + actions -->
-    <div class="hero-col-main">
-      <div class="hero-eyebrow">
-        <span class="hero-dot"></span>
-        <span class="eyebrow">{heroData.microTagline}</span>
+  <div class="relative z-10 w-full wrap grid grid-cols-[1.25fr_0.85fr] gap-[64px] items-center max-h-[860px]:gap-[clamp(28px,4dvh,48px)] max-[920px]:grid-cols-1 max-[920px]:gap-[48px]">
+    <!-- LEFT COL -->
+    <div class="max-[920px]:text-center max-[920px]:flex max-[920px]:flex-col max-[920px]:items-center">
+      <div class="inline-flex items-center gap-[10px] mb-[28px] max-h-[860px]:mb-[18px]">
+        <span class="w-[7px] h-[7px] bg-brass-bright rounded-full shadow-[0_0_12px_1px_var(--color-brass-glow)] animate-[hero-pulse_2.6s_cubic-bezier(0.65,0,0.35,1)_infinite] motion-reduce:animate-none"></span>
+        <span class="font-mono font-semibold text-[12px] tracking-[0.24em] uppercase text-brass-bright">{heroData.microTagline}</span>
       </div>
 
-      <h1 id="hero-title" class="hero-title">
-        <span class="ln"><span class="w">{heroData.line1}</span></span>
-        <span class="ln"><span class="w">{heroData.line2}</span></span>
-        <span class="ln"><span class="w accent">{heroData.line3}</span></span>
+      <h1 id="hero-title" class="font-heading font-bold uppercase leading-[1.0] tracking-[0.02em] text-silver m-0 text-[clamp(38px,6.2vw,86px)] max-h-[860px]:text-[clamp(34px,5.6vw,70px)] max-h-[760px]:text-[clamp(30px,5.2vw,58px)] [&.lit_.w]:translate-y-0 [&.lit_.ln:nth-child(2)_.w]:delay-100 [&.lit_.ln:nth-child(3)_.w]:delay-200">
+        <span class="block overflow-hidden pt-[0.18em] -mt-[0.18em] ln"><span class="block translate-y-[110%] transition-transform duration-[900ms] ease-[cubic-bezier(0.83,0,0.17,1)] motion-reduce:translate-y-0 motion-reduce:transition-none w">{heroData.line1}</span></span>
+        <span class="block overflow-hidden pt-[0.18em] -mt-[0.18em] ln"><span class="block translate-y-[110%] transition-transform duration-[900ms] ease-[cubic-bezier(0.83,0,0.17,1)] motion-reduce:translate-y-0 motion-reduce:transition-none w">{heroData.line2}</span></span>
+        <span class="block overflow-hidden pt-[0.18em] -mt-[0.18em] ln"><span class="block translate-y-[110%] transition-transform duration-[900ms] ease-[cubic-bezier(0.83,0,0.17,1)] motion-reduce:translate-y-0 motion-reduce:transition-none w text-brass-bright">{heroData.line3}</span></span>
       </h1>
 
-      <p class="hero-sub">{heroData.subheading}</p>
+      <p class="max-w-[560px] mx-0 mt-[30px] mb-[38px] text-[clamp(16px,1.5vw,19px)] leading-[1.6] text-silver-soft opacity-0 animate-[hero-fade_0.9s_cubic-bezier(0.16,1,0.3,1)_0.55s_forwards] motion-reduce:animate-none motion-reduce:opacity-100 max-h-[860px]:my-[18px] max-h-[860px]:text-[clamp(15px,1.28vw,18px)] max-h-[860px]:leading-[1.45] max-h-[760px]:my-[12px] max-h-[760px]:text-[clamp(14px,1.18vw,16px)] max-h-[760px]:leading-[1.38]">{heroData.subheading}</p>
 
-      <div class="hero-actions">
-        <a href={heroData.primaryCta.href} class="nb-btn nb-btn--primary nb-btn--lg">
+      <div class="flex flex-wrap gap-[16px] opacity-0 animate-[hero-fade_0.9s_cubic-bezier(0.16,1,0.3,1)_0.7s_forwards] motion-reduce:animate-none motion-reduce:opacity-100 max-h-[860px]:gap-[12px] max-[920px]:justify-center">
+        <a href={heroData.primaryCta.href} class="nb-btn nb-btn--primary nb-btn--lg group">
           <span class="nb-btn__label">{heroData.primaryCta.label}</span>
-          <span class="nb-btn__icon">
+          <span class="inline-flex transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="square" stroke-linejoin="miter">
               <path d="M5 12 H19 M13 6 L19 12 L13 18" />
             </svg>
@@ -42,27 +42,27 @@ import { heroData } from '../../data/content';
       </div>
     </div>
 
-    <!-- RIGHT COL — medallion + stat stripe -->
-    <div class="hero-col-aside">
-      <div class="hero-medallion">
-        <img src="/logo-icon.svg" alt="Nobelion — logo" width="340" height="340" fetchpriority="high" decoding="async" />
-        <div class="hero-medallion__ring"></div>
+    <!-- RIGHT COL -->
+    <div class="flex flex-col items-start max-[920px]:items-center">
+      <div class="relative w-[min(340px,80%)] aspect-square mx-auto max-h-[860px]:w-[min(270px,70%)] max-h-[760px]:w-[min(220px,60%)] max-[920px]:w-[min(240px,60%)] max-[480px]:w-[180px]">
+        <img src="/logo-icon.svg" alt="Nobelion — logo" width="340" height="340" fetchpriority="high" decoding="async" class="w-full h-full object-contain drop-shadow-[0_0_60px_rgba(197,160,89,0.22)] animate-[hero-float_7s_cubic-bezier(0.65,0,0.35,1)_infinite]" />
+        <div class="absolute -inset-[6%] max-h-[760px]:-inset-[4%] border border-white/5 rounded-full animate-[hero-spin_60s_linear_infinite] before:content-[''] before:absolute before:-top-[3px] before:left-1/2 before:w-[5px] before:h-[5px] before:bg-brass-bright before:rounded-full before:shadow-[0_0_10px_var(--color-brass-glow)]"></div>
       </div>
 
-      <div class="hero-stripe is-vert">
+      <div class="flex flex-col gap-[22px] mt-[36px] opacity-0 animate-[hero-fade_0.9s_cubic-bezier(0.16,1,0.3,1)_0.85s_forwards] motion-reduce:animate-none motion-reduce:opacity-100 max-h-[860px]:gap-[12px] max-h-[860px]:mt-[16px] max-h-[760px]:gap-[8px] max-h-[760px]:mt-[12px] max-[920px]:flex-row max-[920px]:flex-wrap max-[920px]:justify-center max-[920px]:gap-[24px] max-[920px]:mt-[24px]">
         {heroData.stripe.map((s) => (
-          <div class="hero-stripe__item">
-            <div class="hero-stripe__k">{s.k}</div>
-            <div class="hero-stripe__v">{s.v}</div>
+          <div class="border-l-2 border-brass-bright pl-[16px] max-[920px]:border-l-0 max-[920px]:border-t-2 max-[920px]:pl-0 max-[920px]:pt-[10px] max-[920px]:text-center">
+            <div class="font-heading font-bold text-[clamp(20px,2vw,27px)] text-brass-bright tracking-[0.01em] max-h-[860px]:text-[clamp(18px,1.8vw,24px)]">{s.k}</div>
+            <div class="font-mono text-[11px] tracking-[0.14em] uppercase text-steel mt-[6px] max-h-[860px]:text-[10px] max-h-[860px]:mt-[4px]">{s.v}</div>
           </div>
         ))}
       </div>
     </div>
   </div>
 
-  <a class="hero-scroll" href="#oferta" aria-label="Przewiń">
-    <span class="caption">{heroData.scrollText}</span>
-    <span class="hero-scroll__line"></span>
+  <a class="absolute bottom-[28px] left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-[10px] text-steel no-underline" href="#oferta" aria-label="Przewiń">
+    <span class="font-mono text-[11px] tracking-[0.24em] uppercase text-steel">{heroData.scrollText}</span>
+    <span class="relative w-[1px] h-[44px] bg-[linear-gradient(var(--color-brass-bright),transparent)] overflow-hidden after:content-[''] after:absolute after:-top-1/2 after:left-0 after:w-full after:h-1/2 after:bg-brass-bright after:animate-[scroll-cue_2s_cubic-bezier(0.65,0,0.35,1)_infinite]"></span>
   </a>
 </section>
 
@@ -76,179 +76,12 @@ import { heroData } from '../../data/content';
 </script>
 
 <style>
-/* ---------------- HERO ---------------- */
-.hero {
-  position: relative;
-  min-height: 100vh;
-  min-height: 100dvh;
-  height: auto;
-  display: flex;
-  align-items: center;
-  overflow: hidden;
-  padding-top: clamp(76px, 10dvh, 110px);
-  padding-bottom: clamp(72px, 11dvh, 120px);
-  background-color: var(--color-onyx);
-  color: var(--color-silver);
-}
-.hero-bg {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-}
-.hero-glow {
-  position: absolute;
-  top: -20%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(1100px, 120vw);
-  height: 900px;
-  background: radial-gradient(
-    ellipse at center,
-    rgba(197, 160, 89, 0.16),
-    rgba(197, 160, 89, 0.04) 38%,
-    transparent 64%
-  );
-  filter: blur(8px);
-}
-.hero-grid {
-  position: absolute;
-  inset: 0;
-  opacity: 0.5;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
-  background-size: 64px 64px;
-  mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, #000 30%, transparent 75%);
-  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, #000 30%, transparent 75%);
-}
-.hero-inner {
-  position: relative;
-  z-index: 2;
-  width: 100%;
-}
-
-/* eyebrow */
-.hero-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 28px;
-}
-.hero-dot {
-  width: 7px;
-  height: 7px;
-  background: var(--color-brass-bright);
-  border-radius: 50%;
-  box-shadow: 0 0 12px 1px var(--color-brass-glow);
-  animation: hero-pulse 2.6s cubic-bezier(0.65, 0, 0.35, 1) infinite;
-}
 @keyframes hero-pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.35; }
 }
-
-/* title — word reveal */
-.hero-title {
-  font-family: var(--font-heading);
-  font-weight: 700;
-  text-transform: uppercase;
-  line-height: 1.0;
-  letter-spacing: 0.02em;
-  color: var(--color-silver);
-  margin: 0;
-  font-size: clamp(38px, 6.2vw, 86px);
-}
-.hero-title .ln {
-  display: block;
-  overflow: hidden;
-  padding-top: 0.18em;
-  margin-top: -0.18em;
-}
-.hero-title .w {
-  display: block;
-  transform: translateY(110%);
-  transition: transform 0.9s cubic-bezier(0.83, 0, 0.17, 1);
-}
-.hero-title .w.accent {
-  color: var(--color-brass-bright);
-}
-.hero-title.lit .w {
-  transform: translateY(0);
-}
-.hero-title.lit .ln:nth-child(2) .w {
-  transition-delay: 0.1s;
-}
-.hero-title.lit .ln:nth-child(3) .w {
-  transition-delay: 0.2s;
-}
-
-/* subtitle */
-.hero-sub {
-  max-width: 560px;
-  margin: 30px 0 38px;
-  font-size: clamp(16px, 1.5vw, 19px);
-  line-height: 1.6;
-  color: var(--color-silver-soft);
-  opacity: 0;
-  animation: hero-fade 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.55s forwards;
-}
 @keyframes hero-fade {
   to { opacity: 1; }
-}
-
-/* actions */
-.hero-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  opacity: 0;
-  animation: hero-fade 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.7s forwards;
-}
-
-/* split layout */
-.hero-split {
-  display: grid;
-  grid-template-columns: 1.25fr 0.85fr;
-  gap: 64px;
-  align-items: center;
-}
-.hero-col-aside {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-/* medallion */
-.hero-medallion {
-  position: relative;
-  width: min(340px, 80%);
-  aspect-ratio: 1;
-  margin: 0 auto;
-}
-.hero-medallion img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  filter: drop-shadow(0 0 60px rgba(197, 160, 89, 0.22));
-  animation: hero-float 7s cubic-bezier(0.65, 0, 0.35, 1) infinite;
-}
-.hero-medallion__ring {
-  position: absolute;
-  inset: -6%;
-  border: 1px solid var(--color-hair-light-2);
-  border-radius: 50%;
-  animation: hero-spin 60s linear infinite;
-}
-.hero-medallion__ring::before {
-  content: "";
-  position: absolute;
-  top: -3px;
-  left: 50%;
-  width: 5px;
-  height: 5px;
-  background: var(--color-brass-bright);
-  border-radius: 50%;
-  box-shadow: 0 0 10px var(--color-brass-glow);
 }
 @keyframes hero-float {
   0%, 100% { transform: translateY(0); }
@@ -257,225 +90,8 @@ import { heroData } from '../../data/content';
 @keyframes hero-spin {
   to { transform: rotate(360deg); }
 }
-
-/* stat stripe */
-.hero-stripe {
-  display: flex;
-  gap: 0;
-  opacity: 0;
-  animation: hero-fade 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.85s forwards;
-}
-.hero-stripe.is-vert {
-  flex-direction: column;
-  gap: 22px;
-  margin-top: 36px;
-}
-.hero-stripe.is-vert .hero-stripe__item {
-  border-left: 2px solid var(--color-brass-bright);
-  padding-left: 16px;
-}
-.hero-stripe__k {
-  font-family: var(--font-heading);
-  font-weight: 700;
-  font-size: clamp(20px, 2vw, 27px);
-  color: var(--color-brass-bright);
-  letter-spacing: 0.01em;
-}
-.hero-stripe__v {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--color-steel);
-  margin-top: 6px;
-}
-
-/* scroll cue */
-.hero-scroll {
-  position: absolute;
-  bottom: 28px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 3;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  color: var(--color-steel);
-  text-decoration: none;
-}
-.hero-scroll .caption {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  color: var(--color-steel);
-}
-.hero-scroll__line {
-  width: 1px;
-  height: 44px;
-  background: linear-gradient(var(--color-brass-bright), transparent);
-  position: relative;
-  overflow: hidden;
-}
-.hero-scroll__line::after {
-  content: "";
-  position: absolute;
-  top: -50%;
-  left: 0;
-  width: 100%;
-  height: 50%;
-  background: var(--color-brass-bright);
-  animation: scroll-cue 2s cubic-bezier(0.65, 0, 0.35, 1) infinite;
-}
 @keyframes scroll-cue {
   0% { top: -50%; }
   100% { top: 100%; }
-}
-
-/* ---------------- BUTTONS ---------------- */
-
-
-/* eyebrow */
-.eyebrow {
-  font-family: var(--font-mono);
-  font-weight: 600;
-  font-size: 12px;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  color: var(--color-brass-bright);
-}
-
-/* responsive */
-@media (max-height: 860px) {
-  .hero {
-    align-items: center;
-    padding-top: clamp(52px, 7dvh, 84px);
-    padding-bottom: clamp(40px, 6dvh, 70px);
-  }
-  .hero-split {
-    gap: clamp(28px, 4dvh, 48px);
-  }
-  .hero-eyebrow {
-    margin-bottom: 18px;
-  }
-  .hero-title {
-    font-size: clamp(34px, 5.6vw, 70px);
-  }
-  .hero-sub {
-    margin: 18px 0 22px;
-    font-size: clamp(15px, 1.28vw, 18px);
-    line-height: 1.45;
-  }
-  .hero-actions {
-    gap: 12px;
-  }
-  .hero-medallion {
-    width: min(270px, 70%);
-  }
-  .hero-stripe.is-vert {
-    gap: 12px;
-    margin-top: 16px;
-  }
-  .hero-stripe__k {
-    font-size: clamp(18px, 1.8vw, 24px);
-  }
-  .hero-stripe__v {
-    font-size: 10px;
-    margin-top: 4px;
-  }
-}
-
-@media (max-height: 760px) {
-  .hero {
-    align-items: center;
-    padding-top: clamp(42px, 5.5dvh, 66px);
-    padding-bottom: clamp(22px, 3.8dvh, 42px);
-  }
-  .hero-title {
-    font-size: clamp(30px, 5.2vw, 58px);
-  }
-  .hero-sub {
-    margin: 12px 0 16px;
-    font-size: clamp(14px, 1.18vw, 16px);
-    line-height: 1.38;
-  }
-  .hero-medallion {
-    width: min(220px, 60%);
-  }
-  .hero-medallion__ring {
-    inset: -4%;
-  }
-  .hero-stripe.is-vert {
-    gap: 8px;
-    margin-top: 12px;
-  }
-}
-
-@media (max-height: 760px) and (max-width: 920px) {
-  .hero {
-    padding-top: 76px;
-    padding-bottom: 30px;
-  }
-}
-
-@media (max-width: 920px) {
-  .hero {
-    height: auto;
-    min-height: 100dvh;
-    padding-top: 140px;
-    padding-bottom: 120px;
-  }
-  .hero-split {
-    grid-template-columns: 1fr;
-    gap: 48px;
-  }
-  .hero-col-main {
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  .hero-actions {
-    justify-content: center;
-  }
-  .hero-col-aside {
-    align-items: center;
-  }
-  .hero-medallion {
-    width: min(240px, 60%);
-  }
-  .hero-stripe.is-vert {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 24px;
-    margin-top: 24px;
-  }
-  .hero-stripe.is-vert .hero-stripe__item {
-    border-left: none;
-    border-top: 2px solid var(--color-brass-bright);
-    padding-left: 0;
-    padding-top: 10px;
-    text-align: center;
-  }
-}
-@media (max-width: 480px) {
-  .hero-medallion {
-    width: 180px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hero-title .w {
-    transform: none !important;
-    transition: none !important;
-  }
-  .hero-sub,
-  .hero-actions,
-  .hero-stripe {
-    animation: none !important;
-    opacity: 1 !important;
-  }
 }
 </style>

@@ -1,18 +1,20 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import { renderMarkdown } from '../../lib/markdown';
-import DocModal from '../../components/ui/DocModal.astro';
+import QuotePaymentWidget from '../../components/ui/QuotePaymentWidget.svelte';
+import QuoteChangeModal from '../../components/ui/QuoteChangeModal.svelte';
+import { BUSINESS_CONFIG, PAYMENT_MODELS, PAYMENT_STATUSES, getApiUrl, API_ENDPOINTS } from '../../lib/constants';
 
 export const prerender = false;
 
-const { token } = Astro.params;
-const apiUrl = (process.env.PAYLOAD_API_URL || import.meta.env.PAYLOAD_API_URL || 'http://localhost:3001').replace(/\/$/, '');
+const token = Astro.params.token || '';
+const apiUrl = getApiUrl();
 
 let quoteData: any = null;
 let errorMsg: string | null = null;
 
 try {
-  const res = await fetch(`${apiUrl}/api/quotes/client/${token}`);
+  const res = await fetch(`${apiUrl}${API_ENDPOINTS.quoteByToken(token)}`);
   if (res.ok) {
     quoteData = await res.json();
   } else {
@@ -23,780 +25,115 @@ try {
 }
 
 const fullPrice: number = quoteData?.totalPrice || 0;
-const discountedPrice = Math.round(fullPrice * 0.9);
-const savings = fullPrice - discountedPrice;
 const briefCompany: string = quoteData?.brief?.company || 'Klienta';
 const briefProblem: string = quoteData?.brief?.problemDescription || '';
-// Po opłaceniu panel płatności zamienia się w potwierdzenie (endpoint i tak blokuje).
-const paymentStatus: string = quoteData?.paymentStatus || 'unpaid';
-const remainingPrice = fullPrice - Math.round(fullPrice / 2);
+const paymentStatus: string = quoteData?.paymentStatus || PAYMENT_STATUSES.UNPAID;
 
-// Treść wyceny jest pisana w Markdown (pola textarea w panelu) → render + sanityzacja.
 const introHtml = renderMarkdown(quoteData?.intro);
 const timelineHtml = renderMarkdown(quoteData?.timelinePlan);
 const scopeHtml = renderMarkdown(quoteData?.scopePlan);
 
-// Dokumenty prawne do akceptacji (clickwrap). Publiczny endpoint, bez auth.
 type LegalDoc = { docType: string; title: string; content: string; version?: string };
 let legalDocs: Record<string, { title: string; html: string; version?: string }> = {};
-if (quoteData && paymentStatus === 'unpaid') {
+if (quoteData && paymentStatus === PAYMENT_STATUSES.UNPAID) {
   try {
-    const dres = await fetch(`${apiUrl}/api/documents/public`);
+    const dres = await fetch(`${apiUrl}${API_ENDPOINTS.publicDocuments()}`);
     if (dres.ok) {
       const dj = await dres.json();
       for (const d of (dj.documents || []) as LegalDoc[]) {
         legalDocs[d.docType] = { title: d.title, html: renderMarkdown(d.content), version: d.version };
       }
     }
-  } catch { /* dokumenty opcjonalne — brak nie blokuje renderu strony */ }
+  } catch { /* ignored */ }
 }
-const docOrder = ['umowa-wspolpracy', 'regulamin', 'polityka-prywatnosci'] as const;
-const consentDocs = docOrder
-  .filter((t) => legalDocs[t])
-  .map((t) => ({ type: t, title: legalDocs[t].title, html: legalDocs[t].html }));
-// Pojedyncze dokumenty — dwie grupy zgód: (regulamin + polityka) oraz (umowa współpracy).
-const docRegulamin = legalDocs['regulamin'];
-const docPolityka = legalDocs['polityka-prywatnosci'];
-const docUmowa = legalDocs['umowa-wspolpracy'];
-
-const fmt = (n: number) => new Intl.NumberFormat('pl-PL').format(n);
 ---
 
-<Layout>
+<Layout title={`Wycena: ${briefCompany} | Nobelion`} noindex={true}>
   {errorMsg ? (
-    <section class="onyx q-error">
-      <div class="wrap q-error__inner">
+    <section class="onyx min-h-[70vh] flex items-center pt-[120px] pb-[80px] bg-onyx text-silver">
+      <div class="wrap text-center">
         <span class="eyebrow">Błąd</span>
-        <h1 class="h2 q-error__title">Nie znaleziono wyceny</h1>
+        <h1 class="h2 m-[16px_0] text-silver">Nie znaleziono wyceny</h1>
         <p class="lead">{errorMsg}</p>
-        <a href="/" class="nb-btn nb-btn--ghost-light nb-btn--lg q-error__cta">
+        <a href="/" class="nb-btn nb-btn--ghost-light nb-btn--lg mt-[28px]">
           <span class="nb-btn__label">Wróć na stronę główną</span>
         </a>
       </div>
     </section>
   ) : (
     <>
-      {/* ───────── ONYX HERO BAND ───────── */}
-      <section class="onyx q-hero">
-        <div class="q-hero__bg" aria-hidden="true">
-          <div class="q-hero__glow"></div>
-          <div class="q-hero__grid"></div>
+      <section class="onyx relative overflow-hidden bg-onyx text-silver pt-[clamp(128px,17vh,196px)] pb-[clamp(96px,12vw,168px)] max-[640px]:pt-[clamp(100px,15vh,140px)] max-[640px]:pb-[clamp(52px,11vw,88px)]">
+        <div class="absolute inset-0 z-0" aria-hidden="true">
+          <div class="absolute top-[-30%] left-1/2 -translate-x-1/2 w-[min(900px,110vw)] h-[700px] blur-[8px]" style="background: radial-gradient(ellipse at center, rgba(197,160,89,0.18), rgba(197,160,89,0.04) 40%, transparent 66%);"></div>
+          <div class="absolute inset-0 opacity-50 bg-[size:64px_64px]" style="background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px); mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, #000 30%, transparent 75%); -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, #000 30%, transparent 75%);"></div>
         </div>
-        <div class="wrap q-hero__inner">
-          <div class="q-hero__eyebrow">
-            <span class="q-hero__dot"></span>
+        <div class="wrap relative z-2">
+          <div class="inline-flex items-center gap-[10px] mb-[26px]">
+            <span class="w-[7px] h-[7px] rounded-full bg-brass-bright shadow-[0_0_12px_1px_var(--color-brass-glow)] motion-safe:animate-[q-pulse_2.6s_cubic-bezier(0.65,0,0.35,1)_infinite]"></span>
             <span class="eyebrow">Propozycja wdrożenia</span>
           </div>
-          <h1 class="q-hero__title">
-            Wycena dla <span class="q-hero__accent">{briefCompany}</span>
+          <h1 class="font-heading font-bold uppercase leading-[1.04] tracking-[0.04em] text-silver m-0 text-[clamp(28px,5vw,68px)] max-w-[16ch] break-words">
+            Wycena dla <span class="text-brass-bright">{briefCompany}</span>
           </h1>
-          <p class="q-hero__sub">
+          <p class="max-w-[60ch] m-[28px_0_0] text-[clamp(16px,1.4vw,19px)] leading-[1.6] text-silver-soft">
             Zgodnie z naszymi ustaleniami, przedstawiamy dedykowany plan inwestycji oraz
             szczegóły technologiczne dla Twojego rozwiązania.
           </p>
         </div>
       </section>
 
-      {/* ───────── LIGHT BODY (overlapping panel) ───────── */}
-      <section class="section q-body nb-panel bg-paper">
+      <section class="section nb-panel bg-paper pt-[clamp(56px,7vw,96px)]">
         <div class="wrap">
-          <div class="q-grid">
+          <div class="grid grid-cols-[1.6fr_0.9fr] gap-[clamp(40px,5vw,80px)] items-start max-[980px]:grid-cols-1 max-[980px]:gap-[48px]">
 
-            {/* LEFT — treść */}
-            <div class="q-content">
-
+            <div class="min-w-0">
               {introHtml ? (
                 <div class="rt" set:html={introHtml} />
               ) : briefProblem ? (
-                <section class="q-section">
-                  <h2 class="q-h"><span class="q-h__mark" aria-hidden="true"></span>Wyzwanie</h2>
-                  <p class="q-problem">{briefProblem}</p>
+                <section class="mb-[clamp(40px,5vw,64px)]">
+                  <h2 class="flex items-center gap-[14px] max-[640px]:gap-[10px] font-heading font-semibold text-[var(--fs-h4)] max-[640px]:text-[1rem] tracking-[var(--tracking-cinematic)] uppercase text-ink m-[0_0_22px] pb-[18px] border-b border-hair-ink">
+                    <span class="w-[11px] h-[11px] shrink-0 border border-brass rotate-45 relative after:content-[''] after:absolute after:inset-[3px] after:bg-brass" aria-hidden="true"></span>
+                    Wyzwanie
+                  </h2>
+                  <p class="text-ink-2 leading-[var(--lh-body)] whitespace-pre-wrap">{briefProblem}</p>
                 </section>
               ) : null}
 
               {timelineHtml && (
-                <section class="q-section">
-                  <h2 class="q-h"><span class="q-h__mark" aria-hidden="true"></span>Plan realizacji</h2>
+                <section class="mb-[clamp(40px,5vw,64px)]">
+                  <h2 class="flex items-center gap-[14px] max-[640px]:gap-[10px] font-heading font-semibold text-[var(--fs-h4)] max-[640px]:text-[1rem] tracking-[var(--tracking-cinematic)] uppercase text-ink m-[0_0_22px] pb-[18px] border-b border-hair-ink">
+                    <span class="w-[11px] h-[11px] shrink-0 border border-brass rotate-45 relative after:content-[''] after:absolute after:inset-[3px] after:bg-brass" aria-hidden="true"></span>
+                    Plan realizacji
+                  </h2>
                   <div class="rt" set:html={timelineHtml} />
                 </section>
               )}
 
               {scopeHtml && (
-                <section class="q-section">
-                  <h2 class="q-h"><span class="q-h__mark" aria-hidden="true"></span>Zakres prac</h2>
+                <section class="mb-[clamp(40px,5vw,64px)]">
+                  <h2 class="flex items-center gap-[14px] max-[640px]:gap-[10px] font-heading font-semibold text-[var(--fs-h4)] max-[640px]:text-[1rem] tracking-[var(--tracking-cinematic)] uppercase text-ink m-[0_0_22px] pb-[18px] border-b border-hair-ink">
+                    <span class="w-[11px] h-[11px] shrink-0 border border-brass rotate-45 relative after:content-[''] after:absolute after:inset-[3px] after:bg-brass" aria-hidden="true"></span>
+                    Zakres prac
+                  </h2>
                   <div class="rt" set:html={scopeHtml} />
                 </section>
               )}
 
-              <div class="q-change">
-                <p>Masz pytania lub chciałbyś zmodyfikować zakres tej wyceny?</p>
-                <button id="open-change-modal" class="q-change__btn" type="button">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" stroke-linejoin="miter">
-                    <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                  </svg>
-                  <span>Poproś o poprawki do wyceny</span>
-                </button>
-              </div>
+              <QuoteChangeModal client:load {apiUrl} {token} />
             </div>
 
-            {/* RIGHT — płatność */}
-            <aside class="q-pay" id="payment-options" data-token={token} data-api={apiUrl}>
-              <div class="q-pay__sticky">
-                <div class="q-pay__head">
-                  <span class="eyebrow">Całkowita wartość</span>
-                  <div class="q-pay__full">{fmt(fullPrice)} PLN</div>
-                  <span class="caption">Cena podstawowa (netto)</span>
-                </div>
-
-                {paymentStatus === 'paid_full' ? (
-                  <div class="q-paid">
-                    <span class="q-paid__check" aria-hidden="true">
-                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" stroke-linejoin="miter">
-                        <path d="M5 12.5 L10 17.5 L19 6.5" />
-                      </svg>
-                    </span>
-                    <h3 class="h4 q-paid__title">Opłacone w całości</h3>
-                    <p class="q-paid__desc">Dziękujemy — realizacja jest w toku. Potwierdzenie płatności i faktura trafiły na Twój e-mail.</p>
-                  </div>
-                ) : paymentStatus === 'paid_half' ? (
-                  <div class="q-paid">
-                    <span class="q-paid__check" aria-hidden="true">
-                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" stroke-linejoin="miter">
-                        <path d="M5 12.5 L10 17.5 L19 6.5" />
-                      </svg>
-                    </span>
-                    <h3 class="h4 q-paid__title">I rata opłacona</h3>
-                    <p class="q-paid__desc">Pracujemy nad Twoim projektem. Pozostałą część ({fmt(remainingPrice)} PLN) opłacisz linkiem, który wyślemy mailem na koniec prac.</p>
-                  </div>
-                ) : (
-                  <>
-                    {/* Dokumenty i zgody (clickwrap) — pod ceną, PRZED wyborem płatności */}
-                    <div class="q-consent" id="q-consent">
-                      <span class="caption q-consent__h">Dokumenty i zgody</span>
-
-                      <div class="q-consent__group">
-                        {(docRegulamin || docPolityka) && (
-                          <div class="q-consent__docs">
-                            {docRegulamin && (
-                              <button type="button" class="q-consent__doc" data-doc="regulamin">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M7 3h7l5 5v13H7zM14 3v5h5"/></svg>
-                                <span>{docRegulamin.title}</span>
-                                {docRegulamin.version && <span class="q-consent__ver">wersja {docRegulamin.version}</span>}
-                              </button>
-                            )}
-                            {docPolityka && (
-                              <button type="button" class="q-consent__doc" data-doc="polityka-prywatnosci">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M7 3h7l5 5v13H7zM14 3v5h5"/></svg>
-                                <span>{docPolityka.title}</span>
-                                {docPolityka.version && <span class="q-consent__ver">wersja {docPolityka.version}</span>}
-                              </button>
-                            )}
-                          </div>
-                        )}
-                        <label class="q-consent__check">
-                          <input type="checkbox" id="consent-terms" />
-                          <span class="q-consent__cbox" aria-hidden="true"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="square"><path d="M5 12.5 L10 17.5 L19 6.5"/></svg></span>
-                          <span>Akceptuję regulamin i politykę prywatności.</span>
-                        </label>
-                      </div>
-
-                      <div class="q-consent__group">
-                        {docUmowa && (
-                          <div class="q-consent__docs">
-                            <button type="button" class="q-consent__doc" data-doc="umowa-wspolpracy">
-                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M7 3h7l5 5v13H7zM14 3v5h5"/></svg>
-                              <span>{docUmowa.title}</span>
-                              {docUmowa.version && <span class="q-consent__ver">wersja {docUmowa.version}</span>}
-                            </button>
-                          </div>
-                        )}
-                        <label class="q-consent__check">
-                          <input type="checkbox" id="consent-agreement" />
-                          <span class="q-consent__cbox" aria-hidden="true"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="square"><path d="M5 12.5 L10 17.5 L19 6.5"/></svg></span>
-                          <span>Akceptuję umowę współpracy.</span>
-                        </label>
-                      </div>
-
-                      <p class="q-consent__hint" id="consent-hint">Zaznacz obie zgody, aby odblokować płatność.</p>
-                    </div>
-
-                    {/* Wybór płatności — najważniejsza jest jednorazowa z rabatem */}
-                    <span class="caption q-pay__choose">Wybierz formę płatności</span>
-
-                    {/* Jednorazowa — rabat 10% (opcja główna) */}
-                    <button type="button" data-model="100" class="payment-btn q-opt q-opt--primary">
-                      <span class="q-opt__ribbon">Rabat 10%</span>
-                      <h3 class="h4 q-opt__title">Płatność jednorazowa</h3>
-                      <p class="q-opt__desc">Domykasz sprawę od ręki i schodzisz z ceny o 10%. Jedna płatność, pełny rabat — ruszamy z projektem bez zwłoki.</p>
-                      <div class="q-opt__price q-opt__price--accent">{fmt(discountedPrice)} PLN</div>
-                      {savings > 0 && <span class="q-opt__save">Oszczędzasz {fmt(savings)} PLN</span>}
-                      <span class="btn-text q-opt__cta q-opt__cta--solid">Opłać całość z rabatem</span>
-                    </button>
-
-                    {/* Etapowa — 50% (opcja drugorzędna) */}
-                    <button type="button" data-model="50" class="payment-btn q-opt q-opt--secondary">
-                      <h3 class="h4 q-opt__title">Płatność w dwóch ratach</h3>
-                      <p class="q-opt__desc">Wolisz rozłożyć inwestycję? Płacisz połowę na start, a drugą część dopiero po odbiorze gotowego projektu.</p>
-                      <div class="q-opt__price">{fmt(Math.round(fullPrice / 2))} PLN</div>
-                      <span class="caption q-opt__sub">I rata — start prac</span>
-                      <span class="btn-text q-opt__cta q-opt__cta--ghost">Opłać I ratę (50%)</span>
-                    </button>
-
-                    {/* Opcjonalny add-on: opieka po wdrożeniu (upsell — start po oddaniu projektu) */}
-                    {quoteData.maintenancePrice ? (
-                      <label class="q-addon">
-                        <input type="checkbox" id="maintenance-checkbox" checked={quoteData.clientSelectedMaintenance} />
-                        <span class="q-addon__box" aria-hidden="true">
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="square"><path d="M5 12.5 L10 17.5 L19 6.5"/></svg>
-                        </span>
-                        <span class="q-addon__body">
-                          <span class="q-addon__top">
-                            <span class="q-addon__name">Opieka po wdrożeniu</span>
-                            <span class="q-addon__price">+{fmt(quoteData.maintenancePrice)} zł/mies.</span>
-                          </span>
-                          <span class="q-addon__lead">Twój system zostaje pod naszą ręką — działa bez przerw, jest aktualny i bezpieczny. Ty prowadzisz firmę, technologią zajmujemy się my.</span>
-                          <span class="q-addon__scope">{quoteData.maintenanceDescription || 'Monitoring, aktualizacje, kopie zapasowe i drobne poprawki po starcie.'}</span>
-                          <span class="q-addon__note">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.5"/></svg>
-                            <span>Pierwsza opłata rusza dopiero po oddaniu gotowego projektu — dziś nie płacisz za nią nic.</span>
-                          </span>
-                          <span class="q-addon__cue">
-                            <span class="q-addon__cue--off">
-                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="M12 5v14M5 12h14"/></svg>
-                              Dodaj do oferty
-                            </span>
-                            <span class="q-addon__cue--on">
-                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="square"><path d="M5 12.5 L10 17.5 L19 6.5"/></svg>
-                              W ofercie — start po wdrożeniu
-                            </span>
-                          </span>
-                        </span>
-                      </label>
-                    ) : null}
-                  </>
-                )}
-              </div>
-            </aside>
-
-
+            <QuotePaymentWidget client:load {apiUrl} {token} {fullPrice} {quoteData} {legalDocs} />
 
           </div>
         </div>
       </section>
-
-      {/* ───────── MODAL ───────── */}
-      <div id="change-modal" class="q-modal">
-        <div id="change-modal-content" class="q-modal__box" data-lenis-prevent>
-          <button id="close-change-modal" class="q-modal__close" aria-label="Zamknij" type="button">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" stroke-linejoin="miter">
-              <path d="M6 18L18 6M6 6l12 12"/>
-            </svg>
-          </button>
-          <div id="change-form-state">
-            <span class="eyebrow">Poprawki</span>
-            <h3 class="h3 q-modal__title">Zgłoś zmiany</h3>
-            <p class="q-modal__lead">Napisz co chciałbyś zmienić w zakresie lub wycenie. Przygotujemy nową ofertę.</p>
-            <textarea id="change-message" rows="5" maxlength="2000" class="q-modal__field" placeholder="Twoje uwagi..."></textarea>
-            <button id="submit-change" class="nb-btn nb-btn--primary nb-btn--lg q-modal__submit" type="button">
-              <span class="nb-btn__label">Wyślij prośbę o zmiany</span>
-            </button>
-          </div>
-          <div id="change-success-state" class="q-modal__success">
-            <div class="q-modal__check">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter">
-                <path d="M5 13l4 4L19 7"/>
-              </svg>
-            </div>
-            <h3 class="h3 q-modal__title">Prośba przyjęta</h3>
-            <p class="q-modal__lead">Otrzymaliśmy Twoje uwagi. Wrócimy z poprawioną wersją wyceny na Twój e-mail.</p>
-            <button id="close-success-modal" class="nb-btn nb-btn--ghost-light nb-btn--md q-modal__close-btn" type="button" style="border-color:var(--color-hair-ink);color:var(--color-ink-2);">
-              <span class="nb-btn__label">Zamknij</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Modale dokumentów prawnych */}
-      {consentDocs.map((d) => (
-        <DocModal type={d.type} title={d.title} html={d.html} />
-      ))}
     </>
   )}
 </Layout>
 
 <style>
-/* ============================================================
-   QUOTE — onyx hero + light editorial body (Nobelion design system)
-   ============================================================ */
-
-/* ── ONYX HERO BAND ── */
-.q-hero {
-  position: relative;
-  overflow: hidden;
-  background-color: var(--color-onyx);
-  color: var(--color-silver);
-  padding-top: clamp(128px, 17vh, 196px);
-  padding-bottom: clamp(96px, 12vw, 168px);
-}
-.q-hero__bg { position: absolute; inset: 0; z-index: 0; }
-.q-hero__glow {
-  position: absolute; top: -30%; left: 50%; transform: translateX(-50%);
-  width: min(900px, 110vw); height: 700px;
-  background: radial-gradient(ellipse at center, rgba(197,160,89,0.18), rgba(197,160,89,0.04) 40%, transparent 66%);
-  filter: blur(8px);
-}
-.q-hero__grid {
-  position: absolute; inset: 0; opacity: 0.5;
-  background-image:
-    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
-  background-size: 64px 64px;
-  mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, #000 30%, transparent 75%);
-  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, #000 30%, transparent 75%);
-}
-.q-hero__inner { position: relative; z-index: 2; }
-.q-hero__eyebrow { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 26px; }
-.q-hero__dot {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: var(--color-brass-bright);
-  box-shadow: 0 0 12px 1px var(--color-brass-glow);
-  animation: q-pulse 2.6s cubic-bezier(0.65,0,0.35,1) infinite;
-}
-@keyframes q-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
-.q-hero__title {
-  font-family: var(--font-heading); font-weight: 700; text-transform: uppercase;
-  line-height: 1.04; letter-spacing: 0.04em; color: var(--color-silver);
-  margin: 0; font-size: clamp(28px, 5vw, 68px); max-width: 16ch;
-  overflow-wrap: break-word; word-break: break-word;
-}
-.q-hero__accent { color: var(--color-brass-bright); }
-.q-hero__sub {
-  max-width: 60ch; margin: 28px 0 0;
-  font-size: clamp(16px, 1.4vw, 19px); line-height: 1.6;
-  color: var(--color-silver-soft);
-}
-
-/* ── LIGHT BODY ── */
-.q-body { background: var(--color-paper); padding-top: clamp(56px, 7vw, 96px); }
-.q-grid {
-  display: grid; grid-template-columns: 1.6fr 0.9fr; gap: clamp(40px, 5vw, 80px);
-  align-items: start;
-}
-
-/* left content */
-.q-content { min-width: 0; }
-.q-section { margin-bottom: clamp(40px, 5vw, 64px); }
-.q-h {
-  display: flex; align-items: center; gap: 14px;
-  font-family: var(--font-heading); font-weight: 600; font-size: var(--fs-h4);
-  letter-spacing: var(--tracking-cinematic); text-transform: uppercase;
-  color: var(--color-ink); margin: 0 0 22px; padding-bottom: 18px;
-  border-bottom: 1px solid var(--color-hair-ink);
-}
-.q-h__mark {
-  width: 11px; height: 11px; flex-shrink: 0;
-  border: 1px solid var(--color-brass); transform: rotate(45deg);
-  position: relative;
-}
-.q-h__mark::after {
-  content: ""; position: absolute; inset: 3px; background: var(--color-brass);
-}
-.q-problem { color: var(--color-ink-2); line-height: var(--lh-body); white-space: pre-wrap; }
-
-/* ── add-on opieki (w kolumnie płatności) ── */
-.q-addon {
-  display: flex; gap: 13px; align-items: flex-start; cursor: pointer;
-  border: 1px solid color-mix(in srgb, var(--color-brass), transparent 50%);
-  border-radius: var(--r-card);
-  padding: 16px 18px;
-  background: color-mix(in srgb, var(--color-brass), transparent 95%);
-  transition: border-color var(--dur-base) var(--ease-out), background var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
-}
-.q-addon:hover { border-color: var(--color-brass); box-shadow: 0 8px 22px -14px var(--color-brass-glow); }
-.q-addon:has(input:checked) { border-color: var(--color-brass); background: color-mix(in srgb, var(--color-brass), transparent 88%); box-shadow: inset 0 0 0 1px var(--color-brass); }
-.q-addon:has(input:checked):hover { box-shadow: inset 0 0 0 1px var(--color-brass), 0 8px 22px -14px var(--color-brass-glow); }
-.q-addon input { position: absolute; opacity: 0; width: 0; height: 0; }
-.q-addon input:focus-visible + .q-addon__box { outline: 2px solid var(--color-brass); outline-offset: 2px; }
-.q-addon__box {
-  flex-shrink: 0; width: 24px; height: 24px; margin-top: 1px; border-radius: 6px;
-  border: 1.5px solid var(--color-brass);
-  background: var(--color-paper);
-  display: flex; align-items: center; justify-content: center;
-  color: transparent; transition: all var(--dur-fast);
-  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--color-brass), transparent 86%);
-}
-.q-addon:hover .q-addon__box { border-color: var(--color-brass-dark); }
-.q-addon input:checked + .q-addon__box {
-  background: var(--color-brass); border-color: var(--color-brass); color: var(--color-void); box-shadow: none;
-}
-.q-addon__body { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
-.q-addon__top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
-.q-addon__name { font-family: var(--font-heading); font-weight: 600; font-size: 14px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-ink); }
-.q-addon__price { font-family: var(--font-mono); font-size: 13px; color: var(--color-brass-dark); white-space: nowrap; font-weight: 600; }
-.q-addon__lead { font-size: 12.5px; line-height: 1.58; color: var(--color-ink-2); }
-.q-addon__scope { font-size: 12.5px; line-height: 1.55; color: var(--color-ink-3); white-space: pre-line; }
-.q-addon__note {
-  display: flex; align-items: flex-start; gap: 7px; margin-top: 2px;
-  padding-top: 10px; border-top: 1px solid color-mix(in srgb, var(--color-brass), transparent 78%);
-  font-size: 11.5px; line-height: 1.5; color: var(--color-brass-dark);
-}
-.q-addon__note svg { flex-shrink: 0; margin-top: 1px; }
-.q-addon__cue { margin-top: 3px; font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; }
-.q-addon__cue--off, .q-addon__cue--on { display: inline-flex; align-items: center; gap: 6px; }
-.q-addon__cue--on { display: none; color: var(--color-ink-3); }
-.q-addon__cue--off { color: var(--color-brass-dark); }
-.q-addon:has(input:checked) .q-addon__cue--off { display: none; }
-.q-addon:has(input:checked) .q-addon__cue--on { display: inline-flex; }
-
-/* ── dokumenty i zgody (clickwrap) ── */
-.q-consent {
-  border: 1px solid var(--color-paper-edge); border-radius: var(--r-card);
-  padding: 16px 18px; display: flex; flex-direction: column; gap: 12px;
-  background: var(--color-paper-2);
-}
-.q-consent__h { display: block; color: var(--color-ink-3); }
-.q-consent__group { display: flex; flex-direction: column; gap: 8px; }
-.q-consent__docs { display: flex; flex-direction: column; gap: 6px; }
-.q-consent__doc {
-  display: inline-flex; align-items: center; gap: 9px; text-align: left;
-  background: none; border: none; cursor: pointer; padding: 4px 0;
-  font-size: 13px; color: var(--color-brass-dark); text-decoration: underline; text-underline-offset: 3px;
-  transition: color var(--dur-fast);
-}
-.q-consent__doc:hover { color: var(--color-ink); }
-.q-consent__doc svg { flex-shrink: 0; color: var(--color-ink-4); }
-.q-consent__ver {
-  font-family: var(--font-mono);
-  font-size: 10.5px;
-  letter-spacing: 0.04em;
-  color: var(--color-ink-4);
-  white-space: nowrap;
-}
-.q-consent__empty { font-size: 12px; color: var(--color-ink-4); margin: 0; }
-.q-consent__check { display: flex; gap: 11px; align-items: flex-start; cursor: pointer; }
-.q-consent__check input { position: absolute; opacity: 0; width: 0; height: 0; }
-.q-consent__cbox {
-  flex-shrink: 0; width: 20px; height: 20px; margin-top: 1px; border-radius: 6px;
-  border: 1px solid color-mix(in srgb, var(--color-brass), transparent 40%); display: flex; align-items: center; justify-content: center;
-  color: transparent; background: var(--color-paper); transition: all var(--dur-fast);
-}
-.q-consent__check:hover .q-consent__cbox { border-color: var(--color-brass); }
-.q-consent__check input:focus-visible + .q-consent__cbox { outline: 2px solid var(--color-brass); outline-offset: 2px; }
-.q-consent__check input:checked + .q-consent__cbox { background: var(--color-brass); border-color: var(--color-brass); color: var(--color-void); }
-.q-consent__check span:last-child { font-size: 12.5px; line-height: 1.55; color: var(--color-ink-2); }
-.q-consent__hint { margin: 0; text-align: center; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.04em; color: var(--color-ink-4); }
-
-/* Puls naprowadzający — gdy klient klika opcję płatności przed akceptacją zgód
-   (przewijamy do zgód i podświetlamy), a po akceptacji wracamy pulsem do opcji. */
-@keyframes q-flash {
-  0%, 100% { box-shadow: 0 0 0 0 transparent; }
-  25% { box-shadow: 0 0 0 3px var(--color-brass-glow); border-color: var(--color-brass); }
-}
-.q-consent.is-flash { animation: q-flash 1.1s var(--ease-out); }
-.q-opt.is-flash { animation: q-flash 1.1s var(--ease-out); }
-
-
-/* ── change request ── */
-.q-change { padding-top: clamp(28px, 3vw, 40px); border-top: 1px solid var(--color-hair-ink); }
-.q-change p { font-size: 14px; color: var(--color-ink-3); margin: 0 0 16px; }
-.q-change__btn {
-  display: inline-flex; align-items: center; gap: 10px;
-  font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.06em;
-  color: var(--color-brass-dark); background: none; border: none; cursor: pointer; padding: 0;
-  transition: color var(--dur-base) var(--ease-out);
-}
-.q-change__btn svg { transition: transform var(--dur-base) var(--ease-out); }
-.q-change__btn:hover { color: var(--color-ink); }
-.q-change__btn:hover svg { transform: rotate(-12deg); }
-.q-change__btn span { border-bottom: 1px solid var(--color-brass-glow); padding-bottom: 2px; }
-
-/* ── payment (right) ── */
-.q-pay { min-width: 0; }
-.q-pay__sticky { position: sticky; top: 96px; display: flex; flex-direction: column; gap: 18px; }
-.q-pay__head { margin-bottom: 6px; }
-.q-pay__full {
-  font-family: var(--font-heading); font-weight: 700;
-  font-size: clamp(32px, 3.4vw, 42px); color: var(--color-ink);
-  line-height: 1; margin: 12px 0 8px;
-}
-
-.q-opt {
-  position: relative; display: flex; flex-direction: column; text-align: left;
-  width: 100%; cursor: pointer; padding: clamp(22px, 2.4vw, 30px);
-  background: var(--color-paper-2);
-  border: 1px solid var(--color-hair-ink);
-  border-radius: var(--r-card);
-  transition: border-color var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out);
-}
-.q-opt:hover { border-color: var(--color-ink-4); box-shadow: var(--shadow-lift); transform: translateY(-2px); }
-/* Stan „zablokowane zgodami" — oferta zostaje w pełni czytelna (rabat widoczny),
-   wyciszamy tylko CTA; klik prowadzi do sekcji zgód. */
-.q-opt.is-locked .q-opt__cta { opacity: 0.5; }
-.q-opt.is-busy { opacity: 0.6; cursor: wait; transform: none; pointer-events: none; }
-.q-pay__choose { display: block; color: var(--color-ink-3); margin-bottom: -4px; }
-
-.q-opt--primary {
-  border-color: var(--color-brass);
-  background: linear-gradient(160deg, color-mix(in srgb, var(--color-brass) 7%, var(--color-paper-2)), var(--color-paper-2));
-}
-.q-opt--primary:hover { border-color: var(--color-brass-dark); box-shadow: var(--glow-brass), var(--shadow-lift); }
-
-.q-opt__ribbon {
-  position: absolute; top: 0; right: 0;
-  background: var(--color-brass); color: var(--color-void);
-  font-family: var(--font-mono); font-size: 10px; font-weight: 600;
-  letter-spacing: 0.14em; text-transform: uppercase; padding: 6px 12px;
-  border-bottom-left-radius: var(--r-inset);
-}
-.q-opt__title { margin: 0 0 10px; color: var(--color-ink); }
-.q-opt__desc { font-size: 14px; line-height: 1.6; color: var(--color-ink-3); margin: 0 0 20px; flex-grow: 1; }
-.q-opt__price {
-  font-family: var(--font-heading); font-weight: 700;
-  font-size: clamp(24px, 2.6vw, 30px); color: var(--color-ink); line-height: 1; margin-bottom: 4px;
-}
-.q-opt__price--accent { color: var(--color-brass-dark); }
-.q-opt__save {
-  display: block; margin: 3px 0 18px;
-  font-family: var(--font-mono); font-size: 11.5px; font-weight: 600;
-  letter-spacing: 0.06em; color: var(--color-brass-dark);
-}
-.q-opt__sub { display: block; margin-bottom: 18px; }
-
-/* opcja drugorzędna — celowo wyciszona względem głównej (rabat 10%) */
-.q-opt--secondary { background: transparent; }
-.q-opt--secondary .q-opt__title { color: var(--color-ink-2); }
-.q-opt--secondary .q-opt__price { font-size: clamp(20px, 2.1vw, 25px); color: var(--color-ink-2); }
-
-/* panel po opłaceniu — zamiast przycisków płatności */
-.q-paid {
-  display: flex; flex-direction: column; align-items: flex-start; gap: 10px;
-  border: 1px solid rgba(184, 137, 62, 0.45); background: rgba(184, 137, 62, 0.06);
-  border-radius: var(--r-card); padding: 26px 24px;
-}
-.q-paid__check {
-  width: 44px; height: 44px; border: 1.5px solid var(--color-brass);
-  border-radius: 50%; display: flex; align-items: center; justify-content: center;
-  color: var(--color-brass-dark); margin-bottom: 4px;
-}
-.q-paid__title { margin: 0; color: var(--color-ink); }
-.q-paid__desc { margin: 0; font-size: 14px; line-height: 1.6; color: var(--color-ink-2); }
-.q-opt__cta {
-  display: inline-flex; align-items: center; justify-content: center; width: 100%;
-  font-family: var(--font-mono); font-weight: 600; font-size: 12.5px;
-  letter-spacing: 0.14em; text-transform: uppercase; padding: 14px 20px;
-  margin-top: auto; border-radius: var(--r-control);
-  transition: background var(--dur-base) var(--ease-out), border-color var(--dur-base) var(--ease-out), color var(--dur-base) var(--ease-out);
-}
-.q-opt__cta--solid { background: var(--color-brass-bright); color: var(--color-void); }
-.q-opt--primary:hover .q-opt__cta--solid { background: var(--color-brass-light); }
-.q-opt__cta--ghost { border: 1px solid var(--color-hair-ink); color: var(--color-ink); }
-.q-opt:hover .q-opt__cta--ghost { border-color: var(--color-ink); }
-
-/* ── error state ── */
-.q-error { background: var(--color-onyx); color: var(--color-silver); min-height: 70vh; display: flex; align-items: center; padding-top: 120px; padding-bottom: 80px; }
-.q-error__inner { text-align: center; }
-.q-error__title { margin: 16px 0; color: var(--color-silver); }
-.q-error__cta { margin-top: 28px; }
-
-/* ── modal ── */
-.q-modal {
-  position: fixed; inset: 0; z-index: 1200; display: flex; align-items: center; justify-content: center;
-  padding: 20px; background: rgba(8,9,12,0.6); backdrop-filter: blur(8px);
-  opacity: 0; pointer-events: none; transition: opacity var(--dur-base) var(--ease-out);
-}
-.q-modal.is-open { opacity: 1; pointer-events: auto; }
-.q-modal__box {
-  position: relative; width: 100%; max-width: 30rem;
-  background: var(--color-paper-2); border: 1px solid var(--color-hair-ink);
-  border-radius: var(--r-shell); padding: clamp(28px, 4vw, 40px);
-  box-shadow: var(--shadow-lift); transform: scale(0.96);
-  transition: transform var(--dur-base) var(--ease-out);
-  overscroll-behavior: contain;
-}
-.q-modal.is-open .q-modal__box { transform: scale(1); }
-.q-modal__close {
-  position: sticky; top: 0; float: right; background: var(--color-paper-2); border: none; cursor: pointer;
-  color: var(--color-ink-3); padding: 8px; transition: color var(--dur-fast) var(--ease-out);
-  z-index: 20; border-radius: 50%; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-top: -10px; margin-right: -10px;
-}
-.q-modal__close:hover { color: var(--color-ink); }
-.q-modal__title { margin: 12px 0 10px; color: var(--color-ink); }
-.q-modal__lead { color: var(--color-ink-2); font-size: 15px; line-height: 1.6; margin: 0 0 22px; }
-.q-modal__field {
-  width: 100%; padding: 14px; font-family: var(--font-sans); font-size: 14px;
-  color: var(--color-ink); background: var(--color-paper);
-  border: 1px solid var(--color-hair-ink); border-radius: var(--r-control);
-  resize: none; margin-bottom: 20px; transition: border-color var(--dur-base) var(--ease-out);
-}
-.q-modal__field:focus { outline: none; border-color: var(--color-brass); box-shadow: inset 0 0 0 1px var(--color-brass); }
-.q-modal__submit { width: 100%; justify-content: center; }
-.q-modal__success { display: none; text-align: center; padding: 16px 0; }
-.q-modal__check {
-  width: 56px; height: 56px; border-radius: 50%; margin: 0 auto 20px;
-  display: flex; align-items: center; justify-content: center;
-  border: 1px solid var(--color-brass); color: var(--color-brass-dark);
-}
-.q-modal__close-btn { margin-top: 26px; }
-
-/* ── responsive ── */
-@media (max-width: 980px) {
-  .q-grid { grid-template-columns: 1fr; gap: 48px; }
-  .q-pay__sticky { position: static; }
-}
-
-@media (max-width: 640px) {
-  .q-hero { padding-top: clamp(100px, 15vh, 140px); padding-bottom: clamp(52px, 11vw, 88px); }
-  .q-h { gap: 10px; font-size: 1rem; }
-  .q-opt { padding: 22px; }
-  .q-modal__box { padding: 24px; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .q-hero__dot { animation: none; }
-  .q-opt:hover { transform: none; }
-  .q-consent.is-flash, .q-opt.is-flash { animation: none; }
+@keyframes q-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
 }
 </style>
-
-<script>
-// @ts-nocheck
-document.addEventListener('DOMContentLoaded', () => {
-  const container = document.getElementById('payment-options');
-  if (!container) return;
-  const token = container.dataset.token;
-  const apiUrl = container.dataset.api;
-
-  // ── Bramka zgód (clickwrap) ──
-  // Oferta (z rabatem) jest na górze i zawsze w pełni czytelna. Przyciski nie są
-  // wyszarzone — gdy zgody nie są zaznaczone, klik naprowadza do sekcji zgód
-  // (przewinięcie + puls), a po ich zaznaczeniu wracamy pulsem do wybranej opcji.
-  const payBtns = container.querySelectorAll('.payment-btn');
-  const cTerms = document.getElementById('consent-terms');
-  const cAgree = document.getElementById('consent-agreement');
-  const hint = document.getElementById('consent-hint');
-  const consentBlock = document.getElementById('q-consent');
-  let pendingBtn = null;
-  const gateOk = () => !!(cTerms && cTerms.checked && cAgree && cAgree.checked);
-
-  function pulse(el) {
-    if (!el) return;
-    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    el.classList.remove('is-flash');
-    void el.offsetWidth; // restart animacji
-    el.classList.add('is-flash');
-  }
-
-  function applyGate() {
-    const ok = gateOk();
-    // Przycisk pozostaje operowalny (klik prowadzi do zgód) — bez aria-disabled,
-    // które kłóciłoby się z tym dla czytników ekranu. Stan komunikuje hint + is-locked.
-    payBtns.forEach(b => { b.classList.toggle('is-locked', !ok); });
-    if (hint) hint.style.display = ok ? 'none' : '';
-    // Klient kliknął opcję przed akceptacją — po zaznaczeniu zgód wróć do niej.
-    if (ok && pendingBtn) { const b = pendingBtn; pendingBtn = null; pulse(b); }
-  }
-  cTerms?.addEventListener('change', applyGate);
-  cAgree?.addEventListener('change', applyGate);
-  applyGate();
-
-  // Helper to lock body scroll
-  const lockScroll = (lock) => {
-    document.documentElement.style.overflow = lock ? 'hidden' : '';
-    document.body.style.overflow = lock ? 'hidden' : '';
-  };
-
-  // ── Modale dokumentów ──
-  document.querySelectorAll('.q-consent__doc').forEach(b => {
-    b.addEventListener('click', () => {
-      const m = document.getElementById('docmodal-' + b.dataset.doc);
-      if (m) { m.classList.add('is-open'); lockScroll(true); }
-    });
-  });
-  document.querySelectorAll('.q-docmodal').forEach(m => {
-    m.addEventListener('click', (e) => { 
-      if (e.target === m) { m.classList.remove('is-open'); lockScroll(false); }
-    });
-    m.querySelector('[data-close-doc]')?.addEventListener('click', () => { 
-      m.classList.remove('is-open'); lockScroll(false); 
-    });
-  });
-
-  // ── Płatności ──
-  payBtns.forEach(btn => {
-    btn.addEventListener('click', async () => {
-      // Zablokowane zgodami — naprowadź do sekcji zgód i zapamiętaj wybór.
-      if (!gateOk()) { pendingBtn = btn; pulse(consentBlock); return; }
-      const btnText = btn.querySelector('.btn-text');
-      const orig = btnText.innerHTML;
-      btnText.innerHTML = 'Przetwarzanie&hellip;';
-      payBtns.forEach(b => { b.classList.add('is-busy'); });
-      try {
-        const res = await fetch(`${apiUrl}/api/quotes/checkout/${token}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            paymentModel: btn.dataset.model,
-            acceptTerms: !!(cTerms && cTerms.checked),
-            acceptAgreement: !!(cAgree && cAgree.checked)
-          })
-        });
-        const data = await res.json();
-        if (data.url) { window.location.href = data.url; return; }
-        alert('Błąd: ' + (data.error || 'Spróbuj ponownie.'));
-      } catch { alert('Błąd połączenia z serwerem.'); }
-      btnText.innerHTML = orig;
-      payBtns.forEach(b => { b.classList.remove('is-busy'); });
-      applyGate();
-    });
-  });
-
-  // ── Utrzymanie ──
-  document.getElementById('maintenance-checkbox')?.addEventListener('change', async (e) => {
-    try {
-      await fetch(`${apiUrl}/api/quotes/client/${token}/maintenance`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ wantsMaintenance: e.target.checked })
-      });
-    } catch {}
-  });
-
-  // ── Modal ──
-  const modal = document.getElementById('change-modal');
-  const show = (v) => {
-    modal.classList.toggle('is-open', v);
-    lockScroll(v);
-  };
-  document.getElementById('open-change-modal')?.addEventListener('click', () => show(true));
-  document.getElementById('close-change-modal')?.addEventListener('click', () => show(false));
-  document.getElementById('close-success-modal')?.addEventListener('click', () => show(false));
-  modal?.addEventListener('click', (e) => { if (e.target === modal) show(false); });
-
-  document.getElementById('submit-change')?.addEventListener('click', async () => {
-    const field = document.getElementById('change-message');
-    const msg = field.value.trim();
-    if (!msg) { alert('Wpisz treść uwag.'); return; }
-    const btn = document.getElementById('submit-change');
-    const label = btn.querySelector('.nb-btn__label');
-    const orig = label.innerHTML;
-    label.innerHTML = 'Wysyłanie&hellip;';
-    btn.disabled = true;
-    try {
-      const res = await fetch(`${apiUrl}/api/quotes/request-change/${token}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: msg })
-      });
-      if (res.ok) {
-        document.getElementById('change-form-state').style.display = 'none';
-        document.getElementById('change-success-state').style.display = 'block';
-        return;
-      }
-      const d = await res.json();
-      alert('Błąd: ' + (d.error || 'Spróbuj ponownie.'));
-    } catch { alert('Błąd połączenia.'); }
-    label.innerHTML = orig;
-    btn.disabled = false;
-  });
-});
-</script>
