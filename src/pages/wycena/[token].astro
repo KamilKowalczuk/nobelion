@@ -285,7 +285,7 @@ const fmt = (n: number) => new Intl.NumberFormat('pl-PL').format(n);
 
       {/* ───────── MODAL ───────── */}
       <div id="change-modal" class="q-modal">
-        <div id="change-modal-content" class="q-modal__box">
+        <div id="change-modal-content" class="q-modal__box" data-lenis-prevent>
           <button id="close-change-modal" class="q-modal__close" aria-label="Zamknij" type="button">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" stroke-linejoin="miter">
               <path d="M6 18L18 6M6 6l12 12"/>
@@ -318,7 +318,7 @@ const fmt = (n: number) => new Intl.NumberFormat('pl-PL').format(n);
       {/* Modale dokumentów prawnych */}
       {consentDocs.map((d) => (
         <div class="q-docmodal" id={`docmodal-${d.type}`} data-docmodal={d.type}>
-          <div class="q-docmodal__box">
+          <div class="q-docmodal__box" data-lenis-prevent>
             <button type="button" class="q-docmodal__close" data-close-doc aria-label="Zamknij">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
