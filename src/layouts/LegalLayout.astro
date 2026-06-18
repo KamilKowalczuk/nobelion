@@ -1,0 +1,54 @@
+---
+import Layout from './Layout.astro';
+import Footer from '../components/sections/Footer.astro';
+import ScrollChoreography from '../components/core/ScrollChoreography.svelte';
+
+export interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<Layout title={`${title} | Nobelion`}>
+  <ScrollChoreography client:idle />
+  
+  <div class="main-shell legal-shell">
+    <div class="wrap mx-auto legal-container">
+      <a href="/" class="nb-btn nb-btn--ghost-light nb-btn--md btn-back">
+        <span class="nb-btn__label">← Wróć na stronę główną</span>
+      </a>
+      <h1 class="h1 legal-title">{title}</h1>
+      <div class="rt">
+        <slot />
+      </div>
+    </div>
+  </div>
+
+  <Footer />
+</Layout>
+
+<style>
+  .legal-shell {
+    background-color: var(--color-paper);
+    min-height: 100vh;
+    border-bottom-left-radius: var(--r-shell, 24px);
+    border-bottom-right-radius: var(--r-shell, 24px);
+    box-shadow: 0 10px 40px -10px rgba(0,0,0,0.08);
+    position: relative;
+    z-index: 2; /* overlap the footer */
+  }
+  .legal-container {
+    max-width: 800px;
+    padding: clamp(120px, 15vw, 160px) 0 clamp(80px, 10vw, 120px);
+  }
+  .btn-back {
+    margin-bottom: 40px;
+    border-color: var(--color-hair-ink);
+    color: var(--color-ink-2);
+  }
+  .legal-title {
+    margin-bottom: 48px;
+    color: var(--color-ink);
+  }
+</style>

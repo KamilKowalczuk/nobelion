@@ -2,6 +2,7 @@
 
 /* 2. Import Tailwind v4 */
 @import "tailwindcss";
+@import "./rich-text.css";
 
 /* 3. Konfiguracja Motywu Nobelion Light / Onyx */
 @theme {

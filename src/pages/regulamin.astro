@@ -1,0 +1,28 @@
+---
+import LegalLayout from '../layouts/LegalLayout.astro';
+import { renderMarkdown } from '../lib/markdown';
+
+export const prerender = false;
+
+const apiUrl = import.meta.env.PUBLIC_PAYLOAD_URL || 'http://localhost:3000';
+let title = 'Regulamin';
+let htmlContent = '<p>Brak dostępnego dokumentu lub błąd ładowania.</p>';
+
+try {
+  const res = await fetch(`${apiUrl}/api/documents/public`);
+  if (res.ok) {
+    const data = await res.json();
+    const doc = data.documents?.find((d: any) => d.docType === 'regulamin');
+    if (doc) {
+      title = doc.title || 'Regulamin';
+      htmlContent = renderMarkdown(doc.content);
+    }
+  }
+} catch (e) {
+  console.error("Błąd ładowania regulaminu:", e);
+}
+---
+
+<LegalLayout title={title}>
+  <div set:html={htmlContent} />
+</LegalLayout>

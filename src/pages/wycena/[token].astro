@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import { renderMarkdown } from '../../lib/markdown';
+import DocModal from '../../components/ui/DocModal.astro';
 
 export const prerender = false;
 
@@ -317,15 +318,7 @@ const fmt = (n: number) => new Intl.NumberFormat('pl-PL').format(n);
 
       {/* Modale dokumentów prawnych */}
       {consentDocs.map((d) => (
-        <div class="q-docmodal" id={`docmodal-${d.type}`} data-docmodal={d.type}>
-          <div class="q-docmodal__box" data-lenis-prevent>
-            <button type="button" class="q-docmodal__close" data-close-doc aria-label="Zamknij">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M6 18L18 6M6 6l12 12"/></svg>
-            </button>
-            <h3 class="h3 q-docmodal__title">{d.title}</h3>
-            <div class="q-docmodal__body rt" set:html={d.html} />
-          </div>
-        </div>
+        <DocModal type={d.type} title={d.title} html={d.html} />
       ))}
     </>
   )}
@@ -409,83 +402,6 @@ const fmt = (n: number) => new Intl.NumberFormat('pl-PL').format(n);
   content: ""; position: absolute; inset: 3px; background: var(--color-brass);
 }
 .q-problem { color: var(--color-ink-2); line-height: var(--lh-body); white-space: pre-wrap; }
-
-/* ── rich text (light) ── */
-.rt { color: var(--color-ink-2); overflow-wrap: break-word; word-break: break-word; }
-.rt :global(p) { color: var(--color-ink-2); line-height: 1.72; margin: 0 0 1.1rem; overflow-wrap: break-word; }
-.rt :global(h1), .rt :global(h2), .rt :global(h3), .rt :global(h4), .rt :global(h5), .rt :global(h6) {
-  font-family: var(--font-heading); font-weight: 600;
-  letter-spacing: var(--tracking-cinematic); text-transform: uppercase;
-  color: var(--color-ink); margin: 2rem 0 0.85rem; line-height: 1.25;
-}
-.rt :global(h1) { font-size: var(--fs-h3); }
-.rt :global(h2) { font-size: var(--fs-h4); }
-.rt :global(h3), .rt :global(h4), .rt :global(h5), .rt :global(h6) { font-size: 1rem; }
-.rt :global(h1):first-child, .rt :global(h2):first-child, .rt :global(h3):first-child { margin-top: 0; }
-.rt :global(hr) { border: none; border-top: 1px solid var(--color-hair-ink); margin: 1.8rem 0; }
-.rt :global(code) {
-  font-family: var(--font-mono); font-size: 0.875em;
-  background: var(--color-paper-3); padding: 0.1em 0.4em; border-radius: var(--r-inset);
-  color: var(--color-ink);
-}
-.rt :global(ul), .rt :global(ol) { margin: 0 0 1.1rem; padding: 0; list-style: none; }
-.rt :global(li) {
-  position: relative; padding-left: 1.6em;
-  color: var(--color-ink-2); line-height: 1.7; margin-bottom: 0.55rem;
-  overflow-wrap: break-word;
-}
-.rt :global(ul > li)::before {
-  content: "—"; position: absolute; left: 0; top: 0; color: var(--color-brass);
-}
-.rt :global(ol) { counter-reset: c; }
-.rt :global(ol > li) { counter-increment: c; }
-.rt :global(ol > li)::before {
-  content: counter(c) "."; position: absolute; left: 0; top: 0;
-  color: var(--color-brass); font-family: var(--font-mono);
-}
-/* zagnieżdżone listy i akapity w punktach */
-.rt :global(li > ul), .rt :global(li > ol) { margin: 0.45rem 0 0.2rem; }
-.rt :global(li > p) { margin: 0 0 0.5rem; }
-.rt :global(a) { color: var(--color-brass); text-decoration: underline; text-underline-offset: 3px; transition: color var(--dur-fast) var(--ease-out); }
-.rt :global(a):hover { color: var(--color-brass-dark); }
-.rt :global(strong) { color: var(--color-ink); font-weight: 600; }
-.rt :global(blockquote) {
-  border-left: 2px solid var(--color-brass); padding-left: 1.1rem;
-  margin: 1.2rem 0; color: var(--color-ink-3); font-style: italic;
-}
-.rt :global(s), .rt :global(del) { color: var(--color-ink-4); }
-.rt :global(img) { max-width: 100%; height: auto; border-radius: var(--r-inset); margin: 1rem 0; }
-.rt :global(pre) {
-  background: var(--color-paper-3); border: 1px solid var(--color-hair-ink);
-  border-radius: var(--r-card); padding: 1rem 1.2rem; overflow-x: auto; margin: 1.2rem 0;
-}
-.rt :global(pre code) { background: none; padding: 0; font-size: 0.875rem; line-height: 1.6; }
-
-/* Tabele (GFM) — owinięte w przewijalny kontener (.nb-table-wrap) */
-.rt :global(.nb-table-wrap) {
-  margin: 1.4rem 0; overflow-x: auto; -webkit-overflow-scrolling: touch;
-  border-bottom: 1px solid var(--color-hair-ink-2);
-}
-.rt :global(.nb-table-wrap)::-webkit-scrollbar { height: 6px; }
-.rt :global(.nb-table-wrap)::-webkit-scrollbar-track { background: transparent; }
-.rt :global(.nb-table-wrap)::-webkit-scrollbar-thumb {
-  background: color-mix(in srgb, var(--color-brass), transparent 55%); border-radius: 3px;
-}
-.rt :global(table) {
-  width: 100%; min-width: 30rem; border-collapse: collapse; margin: 0;
-  font-size: 0.95rem;
-}
-.rt :global(thead) { border-bottom: 2px solid var(--color-brass); }
-.rt :global(th) {
-  text-align: left; padding: 0.7rem 0.9rem;
-  font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.08em;
-  text-transform: uppercase; color: var(--color-ink); font-weight: 600;
-}
-.rt :global(td) {
-  padding: 0.7rem 0.9rem; border-top: 1px solid var(--color-hair-ink);
-  color: var(--color-ink-2); vertical-align: top; overflow-wrap: break-word;
-}
-.rt :global(tbody tr):hover { background: var(--color-paper-3); }
 
 /* ── add-on opieki (w kolumnie płatności) ── */
 .q-addon {
@@ -579,26 +495,6 @@ const fmt = (n: number) => new Intl.NumberFormat('pl-PL').format(n);
 .q-consent.is-flash { animation: q-flash 1.1s var(--ease-out); }
 .q-opt.is-flash { animation: q-flash 1.1s var(--ease-out); }
 
-/* ── modal dokumentu prawnego ── */
-.q-docmodal {
-  position: fixed; inset: 0; z-index: 1200; display: none;
-  align-items: center; justify-content: center; padding: 20px;
-  background: rgba(8, 11, 16, 0.62); backdrop-filter: blur(4px);
-}
-.q-docmodal.is-open { display: flex; }
-.q-docmodal__box {
-  position: relative; background: var(--color-paper); border-radius: var(--r-card);
-  max-width: 760px; width: 100%; max-height: 86vh; overflow-y: auto;
-  padding: clamp(28px, 4vw, 48px); box-shadow: var(--shadow-lift);
-  overscroll-behavior: contain;
-}
-.q-docmodal__close {
-  position: absolute; top: 16px; right: 16px; background: none; border: none; cursor: pointer;
-  color: var(--color-ink-3); padding: 6px; transition: color var(--dur-fast);
-}
-.q-docmodal__close:hover { color: var(--color-ink); }
-.q-docmodal__title { margin: 0 0 20px; color: var(--color-ink); }
-.q-docmodal__body { color: var(--color-ink-2); line-height: 1.7; font-size: 15px; }
 
 /* ── change request ── */
 .q-change { padding-top: clamp(28px, 3vw, 40px); border-top: 1px solid var(--color-hair-ink); }
@@ -719,8 +615,9 @@ const fmt = (n: number) => new Intl.NumberFormat('pl-PL').format(n);
 }
 .q-modal.is-open .q-modal__box { transform: scale(1); }
 .q-modal__close {
-  position: absolute; top: 18px; right: 18px; background: none; border: none;
-  color: var(--color-ink-3); cursor: pointer; transition: color var(--dur-fast) var(--ease-out);
+  position: sticky; top: 0; float: right; background: var(--color-paper-2); border: none; cursor: pointer;
+  color: var(--color-ink-3); padding: 8px; transition: color var(--dur-fast) var(--ease-out);
+  z-index: 20; border-radius: 50%; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-top: -10px; margin-right: -10px;
 }
 .q-modal__close:hover { color: var(--color-ink); }
 .q-modal__title { margin: 12px 0 10px; color: var(--color-ink); }

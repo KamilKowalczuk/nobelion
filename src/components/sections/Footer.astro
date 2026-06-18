@@ -48,8 +48,9 @@ import { navigation, contactData } from '../../data/content';
         <div class="nb-footer__legal">
             <span class="caption">© {new Date().getFullYear()} Nobelion Sp. z o.o.</span>
             <div class="nb-footer__legal-links">
-                <button type="button" id="footer-privacy-btn">Polityka prywatności</button>
-                <button type="button" id="footer-terms-btn">Regulamin</button>
+                <a href="/polityka-prywatnosci">Polityka prywatności</a>
+                <a href="/regulamin">Regulamin</a>
+                <a href="/rodo">Klauzula RODO</a>
                 <button type="button" id="footer-cookies-btn">Ustawienia cookies</button>
             </div>
         </div>
@@ -57,12 +58,6 @@ import { navigation, contactData } from '../../data/content';
 </footer>
 
 <script>
-    document.getElementById('footer-privacy-btn')?.addEventListener('click', () => {
-        window.dispatchEvent(new CustomEvent('legal:open', { detail: 'privacy' }));
-    });
-    document.getElementById('footer-terms-btn')?.addEventListener('click', () => {
-        window.dispatchEvent(new CustomEvent('legal:open', { detail: 'terms' }));
-    });
     document.getElementById('footer-cookies-btn')?.addEventListener('click', () => {
         (window as any).openCookiePreferences?.();
     });
@@ -88,7 +83,7 @@ import { navigation, contactData } from '../../data/content';
     .nb-footer__legal{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;padding-top:32px;border-top:1px solid var(--color-hair-light);}
     .nb-footer__legal .caption{color:var(--color-steel-dim);}
     .nb-footer__legal-links{display:flex;gap:28px;}
-    .nb-footer__legal-links button{background:none;border:none;cursor:pointer;color:var(--color-steel);transition:color 180ms;font-family:var(--font-mono);font-size:var(--fs-caption);letter-spacing:var(--tracking-mono-cap);text-transform:uppercase;padding:0;}
-    .nb-footer__legal-links button:hover{color:var(--color-brass-bright);}
+    .nb-footer__legal-links button, .nb-footer__legal-links a {background:none;border:none;cursor:pointer;color:var(--color-steel);transition:color 180ms;font-family:var(--font-mono);font-size:var(--fs-caption);letter-spacing:var(--tracking-mono-cap);text-transform:uppercase;padding:0;text-decoration:none;}
+    .nb-footer__legal-links button:hover, .nb-footer__legal-links a:hover {color:var(--color-brass-bright);}
     @media(max-width:760px){.nb-footer__grid{grid-template-columns:1fr;gap:36px;}.nb-footer__rows{grid-template-columns:1fr;}}
 </style>
